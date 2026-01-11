@@ -19,7 +19,7 @@ function Login() {
 
         {/* LEFT — FORM */}
         <div className="p-10 flex flex-col justify-center relative">
-          <p className="text-sm mb-10 absolute top-10 left-10 ">● Logo</p>
+          <p className="text-sm mb-14 absolute top-4 left-10 ">● Logo</p>
 
           <div className="space-y-2 mb-8">
             <h2 className="text-3xl font-semibold">Welcome back</h2>

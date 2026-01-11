@@ -18,7 +18,7 @@ function Register() {
 
         </div>
         <div className="p-10 flex flex-col justify-center relative">
-          <p className="text-sm mb-10 absolute top-10 left-10 ">● Logo</p>
+          <p className="text-sm mb-10 absolute top-5 left-10 ">● Logo</p>
           <div className="space-y-2 mb-8 justify-center items-center flex flex-col">
             <h2 className="text-3xl font-semibold">Create your account</h2>
             <p className="text-sm text-muted-foreground">
