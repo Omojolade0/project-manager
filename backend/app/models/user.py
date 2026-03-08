@@ -1,5 +1,6 @@
 from sqlmodel import SQLModel, Relationship, Field
 from typing import Optional
+# from pydantic import BaseModel
 
 
 class User(SQLModel, table=True):
@@ -18,3 +19,7 @@ class UserCreate(SQLModel):
 class UserLogin(SQLModel):
     email: str  
     password: str  
+class UserPublic(SQLModel):
+    id: int
+    username: str
+    email: str

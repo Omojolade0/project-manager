@@ -1,12 +1,10 @@
-import Layout from "@/components/Layout"
-import StatsIcon from "@/components/StatsIcon"
-import ProjectCard from "@/components/ProjectCard"
+import Layout from "@/components/Layout";
+import StatsIcon from "@/components/StatsIcon";
+import ProjectCard from "@/components/ProjectCard";
 import { Button } from "@/components/ui/button";
 import TaskListCard from "@/components/TaskListCard";
 
-
 function Dashboard() {
-
   return (
     <Layout>
       <div className="grid grid-cols-3 gap-2">
@@ -19,7 +17,7 @@ function Dashboard() {
           <h2 className="text-lg font-semibold">Main Projects</h2>
           <Button>+ Create Project</Button>
         </div>
-        <div className="grid grid-cols-3 gap-2 mt-3" >
+        <div className="grid grid-cols-3 gap-2 mt-3">
           <ProjectCard></ProjectCard>
           <ProjectCard></ProjectCard>
           <ProjectCard></ProjectCard>
@@ -30,13 +28,13 @@ function Dashboard() {
         <div className="flex flex-row items-center justify-between">
           <h2 className="text-lg font-semibold">Upcoming Task</h2>
         </div>
-        <div className="flex flex-col" >
+        <div className="flex flex-col">
           <TaskListCard></TaskListCard>
           <TaskListCard></TaskListCard>
           <TaskListCard></TaskListCard>
         </div>
       </div>
     </Layout>
-  )
+  );
 }
-export default Dashboard
+export default Dashboard;

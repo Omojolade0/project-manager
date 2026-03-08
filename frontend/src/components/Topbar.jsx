@@ -1,14 +1,11 @@
-
-import { useLocation } from "react-router-dom"
-import { Input } from "@/components/ui/input"
+import { useLocation } from "react-router-dom";
+import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
-import { Bell, Search, User } from "lucide-react"
-import icon from "@/assets/icon-person.jpg"
+import { Bell, Search, User } from "lucide-react";
 
 const titles = {
   "/": "Dashboard ",
-  "/login": "Login",
-  "/register": "Register",
+  "/projects": "Projects",
 };
 const getTitle = (pathname) => {
   const match = Object.keys(titles)
@@ -19,18 +16,15 @@ const getTitle = (pathname) => {
 };
 
 function Topbar() {
-
   const { pathname } = useLocation();
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState("");
   const title = useMemo(() => getTitle(pathname), [pathname]);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white">
       <div className="flex items-center justify-between px-6 py-4 shadow-sm">
         {/* LEFT — PAGE TITLE */}
-        <h2 className="text-2xl font-semibold text-gray-900">
-          {title}
-        </h2>
+        <h2 className="text-2xl font-semibold text-gray-900">{title}</h2>
 
         {/* RIGHT — SEARCH + ICONS */}
         <div className="flex items-center gap-4">
@@ -49,7 +43,8 @@ function Topbar() {
           <button
             type="button"
             aria-label="Notifications"
-            className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-gray-100 bg-transparent">
+            className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-gray-100 bg-transparent"
+          >
             <Bell className="h-5 w-5 text-black" />
           </button>
 
@@ -70,4 +65,4 @@ function Topbar() {
   );
 }
 
-export default Topbar
+export default Topbar;

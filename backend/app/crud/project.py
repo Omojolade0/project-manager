@@ -24,11 +24,11 @@ def update_project(project_id: int, data:ProjectUpdate, user_id: int, session: S
   updater = session.exec(select(Project).where((Project.id == project_id) & (Project.user_id == user_id))).first()
   if not updater:
     raise HTTPException(status_code=404, detail="Project not found")
-  if data.name:
+  if data.name is not None:
     updater.name = data.name
-  if data.description:
+  if data.description is not None:
     updater.description = data.description
-  if data.status:
+  if data.status is not None:
     updater.status = data.status
   session.add(updater)
   session.commit()
@@ -39,7 +39,8 @@ def delete_project(project_id: int , user_id:int,  session: Session):
   deleter = session.exec(select(Project).where((Project.id == project_id) & (Project.user_id == user_id))).first()
   if not deleter:
     raise HTTPException(status_code=404, detail="Project not found")
-  if deleter:
-    session.delete(deleter)
-    session.commit()
+
+  session.delete(deleter)
+  session.commit()
     
+ 

@@ -9,7 +9,8 @@ from app.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
-
+# change it to something like this in case of versioning 
+# router = APIRouter(prefix = "/api/v1/issues", tags = ["issues"])
 
 @router.get("/")
 def list_projects(

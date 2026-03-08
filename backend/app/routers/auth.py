@@ -1,5 +1,6 @@
+from app.auth.dependencies import get_current_user
 from fastapi import APIRouter, Depends
-from app.models.user import User, UserCreate, UserLogin
+from app.models.user import UserLogin, UserCreate, UserPublic
 from app.crud import user as crud
 from sqlmodel import Session 
 from app.routers.utils import get_session
@@ -12,7 +13,7 @@ auth_router = APIRouter(
     tags=['Auth'],
 )
 
-@auth_router.post('/register')
+@auth_router.post('/register', response_model= UserPublic)
 def create_user_account(data: UserCreate, session: Session = Depends(get_session)):
   return crud.create_user(data, session)
 
@@ -37,3 +38,7 @@ def user_login(data:UserLogin, session: Session = Depends(get_session)):
             "email": user.email
         }
     }
+
+@auth_router.get('/me', response_model=UserPublic)
+def get_me(current_user: UserPublic = Depends(get_current_user)):
+    return current_user

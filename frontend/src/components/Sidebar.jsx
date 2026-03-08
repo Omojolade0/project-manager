@@ -1,22 +1,35 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import ItemsNav from "./ItemsNav";
 import icon from "@/assets/icon-person.jpg";
-
-import {
-  LayoutDashboard,
-  FolderKanban,
-  CheckSquare,
-  MessageSquare,
-  Settings,
-  LogOut,
-} from "lucide-react";
+import authService from "@/services/authService";
+import { LayoutDashboard, FolderKanban, Settings, LogOut } from "lucide-react";
 
 function Sidebar({ isCollapsed, setIsCollapsed }) {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    localStorage.removeItem("token");
+    navigate("/login");
+  }
+
+  useEffect(() => {
+    async function getData() {
+      try {
+        const result = await authService.getMe();
+        setUser(result);
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        handleLogout();
+      }
+    }
+    getData();
+  }, []);
+
   const navItems = [
     { label: "Dashboard", to: "/", Icon: LayoutDashboard },
     { label: "Projects", to: "/projects", Icon: FolderKanban },
-    { label: "Tasks", to: "/tasks", Icon: CheckSquare },
-    { label: "Messages", to: "/messages", Icon: MessageSquare },
   ];
 
   return (
@@ -31,15 +44,25 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
     >
       <div className="flex h-full flex-col p-3">
         {/* Profile */}
-        <div className={["mt-2 flex items-center gap-2", isCollapsed ? "justify-center" : ""].join(" ")}>
+        <div
+          className={[
+            "mt-2 flex items-center gap-2",
+            isCollapsed ? "justify-center" : "",
+          ].join(" ")}
+        >
           <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-300">
-            <img src={icon} alt="User avatar" className="h-full w-full object-cover" />
+            <img
+              src={icon}
+              alt="User avatar"
+              className="h-full w-full object-cover"
+            />
           </div>
-
           {!isCollapsed && (
             <div className="leading-tight">
-              <h2 className="text-sm font-medium text-slate-900">Username</h2>
-              <p className="text-xs text-slate-600">username@gmail.com</p>
+              <h2 className="text-sm font-medium text-slate-900">
+                {user?.username}
+              </h2>
+              <p className="text-xs text-slate-600">{user?.email}</p>
             </div>
           )}
         </div>
@@ -75,7 +98,7 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
               "hover:bg-slate-300/60",
               isCollapsed ? "justify-center px-2" : "",
             ].join(" ")}
-            onClick={() => console.log("logout")}
+            onClick={handleLogout}
           >
             <LogOut className="h-5 w-5 text-slate-700" />
             {!isCollapsed && <span className="text-slate-800">Logout</span>}

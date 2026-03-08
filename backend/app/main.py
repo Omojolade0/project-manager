@@ -1,7 +1,25 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from app.database import create_db_tables
 from app.routers import project, task, notes, auth
-app = FastAPI()
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_tables()
+    yield
+
+app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = ["http://localhost:8080"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(project.router)
 app.include_router(task.router)
@@ -9,9 +27,6 @@ app.include_router(notes.router)
 app.include_router(auth.auth_router)
 
 
-@app.on_event("startup")
-def on_startup():
-    create_db_tables()
 
 @app.get("/")
 def root():
