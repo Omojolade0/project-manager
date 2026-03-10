@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+// import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import {
@@ -21,7 +21,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { Calendar } from "@/components/ui/calendar";
+// import { Calendar } from "@/components/ui/calendar";
+import projectService from "@/services/projectService";
 import {
   Popover,
   PopoverContent,
@@ -30,15 +31,38 @@ import {
 
 export const title = "Multiple Inputs Dialog";
 
-function ProjectModal() {
+function ProjectModal({ onSuccess }) {
   const [selectedPlan, setSelectedPlan] = useState("incomplete");
-  const [deadline, setDeadline] = useState(null);
+  // const [deadline, setDeadline] = useState(null);
+  const [projectName, setProjectName] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("incomplete");
 
   const statuses = [
-    { id: "incomplete", name: "Incomplete" },
-    { id: "complete", name: "Complete" },
-    { id: "inprogress", name: "In progress" },
+    { id: "Active", name: "Active" },
+    { id: "Completed", name: "Completed" },
+    { id: "Inactive", name: "Inactive" },
   ];
+
+  async function handleCreate() {
+    try {
+      await projectService.createProject({
+        name: projectName,
+        description: description,
+        status: selectedPlan,
+      });
+      onSuccess();
+      // also see point 3
+    } catch (error) {
+      console.error("Error adding projects:", error);
+    }
+  }
+
+  function handleCancel() {
+    setProjectName("");
+    setDescription("");
+    setStatus("Active");
+  }
 
   return (
     <AlertDialog>
@@ -57,7 +81,12 @@ function ProjectModal() {
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="subject">Project Name</Label>
-            <Input id="subject" placeholder="Enter Project Name" />
+            <Input
+              id="subject"
+              placeholder="Enter Project Name"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+            />
           </div>
 
           <div className="space-y-2">
@@ -66,6 +95,8 @@ function ProjectModal() {
               className="min-h-[100px]"
               id="message"
               placeholder="Enter project description."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
@@ -82,7 +113,7 @@ function ProjectModal() {
                     "flex items-center justify-center rounded-lg border-2 p-3 text-sm font-medium transition-colors",
                     selectedPlan === s.id
                       ? "border-primary bg-primary/5"
-                      : "border-input hover:border-primary/50"
+                      : "border-input hover:border-primary/50",
                   )}
                 >
                   {s.name}
@@ -95,32 +126,33 @@ function ProjectModal() {
           <div className="space-y-2">
             <Label>Deadline</Label>
             <Popover>
-              <PopoverTrigger asChild>
+              {/* <PopoverTrigger asChild>
                 <Button
                   type="button"
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !deadline && "text-muted-foreground"
+                    !deadline && "text-muted-foreground",
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {deadline ? format(deadline, "PPP") : "Pick a date"}
                 </Button>
-              </PopoverTrigger>
+              </PopoverTrigger> */}
 
-              <PopoverContent className="w-auto p-0" align="start">
+              {/* <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={deadline}
                   onSelect={setDeadline}
                   initialFocus
                 />
-              </PopoverContent>
+              </PopoverContent> */}
             </Popover>
           </div>
 
           {/* Pin */}
+          {/* Hnalde this later */}
           <div className="flex items-start space-x-3">
             <Checkbox id="pin-project" />
             <div className="grid gap-1.5">
@@ -130,10 +162,10 @@ function ProjectModal() {
             </div>
           </div>
         </div>
-
+        {console.log(status)}
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Create</AlertDialogAction>
+          <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleCreate}>Create</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
