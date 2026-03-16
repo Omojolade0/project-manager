@@ -1,15 +1,19 @@
-
-import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+  CardDescription,
+} from "@/components/ui/card";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { User, Calendar, Clock9 } from "lucide-react";
 
 function TaskListCard() {
-
-
   return (
-    <Card className="min-w-min rounded-xl border shadow-sm m-6 flex justify-center items-center" >
+    <Card className="min-w-min rounded-xl border shadow-sm m-6 flex justify-center items-center">
       <CardHeader className="pb-2 mb-2">
         <CardTitle className="text-lg">Task Name</CardTitle>
         <CardDescription className="mt-1">
@@ -33,7 +37,7 @@ function TaskListCard() {
           </div>
         </div>
       </CardContent>
-    </Card >
-  )
+    </Card>
+  );
 }
-export default TaskListCard
+export default TaskListCard;

@@ -3,7 +3,7 @@
 // - [ ] Add updateTask(projectId, taskId, data) function
 // - [ ] Add deleteTask(projectId, taskId) function
 
-import api from "./api";
+import api from "@/api/api";
 
 const taskService = {
   getTasks: async (projectId) => {

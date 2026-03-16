@@ -1,7 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import ItemsNav from "./ItemsNav";
-import icon from "@/assets/icon-person.jpg";
 import authService from "@/services/authService";
 import { LayoutDashboard, FolderKanban, Settings, LogOut } from "lucide-react";
 
@@ -20,15 +19,15 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
         const result = await authService.getMe();
         setUser(result);
       } catch (error) {
-        console.error("Failed to fetch user data:", error);
         handleLogout();
+        console.error("Error fetching user data:", error);
       }
     }
     getData();
   }, []);
 
   const navItems = [
-    { label: "Dashboard", to: "/", Icon: LayoutDashboard },
+    { label: "Dashboard", to: "/dashboard", Icon: LayoutDashboard },
     { label: "Projects", to: "/projects", Icon: FolderKanban },
   ];
 
@@ -37,71 +36,97 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
       onMouseEnter={() => setIsCollapsed(false)}
       onMouseLeave={() => setIsCollapsed(true)}
       className={[
-        "fixed left-0 top-0 z-50 h-screen bg-slate-200 border-r border-slate-300",
-        "transition-all duration-200",
+        "fixed left-0 top-0 z-50 h-screen bg-white",
+        "transition-all duration-300 ease-in-out",
         isCollapsed ? "w-20" : "w-64",
       ].join(" ")}
+      style={{
+        borderRight: "1px solid #f1f5f9",
+        borderRadius: "0 24px 24px 0",
+        boxShadow: "4px 0 24px rgba(0,0,0,0.06)",
+      }}
     >
-      <div className="flex h-full flex-col p-3">
-        {/* Profile */}
+      <div className="flex h-full flex-col px-3 py-5">
+        {/* Logo */}
         <div
           className={[
-            "mt-2 flex items-center gap-2",
+            "flex items-center mb-8 px-2",
             isCollapsed ? "justify-center" : "",
           ].join(" ")}
         >
-          <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-300">
-            <img
-              src={icon}
-              alt="User avatar"
-              className="h-full w-full object-cover"
-            />
-          </div>
-          {!isCollapsed && (
-            <div className="leading-tight">
-              <h2 className="text-sm font-medium text-slate-900">
-                {user?.username}
-              </h2>
-              <p className="text-xs text-slate-600">{user?.email}</p>
+          {isCollapsed ? (
+            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+              <span className="text-white text-xs font-bold">C</span>
             </div>
+          ) : (
+            <span className="text-xl font-semibold text-slate-900 tracking-tight">
+              Coeus
+            </span>
           )}
         </div>
 
         {/* Nav links */}
-        <nav className="mt-6 flex flex-col gap-1">
+        <nav className="flex flex-col gap-1">
           {navItems.map((item) => (
             <ItemsNav key={item.to} item={item} collapsed={isCollapsed} />
           ))}
         </nav>
 
-        {/* Bottom actions */}
-        <div className="mt-auto flex flex-col gap-1 pb-2">
+        {/* Bottom */}
+        <div className="mt-auto flex flex-col gap-1">
+          {/* User profile */}
+          {!isCollapsed && user && (
+            <div className="flex items-center gap-3 px-3 py-3 mb-2 bg-slate-50 rounded-xl">
+              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                <span className="text-xs font-semibold text-indigo-600">
+                  {user?.username?.[0]?.toUpperCase()}
+                </span>
+              </div>
+              <div className="leading-tight overflow-hidden">
+                <p className="text-sm font-medium text-slate-900 truncate">
+                  {user?.username}
+                </p>
+                <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+              </div>
+            </div>
+          )}
+
+          {isCollapsed && user && (
+            <div className="flex justify-center mb-2">
+              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                <span className="text-xs font-semibold text-indigo-600">
+                  {user?.username?.[0]?.toUpperCase()}
+                </span>
+              </div>
+            </div>
+          )}
+
           <NavLink
             to="/settings"
             className={({ isActive }) =>
               [
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                "hover:bg-slate-300/60",
-                isActive ? "bg-white shadow-sm" : "",
-                isCollapsed ? "justify-center px-2" : "",
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
+                "hover:bg-slate-50 text-slate-500 hover:text-slate-900",
+                isActive ? "bg-slate-50 text-slate-900" : "",
+                isCollapsed ? "justify-center" : "",
               ].join(" ")
             }
           >
-            <Settings className="h-5 w-5 text-slate-700" />
-            {!isCollapsed && <span className="text-slate-800">Settings</span>}
+            <Settings className="h-4 w-4 shrink-0" />
+            {!isCollapsed && <span>Settings</span>}
           </NavLink>
 
           <button
             type="button"
-            className={[
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-              "hover:bg-slate-300/60",
-              isCollapsed ? "justify-center px-2" : "",
-            ].join(" ")}
             onClick={handleLogout}
+            className={[
+              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
+              "hover:bg-red-50 text-slate-500 hover:text-red-600 w-full",
+              isCollapsed ? "justify-center" : "",
+            ].join(" ")}
           >
-            <LogOut className="h-5 w-5 text-slate-700" />
-            {!isCollapsed && <span className="text-slate-800">Logout</span>}
+            <LogOut className="h-4 w-4 shrink-0" />
+            {!isCollapsed && <span>Logout</span>}
           </button>
         </div>
       </div>

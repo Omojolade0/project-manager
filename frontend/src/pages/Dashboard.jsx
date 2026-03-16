@@ -1,12 +1,15 @@
 import Layout from "@/components/Layout";
-import StatsIcon from "@/components/StatsIcon";
 import ProjectCard from "@/components/ProjectCard";
-import { Button } from "@/components/ui/button";
-import TaskListCard from "@/components/TaskListCard";
 import ProjectModal from "@/components/ProjectModal";
 import projectService from "@/services/projectService";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  FolderKanban,
+  CheckSquare,
+  FolderCheck,
+  ArrowRight,
+} from "lucide-react";
 
 function Dashboard() {
   const [projects, setProjects] = useState([]);
@@ -16,7 +19,7 @@ function Dashboard() {
   async function fetchProjects() {
     try {
       const response = await projectService.getProjects();
-      setProjects(response); // also see point 3
+      setProjects(response);
     } catch (error) {
       console.error("Error fetching projects:", error);
     } finally {
@@ -28,32 +31,97 @@ function Dashboard() {
     fetchProjects();
   }, []);
 
-  function handleViewMore() {
-    navigate("/projects");
-  }
+  const activeProjects = projects.filter((p) => p.status === "Active");
+  const completedProjects = projects.filter((p) => p.status === "Completed");
+
+  const stats = [
+    {
+      label: "Total Projects",
+      value: projects.length,
+      icon: FolderKanban,
+      color: "bg-indigo-50 text-indigo-600",
+    },
+    {
+      label: "Active",
+      value: activeProjects.length,
+      icon: CheckSquare,
+      color: "bg-amber-50 text-amber-600",
+    },
+    {
+      label: "Completed",
+      value: completedProjects.length,
+      icon: FolderCheck,
+      color: "bg-green-50 text-green-600",
+    },
+  ];
+
   return (
     <Layout>
-      <div className="grid grid-cols-3 gap-2">
-        <StatsIcon title="Active Projects" number={projects.length}></StatsIcon>
-        <StatsIcon title="Task Due Soon" number={0}></StatsIcon>
-        <StatsIcon
-          title="Active Projects"
-          number={projects.filter((p) => p.status === "Completed").length}
-        ></StatsIcon>
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        {stats.map((s, i) => (
+          <div
+            key={i}
+            className="bg-white rounded-2xl border border-slate-100 p-6 flex items-center gap-4"
+          >
+            <div
+              className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${s.color}`}
+            >
+              <s.icon className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-semibold text-slate-900">{s.value}</p>
+              <p className="text-sm text-slate-400">{s.label}</p>
+            </div>
+          </div>
+        ))}
       </div>
-      <div className="mt-4">
-        <div className="flex flex-row items-center justify-between">
-          <h2 className="text-lg font-semibold">My Projects</h2>
-          <ProjectModal onSuccess={fetchProjects} />
+
+      {/* Projects section */}
+      <div className="bg-white rounded-2xl border border-slate-100 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">
+              My Projects
+            </h2>
+            <p className="text-sm text-slate-400 mt-0.5">
+              Your most recent projects
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/projects")}
+              className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-900 transition-colors"
+            >
+              View all <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+            <ProjectModal onSuccess={fetchProjects} />
+          </div>
         </div>
+
         {loading ? (
-          <p className="text-sm text-muted-foreground mt-4">Loading...</p>
+          <div className="grid grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-36 bg-slate-50 rounded-xl animate-pulse"
+              />
+            ))}
+          </div>
         ) : projects.length === 0 ? (
-          <p className="text-sm text-muted-foreground mt-4">
-            No projects yet. Create one!
-          </p>
+          <div className="text-center py-16">
+            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <FolderKanban className="w-6 h-6 text-slate-300" />
+            </div>
+            <p className="text-sm font-medium text-slate-900 mb-1">
+              No projects yet
+            </p>
+            <p className="text-sm text-slate-400">
+              Create your first project to get started
+            </p>
+          </div>
         ) : (
-          <div className="grid grid-cols-3 gap-2 mt-3">
+          <div className="grid grid-cols-3 gap-4">
             {projects.slice(0, 6).map((project) => (
               <ProjectCard
                 key={project.id}
@@ -63,22 +131,9 @@ function Dashboard() {
             ))}
           </div>
         )}
-        <button onClick={handleViewMore} className="mt-4">
-          View more
-        </button>
-      </div>
-      {/* Work ontasks */}
-      <div className="mt-4">
-        <div className="flex flex-row items-center justify-between">
-          <h2 className="text-lg font-semibold">Upcoming Tasks</h2>
-        </div>
-        <div className="flex flex-col">
-          <TaskListCard></TaskListCard>
-          <TaskListCard></TaskListCard>
-          <TaskListCard></TaskListCard>
-        </div>
       </div>
     </Layout>
   );
 }
+
 export default Dashboard;

@@ -6,22 +6,16 @@ function Layout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Sidebar sits outside the normal flow */}
+    <div className="min-h-screen bg-[#FAFAF8]">
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-
-      {/* Content area is padded to make room for sidebar */}
       <div
         className={[
-          "min-h-screen transition-all duration-200",
+          "min-h-screen transition-all duration-300",
           isCollapsed ? "pl-20" : "pl-64",
         ].join(" ")}
       >
         <Topbar />
-
-        <main className="p-6">
-          {children}
-        </main>
+        <main className="p-8">{children}</main>
       </div>
     </div>
   );

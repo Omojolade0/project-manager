@@ -1,8 +1,5 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-// import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,158 +11,143 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-
-// import { Calendar } from "@/components/ui/calendar";
 import projectService from "@/services/projectService";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
-export const title = "Multiple Inputs Dialog";
+import { Plus } from "lucide-react";
 
 function ProjectModal({ onSuccess }) {
-  const [selectedPlan, setSelectedPlan] = useState("incomplete");
-  // const [deadline, setDeadline] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState("Active");
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("incomplete");
 
   const statuses = [
-    { id: "Active", name: "Active" },
-    { id: "Completed", name: "Completed" },
-    { id: "Inactive", name: "Inactive" },
+    {
+      id: "Active",
+      label: "Active",
+      color: "text-green-700 border-green-200 bg-green-50",
+      active: "border-green-500 bg-green-50",
+    },
+    {
+      id: "Inactive",
+      label: "Inactive",
+      color: "text-slate-500 border-slate-200 bg-slate-50",
+      active: "border-slate-400 bg-slate-50",
+    },
+    {
+      id: "Completed",
+      label: "Completed",
+      color: "text-blue-700 border-blue-200 bg-blue-50",
+      active: "border-blue-500 bg-blue-50",
+    },
   ];
 
   async function handleCreate() {
     try {
       await projectService.createProject({
         name: projectName,
-        description: description,
+        description,
         status: selectedPlan,
       });
+      setProjectName("");
+      setDescription("");
+      setSelectedPlan("Active");
       onSuccess();
-      // also see point 3
     } catch (error) {
-      console.error("Error adding projects:", error);
+      console.error("Error creating project:", error);
     }
   }
 
   function handleCancel() {
     setProjectName("");
     setDescription("");
-    setStatus("Active");
+    setSelectedPlan("Active");
   }
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline">Create Project</Button>
+        <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+          <Plus className="w-4 h-4" /> New Project
+        </Button>
       </AlertDialogTrigger>
 
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>New Project</AlertDialogTitle>
-          <AlertDialogDescription>
-            Provide the details of the project here
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+      <AlertDialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
+        <div className="p-6">
+          <AlertDialogHeader className="mb-5">
+            <AlertDialogTitle className="text-lg font-semibold text-slate-900">
+              New Project
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-slate-400">
+              Fill in the details to create your project
+            </AlertDialogDescription>
+          </AlertDialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="subject">Project Name</Label>
-            <Input
-              id="subject"
-              placeholder="Enter Project Name"
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="message">Description</Label>
-            <Textarea
-              className="min-h-[100px]"
-              id="message"
-              placeholder="Enter project description."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          {/* Status */}
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {statuses.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setSelectedPlan(s.id)}
-                  className={cn(
-                    "flex items-center justify-center rounded-lg border-2 p-3 text-sm font-medium transition-colors",
-                    selectedPlan === s.id
-                      ? "border-primary bg-primary/5"
-                      : "border-input hover:border-primary/50",
-                  )}
-                >
-                  {s.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Deadline (Option 2: Popover + Calendar) */}
-          <div className="space-y-2">
-            <Label>Deadline</Label>
-            <Popover>
-              {/* <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !deadline && "text-muted-foreground",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {deadline ? format(deadline, "PPP") : "Pick a date"}
-                </Button>
-              </PopoverTrigger> */}
-
-              {/* <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={deadline}
-                  onSelect={setDeadline}
-                  initialFocus
-                />
-              </PopoverContent> */}
-            </Popover>
-          </div>
-
-          {/* Pin */}
-          {/* Hnalde this later */}
-          <div className="flex items-start space-x-3">
-            <Checkbox id="pin-project" />
-            <div className="grid gap-1.5">
-              <Label className="font-medium" htmlFor="pin-project">
-                Pin project to Dashboard
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">
+                Project Name
               </Label>
+              <Input
+                placeholder="Enter project name"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">
+                Description
+              </Label>
+              <Textarea
+                placeholder="What is this project about?"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="min-h-[80px] bg-slate-50 border-slate-200 rounded-xl text-sm resize-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">
+                Status
+              </Label>
+              <div className="grid grid-cols-3 gap-2">
+                {statuses.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setSelectedPlan(s.id)}
+                    className={cn(
+                      "py-2 rounded-xl border text-xs font-medium transition-all",
+                      selectedPlan === s.id
+                        ? `${s.active} border-2`
+                        : `${s.color} border hover:opacity-80`,
+                    )}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-        {console.log(status)}
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleCreate}>Create</AlertDialogAction>
+
+        <AlertDialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-2">
+          <AlertDialogCancel
+            onClick={handleCancel}
+            className="flex-1 h-10 rounded-xl border-slate-200 text-sm font-medium"
+          >
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleCreate}
+            className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+          >
+            Create Project
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -1,17 +1,12 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-  CardDescription,
-} from "@/components/ui/card";
-
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { User, Calendar, Pencil, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Trash2 } from "lucide-react";
 import projectService from "@/services/projectService";
+
+const statusStyles = {
+  Active: "bg-green-50 text-green-700",
+  Completed: "bg-blue-50 text-blue-700",
+  Inactive: "bg-slate-50 text-slate-500",
+};
 
 function ProjectCard({ project, onDelete }) {
   const navigate = useNavigate();
@@ -20,71 +15,48 @@ function ProjectCard({ project, onDelete }) {
     navigate(`/projects/${project.id}`);
   }
 
-  async function handleDelete() {
+  async function handleDelete(e) {
+    e.stopPropagation();
     try {
       await projectService.deleteProject(project.id);
       onDelete();
     } catch (error) {
-      console.error("Error fetching projects:", error);
+      console.error("Error deleting project:", error);
     }
   }
 
   return (
-    <Card
-      className="w-[350px] rounded-xl border shadow-sm"
+    <div
       onClick={handleNavigate}
+      className="group bg-[#FAFAF8] border border-slate-100 rounded-2xl p-5 cursor-pointer hover:border-slate-200 hover:shadow-sm transition-all duration-150"
     >
-      <CardHeader className="pb-2 mb-2">
-        <CardTitle className="text-lg">{project.name}</CardTitle>
-        <CardDescription className="mt-1">
-          {project.description}
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="pt-0">
-        {/* Status + Date row */}
-        <div className="flex items-center justify-between">
-          <Badge variant="secondary" className="rounded-md">
-            {project.status}
-          </Badge>
-          {/* <Badge variant="secondary" className="rounded-md">
-            {project.priority}
-          </Badge> */}
-
-          {/* <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>{project.dueDate}</span>
-          </div> */}
-        </div>
-      </CardContent>
-
-      <CardFooter className="pt-2 flex justify-between">
-        {/* “Assignee” icon chip */}
-        {/* <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-full border bg-slate-100 flex items-center justify-center">
-            <User className="h-4 w-4 text-slate-600" />
-          </div>
-          <span className="text-xs text-muted-foreground">Assigned</span>
-        </div> */}
-        <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-full flex items-center justify-center">
-            <Pencil
-              className="h-4 w-4 text-slate-600"
-              onClick={handleNavigate}
-            />
-          </div>
-        </div>
-      </CardFooter>
-      {/* would make this positionable */}
-      <div className="h-7 w-7 rounded-full flex items-center justify-center">
-        <X
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDelete();
-          }}
-        />
+      {/* Header */}
+      <div className="flex items-start justify-between mb-3">
+        <h3 className="text-sm font-semibold text-slate-900 leading-snug pr-2 line-clamp-1">
+          {project.name}
+        </h3>
+        <button
+          onClick={handleDelete}
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-red-50 shrink-0"
+        >
+          <Trash2 className="w-3.5 h-3.5 text-slate-300 hover:text-red-500 transition-colors" />
+        </button>
       </div>
-    </Card>
+
+      {/* Description */}
+      <p className="text-xs text-slate-400 leading-relaxed mb-4 line-clamp-2">
+        {project.description || "No description"}
+      </p>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between">
+        <span
+          className={`text-xs font-medium px-2.5 py-1 rounded-lg ${statusStyles[project.status] || "bg-slate-50 text-slate-500"}`}
+        >
+          {project.status}
+        </span>
+      </div>
+    </div>
   );
 }
 

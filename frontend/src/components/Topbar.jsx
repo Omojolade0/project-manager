@@ -1,17 +1,17 @@
 import { useLocation } from "react-router-dom";
-import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
-import { Bell, Search, User } from "lucide-react";
+import { Bell, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 const titles = {
-  "/": "Dashboard ",
+  "/dashboard": "Dashboard",
   "/projects": "Projects",
 };
+
 const getTitle = (pathname) => {
   const match = Object.keys(titles)
     .sort((a, b) => b.length - a.length)
     .find((path) => pathname === path || pathname.startsWith(path + "/"));
-
   return titles[match] ?? "Page";
 };
 
@@ -21,44 +21,28 @@ function Topbar() {
   const title = useMemo(() => getTitle(pathname), [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white">
-      <div className="flex items-center justify-between px-6 py-4 shadow-sm">
-        {/* LEFT — PAGE TITLE */}
-        <h2 className="text-2xl font-semibold text-gray-900">{title}</h2>
-
-        {/* RIGHT — SEARCH + ICONS */}
-        <div className="flex items-center gap-4">
-          {/* Search pill */}
+    <header className="sticky top-0 z-40 w-full bg-[#FAFAF8] border-b border-slate-100">
+      <div className="flex items-center justify-between px-8 py-4">
+        <h2 className="text-xl font-semibold text-slate-900 tracking-tight">
+          {title}
+        </h2>
+        <div className="flex items-center gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
-              className="w-56 rounded-full pl-9 bg-gray-50"
+              className="w-56 rounded-xl pl-9 bg-white border-slate-200 text-sm"
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
-          {/* Bell */}
           <button
             type="button"
             aria-label="Notifications"
-            className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-gray-100 bg-transparent"
+            className="h-9 w-9 rounded-xl flex items-center justify-center hover:bg-white border border-transparent hover:border-slate-200 transition-all bg-transparent"
           >
-            <Bell className="h-5 w-5 text-black" />
+            <Bell className="h-4 w-4 text-slate-500" />
           </button>
-
-          {/* Avatar */}
-          {/* <button
-            type="button"
-            aria-label="Account"
-            className="h-9 w-9 rounded-full flex items-center justify-center bg-gray-300 overflow-hidden">
-            <img
-              src={icon}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          </button> */}
         </div>
       </div>
     </header>

@@ -5,7 +5,7 @@
 // updateNote
 
 // deleteNote
-import api from "./api";
+import api from "@/api/api";
 
 const noteService = {
   getNotes: async (projectId) => {

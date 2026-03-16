@@ -8,15 +8,16 @@ function ItemsNav({ item, collapsed }) {
       to={to}
       className={({ isActive }) =>
         [
-          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-          "hover:bg-slate-300/60",
-          isActive ? "bg-white shadow-sm" : "",
-          collapsed ? "justify-center px-2" : "",
+          "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-150",
+          isActive
+            ? "bg-slate-900 text-white font-medium"
+            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
+          collapsed ? "justify-center" : "",
         ].join(" ")
       }
     >
-      <Icon className="h-5 w-5 text-slate-700" />
-      {!collapsed && <span className="text-slate-800">{label}</span>}
+      <Icon className="h-4 w-4 shrink-0" />
+      {!collapsed && <span>{label}</span>}
     </NavLink>
   );
 }

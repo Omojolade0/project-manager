@@ -4,7 +4,7 @@
 // - [ ] Add updateProject(id, data) function
 // - [ ] Add deleteProject(id) function
 
-import api from "./api";
+import api from "@/api/api";
 
 const projectService = {
   getProjects: async () => {

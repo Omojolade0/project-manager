@@ -1,8 +1,5 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,126 +11,143 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import taskService from "@/services/taskService";
+import { Plus } from "lucide-react";
 
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
-export const title = "Multiple Inputs Dialog";
-
-function TaskModal() {
-  const [selectedPlan, setSelectedPlan] = useState("incomplete");
-  const [deadline, setDeadline] = useState(null);
+function TaskModal({ projectId, onSuccess }) {
+  const [selectedStatus, setSelectedStatus] = useState("Todo");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   const statuses = [
-    { id: "incomplete", name: "Incomplete" },
-    { id: "complete", name: "Complete" },
-    { id: "inprogress", name: "In progress" },
+    {
+      id: "Todo",
+      label: "Todo",
+      color: "text-slate-500 border-slate-200 bg-slate-50",
+      active: "border-slate-400 bg-slate-50",
+    },
+    {
+      id: "Inprogress",
+      label: "In Progress",
+      color: "text-amber-700 border-amber-200 bg-amber-50",
+      active: "border-amber-500 bg-amber-50",
+    },
+    {
+      id: "Done",
+      label: "Done",
+      color: "text-green-700 border-green-200 bg-green-50",
+      active: "border-green-500 bg-green-50",
+    },
   ];
+
+  async function handleCreate() {
+    try {
+      await taskService.createTask(projectId, {
+        title,
+        description,
+        status: selectedStatus,
+      });
+      setTitle("");
+      setDescription("");
+      setSelectedStatus("Todo");
+      onSuccess();
+    } catch (error) {
+      console.error("Error creating task:", error);
+    }
+  }
+
+  function handleCancel() {
+    setTitle("");
+    setDescription("");
+    setSelectedStatus("Todo");
+  }
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline">New Task</Button>
+        <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+          <Plus className="w-4 h-4" /> New Task
+        </Button>
       </AlertDialogTrigger>
 
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Create Task</AlertDialogTitle>
-          <AlertDialogDescription>
-            Provide details of the task here
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+      <AlertDialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
+        <div className="p-6">
+          <AlertDialogHeader className="mb-5">
+            <AlertDialogTitle className="text-lg font-semibold text-slate-900">
+              New Task
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-slate-400">
+              Add a task to this project
+            </AlertDialogDescription>
+          </AlertDialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="subject">Task Name</Label>
-            <Input id="subject" placeholder="Enter Task " />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="message">Description</Label>
-            <Textarea
-              className="min-h-[100px]"
-              id="message"
-              placeholder="Enter project description."
-            />
-          </div>
-
-          {/* Status */}
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {statuses.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setSelectedPlan(s.id)}
-                  className={cn(
-                    "flex items-center justify-center rounded-lg border-2 p-3 text-sm font-medium transition-colors",
-                    selectedPlan === s.id
-                      ? "border-primary bg-primary/5"
-                      : "border-input hover:border-primary/50"
-                  )}
-                >
-                  {s.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Deadline (Option 2: Popover + Calendar) */}
-          <div className="space-y-2">
-            <Label>Deadline</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !deadline && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {deadline ? format(deadline, "PPP") : "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={deadline}
-                  onSelect={setDeadline}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Pin */}
-          <div className="flex items-start space-x-3">
-            <Checkbox id="pin-project" />
-            <div className="grid gap-1.5">
-              <Label className="font-medium" htmlFor="pin-project">
-                Pin project to Dashboard
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">
+                Task Name
               </Label>
+              <Input
+                placeholder="What needs to be done?"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">
+                Description
+              </Label>
+              <Textarea
+                placeholder="Add more details..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="min-h-[80px] bg-slate-50 border-slate-200 rounded-xl text-sm resize-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">
+                Status
+              </Label>
+              <div className="grid grid-cols-3 gap-2">
+                {statuses.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setSelectedStatus(s.id)}
+                    className={cn(
+                      "py-2 rounded-xl border text-xs font-medium transition-all",
+                      selectedStatus === s.id
+                        ? `${s.active} border-2`
+                        : `${s.color} border hover:opacity-80`,
+                    )}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Create</AlertDialogAction>
+        <AlertDialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-2">
+          <AlertDialogCancel
+            onClick={handleCancel}
+            className="flex-1 h-10 rounded-xl border-slate-200 text-sm font-medium"
+          >
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleCreate}
+            className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+          >
+            Create Task
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
