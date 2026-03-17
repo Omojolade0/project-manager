@@ -19,6 +19,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         os.getenv("FRONTEND_URL", ""),
+        "https://project-manager-psi-eight.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
