@@ -5,7 +5,9 @@ import os
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./orm.db")
-engine = create_engine(DATABASE_URL, echo=True)
-
+engine = create_engine(
+    DATABASE_URL,
+    echo=os.getenv("ENVIRONMENT", "development") == "development"
+)
 def create_db_tables():
     return SQLModel.metadata.create_all(engine)

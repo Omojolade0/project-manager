@@ -3,6 +3,7 @@ from app.database import create_db_tables
 from app.routers import project, task, notes, auth
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+import os
 
 
 
@@ -15,7 +16,10 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins = ["http://localhost:5173"],  # ✅ change from 8080 to 5173
+    allow_origins=[
+        "http://localhost:5173",
+        os.getenv("FRONTEND_URL", ""),
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
