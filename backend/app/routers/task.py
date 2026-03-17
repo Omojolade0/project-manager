@@ -9,12 +9,12 @@ from app.models.user import User
 
 router = APIRouter(prefix="/projects/{project_id}/tasks", tags=["Task"] )
 
-@router.get("/")
+@router.get("")
 def get_project_tasks(project_id: int, session: Session = Depends(get_session),
                       current_user: User = Depends(get_current_user)):
   return crud.get_all_project_tasks(project_id, user_id = current_user.id, session =session)
 
-@router.post("/")
+@router.post("")
 def create_task(project_id: int, data: TaskCreate, 
                 current_user: User = Depends(get_current_user),
                 session: Session = Depends(get_session)):

@@ -10,7 +10,7 @@ from app.routers.utils import get_session
 router = APIRouter(prefix="/projects/{project_id}/notes", tags=["Notes"] )
 
 
-@router.get("/")
+@router.get("")
 def get_project_notes(project_id: int ,
                       current_user: User = Depends(get_current_user),
                       session = Depends(get_session)):
@@ -22,7 +22,7 @@ def get_note(project_id: int, notes_id: int,
               session = Depends(get_session)):
   return crud.get_note_by_id(project_id, notes_id, user_id = current_user.id, session=session)
 
-@router.post("/")
+@router.post("")
 def create_note(project_id: int, data: NoteCreate, 
                 current_user: User = Depends(get_current_user),
                 session: Session = Depends(get_session)):
