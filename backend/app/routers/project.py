@@ -12,7 +12,7 @@ router = APIRouter(prefix="/projects", tags=["Projects"])
 # change it to something like this in case of versioning 
 # router = APIRouter(prefix = "/api/v1/issues", tags = ["issues"])
 
-@router.get("/")
+@router.get("")
 def list_projects(
     current_user: User= Depends(get_current_user), 
     session: Session = Depends(get_session)):
@@ -31,7 +31,7 @@ def retrieve_project(project_id: int,
                                   user_id=current_user.id,
                                   session=session)
 
-@router.post("/")
+@router.post("")
 def create_project( data: ProjectCreate, 
                    current_user: User= Depends(get_current_user),
                    session:Session = Depends(get_session)):
