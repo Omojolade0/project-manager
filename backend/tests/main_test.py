@@ -1,6 +1,5 @@
 import pytest
 
-pytestmark = pytest.mark.asyncio
 
 # ─── AUTH TESTS ───────────────────────────────────────────────────────────────
 
@@ -43,7 +42,7 @@ async def test_login_success(client):
     assert "access_token" in response.json()
 
 
-async def test_login_wrong_password(client):
+async def test_login_wrong_password(client): 
     await client.post("/auth/register", json={
         "username": "testuser",
         "email": "test@example.com",
