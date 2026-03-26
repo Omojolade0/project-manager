@@ -1,11 +1,12 @@
 import { Trash2 } from "lucide-react";
 import noteService from "@/services/noteService";
+import NoteModal from "@/components/NoteModal";
 
-function NoteCard({ note, projectId, onDelete }) {
+function NoteCard({ note, projectId, onRefresh }) {
   async function handleDelete() {
     try {
       await noteService.deleteNote(projectId, note.id);
-      onDelete();
+      onRefresh();
     } catch (error) {
       console.error("Error deleting note:", error);
     }
@@ -21,6 +22,9 @@ function NoteCard({ note, projectId, onDelete }) {
         >
           <Trash2 className="w-3.5 h-3.5 text-slate-300 hover:text-red-500 transition-colors" />
         </button>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <NoteModal note={note} projectId={projectId} onSuccess={onRefresh} />
+        </div>
       </div>
     </div>
   );
