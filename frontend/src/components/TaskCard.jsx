@@ -1,5 +1,7 @@
 import { Trash2 } from "lucide-react";
 import taskService from "@/services/taskService";
+import TaskModal from "@/components/TaskModal";
+import StatusDropdown from "@/components/StatusDropdown";
 
 const statusStyles = {
   Todo: "bg-slate-50 text-slate-500",
@@ -7,14 +9,24 @@ const statusStyles = {
   Done: "bg-green-50 text-green-700",
 };
 
-function TaskCard({ task, onDelete, projectId }) {
+function TaskCard({ task, onRefresh, projectId }) {
   async function handleDelete(e) {
     e.stopPropagation();
     try {
       await taskService.deleteTask(projectId, task.id);
-      onDelete();
+      onRefresh();
     } catch (error) {
       console.error("Error deleting task:", error);
+    }
+  }
+  async function handleStatusChange(newStatus) {
+    try {
+      await taskService.updateTask(projectId, task.id, {
+        status: newStatus,
+      });
+      onRefresh();
+    } catch (error) {
+      console.error("Error updating task:", error);
     }
   }
 
@@ -25,25 +37,39 @@ function TaskCard({ task, onDelete, projectId }) {
         <h3 className="text-sm font-semibold text-slate-900 leading-snug pr-2 line-clamp-1">
           {task.title}
         </h3>
-        <button
-          onClick={handleDelete}
-          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-red-50 shrink-0"
-        >
-          <Trash2 className="w-3.5 h-3.5 text-slate-300 hover:text-red-500 transition-colors" />
-        </button>
+        <div className="flex">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <TaskModal
+              task={task}
+              projectId={projectId}
+              onSuccess={onRefresh}
+            />
+          </div>
+          <button
+            onClick={handleDelete}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-red-50 shrink-0"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-slate-300 hover:text-red-500 transition-colors" />
+          </button>
+        </div>
       </div>
-
       {/* Description */}
       <p className="text-xs text-slate-400 leading-relaxed mb-4 line-clamp-2">
         {task.description || "No description"}
       </p>
-
       {/* Status */}
-      <span
+      {/* <span
         className={`text-xs font-medium px-2.5 py-1 rounded-lg ${statusStyles[task.status] || "bg-slate-50 text-slate-500"}`}
+        onClick={() => {}}
       >
         {task.status === "Inprogress" ? "In Progress" : task.status}
-      </span>
+      </span> */}
+      <StatusDropdown
+        currentStatus={task.status}
+        statuses={["Todo", "Inprogress", "Done"]}
+        onStatusChange={handleStatusChange}
+        statusStyles={statusStyles}
+      />
     </div>
   );
 }

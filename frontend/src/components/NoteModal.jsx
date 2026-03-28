@@ -14,10 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import noteService from "@/services/noteService";
-import { Plus } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
 
-function NoteModal({ projectId, onSuccess }) {
-  const [content, setContent] = useState("");
+function NoteModal({ projectId, onSuccess, note }) {
+  const [content, setContent] = useState(note ? note.content : "");
 
   async function handleCreate() {
     try {
@@ -33,24 +33,53 @@ function NoteModal({ projectId, onSuccess }) {
     setContent("");
   }
 
+  async function handleEdit(noteId) {
+    try {
+      await noteService.updateNote(projectId, noteId, { content });
+      setContent("");
+      onSuccess();
+    } catch (error) {
+      console.error("Error updating note:", error);
+    }
+  }
+
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Add Note
-        </Button>
-      </AlertDialogTrigger>
+      {note ? (
+        <AlertDialogTrigger asChild>
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Edit className="w-4 h-4" />
+          </Button>
+        </AlertDialogTrigger>
+      ) : (
+        <AlertDialogTrigger asChild>
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Plus className="w-4 h-4" /> Add Note
+          </Button>
+        </AlertDialogTrigger>
+      )}
 
       <AlertDialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
         <div className="p-6">
-          <AlertDialogHeader className="mb-5">
-            <AlertDialogTitle className="text-lg font-semibold text-slate-900">
-              New Note
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-slate-400">
-              Add a note to this project
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+          {note ? (
+            <AlertDialogHeader className="mb-5">
+              <AlertDialogTitle className="text-lg font-semibold text-slate-900">
+                Edit Note
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm text-slate-400">
+                Update this note
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+          ) : (
+            <AlertDialogHeader className="mb-5">
+              <AlertDialogTitle className="text-lg font-semibold text-slate-900">
+                New Note
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm text-slate-400">
+                Add a note to this project
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+          )}
 
           <div className="space-y-1.5">
             <Label className="text-sm font-medium text-slate-700">Note</Label>
@@ -70,12 +99,22 @@ function NoteModal({ projectId, onSuccess }) {
           >
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleCreate}
-            className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
-          >
-            Save Note
-          </AlertDialogAction>
+
+          {note ? (
+            <AlertDialogAction
+              onClick={() => handleEdit(note.id)}
+              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+            >
+              Save Changes
+            </AlertDialogAction>
+          ) : (
+            <AlertDialogAction
+              onClick={handleCreate}
+              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+            >
+              Save Note
+            </AlertDialogAction>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

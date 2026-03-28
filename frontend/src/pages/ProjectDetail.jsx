@@ -148,7 +148,7 @@ function ProjectDetail() {
                   key={task.id}
                   task={task}
                   projectId={id}
-                  onDelete={() => fetchTasks(id)}
+                  onRefresh={() => fetchTasks(id)}
                 />
               ))}
             </div>
@@ -182,7 +182,7 @@ function ProjectDetail() {
                   key={note.id}
                   note={note}
                   projectId={id}
-                  onDelete={() => fetchNotes(id)}
+                  onRefresh={() => fetchNotes(id)}
                 />
               ))}
             </div>

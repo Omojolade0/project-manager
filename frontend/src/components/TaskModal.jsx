@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -16,12 +16,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import taskService from "@/services/taskService";
-import { Plus } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
 
-function TaskModal({ projectId, onSuccess }) {
-  const [selectedStatus, setSelectedStatus] = useState("Todo");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+function TaskModal({ projectId, onSuccess, task }) {
+  const [selectedStatus, setSelectedStatus] = useState(
+    task ? task.status : "Todo",
+  );
+  const [title, setTitle] = useState(task ? task.title : "");
+  const [description, setDescription] = useState(task ? task.description : "");
+
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title);
+      setDescription(task.description);
+      setSelectedStatus(task.status);
+    }
+  }, [task]);
 
   const statuses = [
     {
@@ -65,23 +75,46 @@ function TaskModal({ projectId, onSuccess }) {
     setDescription("");
     setSelectedStatus("Todo");
   }
+  async function handleEdit(taskId) {
+    try {
+      await taskService.updateTask(projectId, taskId, {
+        title,
+        description,
+        status: selectedStatus,
+      });
+      setTitle("");
+      setDescription("");
+      setSelectedStatus("Todo");
+      onSuccess();
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
+  }
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
-          <Plus className="w-4 h-4" /> New Task
-        </Button>
-      </AlertDialogTrigger>
+      {task ? (
+        <AlertDialogTrigger asChild>
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+          </Button>
+        </AlertDialogTrigger>
+      ) : (
+        <AlertDialogTrigger asChild>
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Plus className="w-4 h-4" /> New Task
+          </Button>
+        </AlertDialogTrigger>
+      )}
 
       <AlertDialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
         <div className="p-6">
           <AlertDialogHeader className="mb-5">
             <AlertDialogTitle className="text-lg font-semibold text-slate-900">
-              New Task
+              {task ? "Edit Task" : "New Task"}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-slate-400">
-              Add a task to this project
+              {task ? "Update this task" : "Add a task to this project"}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -142,12 +175,22 @@ function TaskModal({ projectId, onSuccess }) {
           >
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleCreate}
-            className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
-          >
-            Create Task
-          </AlertDialogAction>
+
+          {task ? (
+            <AlertDialogAction
+              onClick={() => handleEdit(task.id)}
+              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+            >
+              Save Changes
+            </AlertDialogAction>
+          ) : (
+            <AlertDialogAction
+              onClick={handleCreate}
+              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+            >
+              Create Task
+            </AlertDialogAction>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
