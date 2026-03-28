@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -18,10 +18,18 @@ import { Textarea } from "@/components/ui/textarea";
 import projectService from "@/services/projectService";
 import { Plus } from "lucide-react";
 
-function ProjectModal({ onSuccess }) {
+function ProjectModal({ project, onSuccess }) {
   const [selectedPlan, setSelectedPlan] = useState("Active");
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    if (project) {
+      setProjectName(project.name);
+      setDescription(project.description);
+      setSelectedPlan(project.status);
+    }
+  }, [project]);
 
   const statuses = [
     {
@@ -66,22 +74,46 @@ function ProjectModal({ onSuccess }) {
     setSelectedPlan("Active");
   }
 
+  async function handleEdit(projectId) {
+    try {
+      await projectService.updateProject(projectId, {
+        name: projectName,
+        description,
+        status: selectedPlan,
+      });
+      setProjectName("");
+      setDescription("");
+      setSelectedPlan("Active");
+      onSuccess();
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
+  }
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
-          <Plus className="w-4 h-4" /> New Project
-        </Button>
+        {project ? (
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+          </Button>
+        ) : (
+          <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Plus className="w-4 h-4" /> New Task
+          </Button>
+        )}
       </AlertDialogTrigger>
 
       <AlertDialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
         <div className="p-6">
           <AlertDialogHeader className="mb-5">
             <AlertDialogTitle className="text-lg font-semibold text-slate-900">
-              New Project
+              {project ? "Edit Project" : "New Project"}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-slate-400">
-              Fill in the details to create your project
+              {project
+                ? "Update this project"
+                : "Fill in the details to create your project"}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -142,12 +174,22 @@ function ProjectModal({ onSuccess }) {
           >
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleCreate}
-            className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
-          >
-            Create Project
-          </AlertDialogAction>
+
+          {project ? (
+            <AlertDialogAction
+              onClick={() => handleEdit(project.id)}
+              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+            >
+              Save Changes
+            </AlertDialogAction>
+          ) : (
+            <AlertDialogAction
+              onClick={handleCreate}
+              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+            >
+              Create Project
+            </AlertDialogAction>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

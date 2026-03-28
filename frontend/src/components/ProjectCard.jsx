@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 import projectService from "@/services/projectService";
+import ProjectModal from "./ProjectModal";
+import StatusDropdown from "./StatusDropdown";
 
 const statusStyles = {
   Active: "bg-green-50 text-green-700",
@@ -24,6 +26,16 @@ function ProjectCard({ project, onDelete }) {
       console.error("Error deleting project:", error);
     }
   }
+  async function handleStatusChange(newStatus) {
+    try {
+      await projectService.updateProject(project.id, {
+        status: newStatus,
+      });
+      onDelete();
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
+  }
 
   return (
     <div
@@ -35,6 +47,12 @@ function ProjectCard({ project, onDelete }) {
         <h3 className="text-sm font-semibold text-slate-900 leading-snug pr-2 line-clamp-1">
           {project.name}
         </h3>
+        <div
+          className="opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <ProjectModal project={project} onSuccess={onDelete} />
+        </div>
         <button
           onClick={handleDelete}
           className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-red-50 shrink-0"
@@ -49,12 +67,21 @@ function ProjectCard({ project, onDelete }) {
       </p>
 
       {/* Footer */}
-      <div className="flex items-center justify-between">
-        <span
+      <div
+        className="flex items-center justify-between"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* <span
           className={`text-xs font-medium px-2.5 py-1 rounded-lg ${statusStyles[project.status] || "bg-slate-50 text-slate-500"}`}
         >
           {project.status}
-        </span>
+        </span> */}
+        <StatusDropdown
+          currentStatus={project.status}
+          statuses={["Active", "Inactive", "Completed"]}
+          onStatusChange={handleStatusChange}
+          statusStyles={statusStyles}
+        />
       </div>
     </div>
   );

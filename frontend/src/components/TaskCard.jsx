@@ -1,6 +1,7 @@
 import { Trash2 } from "lucide-react";
 import taskService from "@/services/taskService";
 import TaskModal from "@/components/TaskModal";
+import StatusDropdown from "@/components/StatusDropdown";
 
 const statusStyles = {
   Todo: "bg-slate-50 text-slate-500",
@@ -16,6 +17,16 @@ function TaskCard({ task, onRefresh, projectId }) {
       onRefresh();
     } catch (error) {
       console.error("Error deleting task:", error);
+    }
+  }
+  async function handleStatusChange(newStatus) {
+    try {
+      await taskService.updateTask(projectId, task.id, {
+        status: newStatus,
+      });
+      onRefresh();
+    } catch (error) {
+      console.error("Error updating task:", error);
     }
   }
 
@@ -42,19 +53,23 @@ function TaskCard({ task, onRefresh, projectId }) {
           </button>
         </div>
       </div>
-
       {/* Description */}
       <p className="text-xs text-slate-400 leading-relaxed mb-4 line-clamp-2">
         {task.description || "No description"}
       </p>
-
       {/* Status */}
-      <span
+      {/* <span
         className={`text-xs font-medium px-2.5 py-1 rounded-lg ${statusStyles[task.status] || "bg-slate-50 text-slate-500"}`}
         onClick={() => {}}
       >
         {task.status === "Inprogress" ? "In Progress" : task.status}
-      </span>
+      </span> */}
+      <StatusDropdown
+        currentStatus={task.status}
+        statuses={["Todo", "Inprogress", "Done"]}
+        onStatusChange={handleStatusChange}
+        statusStyles={statusStyles}
+      />
     </div>
   );
 }
