@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -18,8 +16,12 @@ export default function StatusDropdown({
   statuses,
   onStatusChange,
   statusStyles,
+  updatingStatus,
 }) {
   const [position, setPosition] = React.useState(currentStatus);
+  React.useEffect(() => {
+    setPosition(currentStatus);
+  }, [currentStatus]);
 
   function handleChange(newStatus) {
     setPosition(newStatus);
@@ -28,11 +30,15 @@ export default function StatusDropdown({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild disabled={updatingStatus}>
         <span
           className={`cursor-pointer text-xs font-medium px-2.5 py-1 rounded-lg ${statusStyles[currentStatus]}`}
         >
-          {currentStatus === "Inprogress" ? "In Progress" : currentStatus}
+          {updatingStatus
+            ? "Updating..."
+            : currentStatus === "Inprogress"
+              ? "In Progress"
+              : currentStatus}
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-32">

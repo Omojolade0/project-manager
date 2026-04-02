@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import authService from "@/services/authService";
+import toast from "react-hot-toast";
 
 function Register() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,11 @@ function Register() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (!username.trim()) {
+      toast.error("Username is required");
+      return;
+    }
+
     setError("");
     setLoading(true);
     try {
@@ -22,6 +28,7 @@ function Register() {
       const result = await authService.login({ email, password });
       localStorage.setItem("token", result.access_token);
       navigate("/dashboard");
+      toast.success("Account created!");
     } catch (err) {
       setError(err.response?.data?.detail || "Registration failed");
     } finally {
@@ -103,6 +110,7 @@ function Register() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="h-11 bg-slate-50 border-slate-200 focus:bg-white"
+                required={true}
               />
             </div>
 
@@ -117,6 +125,7 @@ function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-11 bg-slate-50 border-slate-200 focus:bg-white"
+                required={true}
               />
             </div>
 
@@ -131,6 +140,7 @@ function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-11 bg-slate-50 border-slate-200 focus:bg-white"
+                required={true}
               />
             </div>
 
