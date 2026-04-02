@@ -7,10 +7,12 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProjectDetail from "./pages/ProjectDetail";
 import LandingPage from "./pages/LandingPage";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <main>
+      <Toaster position="bottom-right" />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

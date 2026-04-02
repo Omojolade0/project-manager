@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import authService from "@/services/authService";
+import toast from "react-hot-toast";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -14,12 +15,18 @@ function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (!email.trim()) {
+      toast.error("Email is required");
+      return;
+    }
+
     setError("");
     setLoading(true);
     try {
       const result = await authService.login({ email, password });
       localStorage.setItem("token", result.access_token);
       navigate("/dashboard");
+      toast.success("Welcome Back");
     } catch (error) {
       setError("Invalid email or password");
       console.error("Login error:", error);
@@ -61,6 +68,7 @@ function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-11 bg-slate-50 border-slate-200 focus:bg-white"
+                required={true}
               />
             </div>
 
@@ -75,6 +83,7 @@ function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-11 bg-slate-50 border-slate-200 focus:bg-white"
+                required={true}
               />
             </div>
 

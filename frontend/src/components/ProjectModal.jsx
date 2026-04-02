@@ -1,27 +1,28 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import projectService from "@/services/projectService";
 import { Plus } from "lucide-react";
+import toast from "react-hot-toast";
 
 function ProjectModal({ project, onSuccess }) {
+  const [open, setOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("Active");
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (project) {
@@ -53,7 +54,12 @@ function ProjectModal({ project, onSuccess }) {
   ];
 
   async function handleCreate() {
+    if (!projectName.trim()) {
+      toast.error("Project name is required");
+      return;
+    }
     try {
+      setLoading(true);
       await projectService.createProject({
         name: projectName,
         description,
@@ -62,9 +68,14 @@ function ProjectModal({ project, onSuccess }) {
       setProjectName("");
       setDescription("");
       setSelectedPlan("Active");
+      setOpen(false);
       onSuccess();
+      toast.success("Project created!");
     } catch (error) {
       console.error("Error creating project:", error);
+      toast.error("Failed to create project");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -72,10 +83,12 @@ function ProjectModal({ project, onSuccess }) {
     setProjectName("");
     setDescription("");
     setSelectedPlan("Active");
+    setOpen(false);
   }
 
   async function handleEdit(projectId) {
     try {
+      setLoading(true);
       await projectService.updateProject(projectId, {
         name: projectName,
         description,
@@ -84,38 +97,43 @@ function ProjectModal({ project, onSuccess }) {
       setProjectName("");
       setDescription("");
       setSelectedPlan("Active");
+      setOpen(false);
       onSuccess();
+      toast.success("Project updated!");
     } catch (error) {
-      console.error("Error updating task:", error);
+      console.error("Error updating project:", error);
+      toast.error("Failed to update project");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         {project ? (
           <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
             <Plus className="w-4 h-4" />
           </Button>
         ) : (
           <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
-            <Plus className="w-4 h-4" /> New Task
+            <Plus className="w-4 h-4" /> New Project
           </Button>
         )}
-      </AlertDialogTrigger>
+      </DialogTrigger>
 
-      <AlertDialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
+      <DialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
         <div className="p-6">
-          <AlertDialogHeader className="mb-5">
-            <AlertDialogTitle className="text-lg font-semibold text-slate-900">
+          <DialogHeader className="mb-5">
+            <DialogTitle className="text-lg font-semibold text-slate-900">
               {project ? "Edit Project" : "New Project"}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-slate-400">
+            </DialogTitle>
+            <DialogDescription className="text-sm text-slate-400">
               {project
                 ? "Update this project"
                 : "Fill in the details to create your project"}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            </DialogDescription>
+          </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-1.5">
@@ -167,32 +185,34 @@ function ProjectModal({ project, onSuccess }) {
           </div>
         </div>
 
-        <AlertDialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-2">
-          <AlertDialogCancel
+        <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-2">
+          <Button
+            variant="outline"
             onClick={handleCancel}
             className="flex-1 h-10 rounded-xl border-slate-200 text-sm font-medium"
           >
             Cancel
-          </AlertDialogCancel>
-
+          </Button>
           {project ? (
-            <AlertDialogAction
+            <Button
               onClick={() => handleEdit(project.id)}
+              disabled={loading}
               className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
             >
-              Save Changes
-            </AlertDialogAction>
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
           ) : (
-            <AlertDialogAction
+            <Button
               onClick={handleCreate}
+              disabled={loading}
               className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
             >
-              Create Project
-            </AlertDialogAction>
+              {loading ? "Creating..." : "Create Project"}
+            </Button>
           )}
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
