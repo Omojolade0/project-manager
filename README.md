@@ -86,11 +86,6 @@ cd frontend
 npm install
 ```
 
-Create a `.env` file in `frontend/`:
-```
-VITE_API_URL=http://localhost:8000
-```
-
 Run the dev server:
 ```bash
 npm run dev
