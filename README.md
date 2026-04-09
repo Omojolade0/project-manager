@@ -22,7 +22,7 @@ A full-stack project management application with user authentication.
 - SQLite
 - JWT authentication with bcrypt
 
-**Frontend (Coming Soon):**
+**Frontend:**
 - React
 - Tailwind CSS
 - shadcn/ui
