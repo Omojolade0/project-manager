@@ -65,14 +65,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Create a `.env` file in `backend/`:
-```
-DATABASE_URL=your_postgresql_url
-SECRET_KEY=your_secret_key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-FRONTEND_URL=http://localhost:5173
-```
 
 Run the server:
 ```bash
