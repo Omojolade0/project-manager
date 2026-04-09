@@ -5,7 +5,7 @@ A full-stack project management application with user authentication.
 ## Project Structure
 
 - `backend/` - FastAPI backend with JWT auth
-- `frontend/` - React frontend (coming soon)
+- `frontend/` - React frontend 
 
 ## Features
 
