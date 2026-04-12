@@ -1,3 +1,4 @@
+
 from sqlmodel import SQLModel, Relationship, Field
 from typing import Optional
 # from pydantic import BaseModel
@@ -23,3 +24,8 @@ class UserPublic(SQLModel):
     id: int
     username: str
     email: str
+
+class UserUpdate(SQLModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None

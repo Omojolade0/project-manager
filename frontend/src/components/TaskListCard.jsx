@@ -30,7 +30,6 @@ function TaskListCard() {
           <Badge variant="secondary" className="rounded-md">
             Priority
           </Badge>
-
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock9 className="h-4 w-4" />
             <span>20 Jan</span>

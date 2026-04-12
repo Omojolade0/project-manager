@@ -1,11 +1,12 @@
-import { useLocation } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
 import { Bell, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 const titles = {
   "/dashboard": "Dashboard",
   "/projects": "Projects",
+  "/settings": "Settings",
 };
 
 const getTitle = (pathname) => {
@@ -19,6 +20,18 @@ function Topbar() {
   const { pathname } = useLocation();
   const [search, setSearch] = useState("");
   const title = useMemo(() => getTitle(pathname), [pathname]);
+  const showSearch = pathname === "/projects";
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (pathname === "/projects") {
+      navigate(`/projects?search=${search}`);
+    }
+  }, [search]);
+
+  useEffect(() => {
+    setSearch("");
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[#FAFAF8] border-b border-slate-100">
@@ -27,15 +40,17 @@ function Topbar() {
           {title}
         </h2>
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <Input
-              className="w-56 rounded-xl pl-9 bg-white border-slate-200 text-sm"
-              placeholder="Search..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          {showSearch && (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input
+                className="w-56 rounded-xl pl-9 bg-white border-slate-200 text-sm"
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          )}
           <button
             type="button"
             aria-label="Notifications"

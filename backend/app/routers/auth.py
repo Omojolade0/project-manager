@@ -1,6 +1,6 @@
 from app.auth.dependencies import get_current_user
 from fastapi import APIRouter, Depends
-from app.models.user import UserLogin, UserCreate, UserPublic
+from app.models.user import UserLogin, UserCreate, UserPublic, UserUpdate
 from app.crud import user as crud
 from sqlmodel import Session 
 from app.routers.utils import get_session
@@ -42,3 +42,13 @@ def user_login(data:UserLogin, session: Session = Depends(get_session)):
 @auth_router.get('/me', response_model=UserPublic)
 def get_me(current_user: UserPublic = Depends(get_current_user)):
     return current_user
+
+@auth_router.put('/me', response_model=UserPublic)
+def update_me(data: UserUpdate, 
+              current_user: UserPublic = Depends(get_current_user), 
+              session: Session = Depends(get_session)):
+    return crud.update_user(current_user.id, data, session)
+@auth_router.delete('/me', status_code=200)
+def delete_me(current_user: UserPublic = Depends(get_current_user), session: Session = Depends(get_session)):
+    crud.delete_user(current_user.id, session)
+    return {"message": "User deleted"}
