@@ -17,6 +17,14 @@ const authService = {
     const response = await api.get("/auth/me");
     return response.data;
   },
+  updateMe: async (data) => {
+    const response = await api.put("/auth/me", data);
+    return response.data;
+  },
+  deleteMe: async () => {
+    const response = await api.delete("/auth/me");
+    return response.data;
+  },
 };
 
 export default authService;

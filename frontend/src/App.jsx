@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ProjectDetail from "./pages/ProjectDetail";
 import LandingPage from "./pages/LandingPage";
 import { Toaster } from "react-hot-toast";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects" element={<ProjectList />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>
     </main>

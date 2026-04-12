@@ -4,8 +4,10 @@ import ProjectModal from "@/components/ProjectModal";
 import projectService from "@/services/projectService";
 import { useEffect, useState } from "react";
 import { FolderKanban } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 function ProjectList() {
+  const [searchParams] = useSearchParams();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
@@ -26,9 +28,11 @@ function ProjectList() {
   }, []);
 
   const filters = ["All", "Active", "Completed", "Inactive"];
+  const search = searchParams.get("search") || "";
 
-  const filtered =
-    filter === "All" ? projects : projects.filter((p) => p.status === filter);
+  const filtered = projects
+    .filter((p) => filter === "All" || p.status === filter)
+    .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <Layout>
