@@ -1,13 +1,10 @@
 from sqlmodel import SQLModel, create_engine, Session
-from dotenv import load_dotenv
-import os
+from app.core.config import DATABASE_URL, ENVIRONMENT
 
-load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./orm.db")
+
 engine = create_engine(
-    DATABASE_URL,
-    echo=os.getenv("ENVIRONMENT", "development") == "development"
+    DATABASE_URL, echo=(ENVIRONMENT == "development")
 )
 def create_db_tables():
     return SQLModel.metadata.create_all(engine)

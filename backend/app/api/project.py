@@ -1,58 +1,55 @@
 from fastapi import APIRouter, Depends
-from app.models.project import Project, ProjectUpdate, ProjectCreate
+from app.schemas.project import ProjectUpdate, ProjectCreate, ProjectPublic 
 from app.models.user import User
 from sqlmodel import Session
-from app.crud import project as crud
-from app.routers.utils import get_session
-from app.auth.dependencies import get_current_user
+from app.services import project as service
+from app.core.dependencies import get_session, get_current_user
 
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
-# change it to something like this in case of versioning 
-# router = APIRouter(prefix = "/api/v1/issues", tags = ["issues"])
 
-@router.get("")
+@router.get("", response_model=list[ProjectPublic])
 def list_projects(
     current_user: User= Depends(get_current_user), 
+    page: int = 1, 
+    limit: int = 10,
     session: Session = Depends(get_session)):
     
     """Retrieve a list of all project."""
-    return crud.get_all_projects(
-        user_id=current_user.id, 
+    return service.get_all_projects(
+        user_id=current_user.id, page=page, limit=limit,
         session=session)
 
-@router.get("/{project_id}")
+@router.get("/{project_id}", response_model=ProjectPublic)
 def retrieve_project(project_id: int, 
                      current_user: User= Depends(get_current_user), 
                      session: Session = Depends(get_session)):
-    """Retrieve a list of all project."""
-    return crud.get_project_by_id(project_id, 
-                                  user_id=current_user.id,
+    return service.get_project_by_id(project_id, 
+                                     user_id=current_user.id,
                                   session=session)
 
-@router.post("")
+@router.post("", response_model=ProjectPublic)
 def create_project( data: ProjectCreate, 
                    current_user: User= Depends(get_current_user),
                    session:Session = Depends(get_session)):
-    return crud.create_project(data,
-                               user_id=current_user.id,
-                               session=session)
+    return service.create_project(data,
+                                   user_id=current_user.id,
+                                   session=session)
 
-@router.put("/{project_id}")
+@router.put("/{project_id}", response_model=ProjectPublic)
 def update_project(project_id: int, 
                    data: ProjectUpdate, 
                    current_user: User = Depends(get_current_user),
                    session:Session = Depends(get_session)):
-    return crud.update_project(project_id, data,
-                               user_id= current_user.id,
-                               session=session)
+    return service.update_project(project_id, data,
+                                   user_id= current_user.id,
+                                   session=session)
 
-@router.delete("/{project_id}")
+@router.delete("/{project_id}", status_code=204)
 def delete_project(project_id: int, 
                      current_user: User= Depends(get_current_user), 
                      session: Session = Depends(get_session)):
-    crud.delete_project(project_id, 
+    service.delete_project(project_id, 
                         user_id=current_user.id,
                         session=session)
-    return {"message": "Project deleted"}

@@ -1,9 +1,10 @@
 from sqlmodel import SQLModel, Field
 from enum import Enum
 from typing import Optional
+from datetime import datetime
 
 
-class Status(str, Enum):
+class ProjectStatus(str, Enum):
     Active = "Active"
     Completed = "Completed"
     Inactive = "Inactive"
@@ -12,18 +13,10 @@ class Status(str, Enum):
 class Project(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
-    description: str
-    status: Status = Field(default=Status.Active)
-    user_id: int = Field(foreign_key="user.id")
-
-
-class ProjectUpdate(SQLModel):
-    name: Optional[str] = None
     description: Optional[str] = None
-    status: Optional[Status] = None
+    status: ProjectStatus = Field(default=ProjectStatus.Active)
+    user_id: int = Field(foreign_key="user.id")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = None
 
 
-class ProjectCreate(SQLModel):
-    name: str
-    description: str
-    status: Optional[Status] = Field(default=Status.Active)

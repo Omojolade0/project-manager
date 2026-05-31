@@ -1,7 +1,6 @@
-
-from sqlmodel import SQLModel, Relationship, Field
+from sqlmodel import SQLModel, Field
 from typing import Optional
-# from pydantic import BaseModel
+from datetime import datetime
 
 
 class User(SQLModel, table=True):
@@ -9,23 +8,9 @@ class User(SQLModel, table=True):
     username: str
     email: str = Field(unique=True, index=True)
     hashed_password: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = None
+    is_active: bool = Field(default=True)
+    avatar_url: Optional[str] = None
 
 
-class UserCreate(SQLModel):
-    username: str
-    email: str
-    password: str
-
-
-class UserLogin(SQLModel):
-    email: str  
-    password: str  
-class UserPublic(SQLModel):
-    id: int
-    username: str
-    email: str
-
-class UserUpdate(SQLModel):
-    username: Optional[str] = None
-    email: Optional[str] = None
-    password: Optional[str] = None

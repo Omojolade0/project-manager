@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 from app.database import create_db_tables
-from app.routers import project, task, notes, auth
+from app.api import project, task, notes, auth, intelligence 
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-import os
-
+from app.core.config import FRONTEND_URL
 
 
 @asynccontextmanager
@@ -17,8 +16,7 @@ app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        os.getenv("FRONTEND_URL", ""),
+        FRONTEND_URL,
         "https://project-manager-psi-eight.vercel.app",
     ],
     allow_credentials=True,
@@ -30,6 +28,7 @@ app.include_router(project.router)
 app.include_router(task.router)
 app.include_router(notes.router)
 app.include_router(auth.auth_router)
+app.include_router(intelligence.router)
 
 
 
