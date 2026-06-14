@@ -8,20 +8,40 @@ import api from "@/api/api";
 
 const projectService = {
   getProjects: async () => {
-    const response = await api.get("/projects");
-    return response.data;
+    try {
+      const response = await api.get("/projects");
+      return response.data;
+    } catch (error) {
+      console.error("Get projects error:", error);
+      throw error;
+    }
   },
   getProjectById: async (id) => {
-    const response = await api.get(`/projects/${id}`);
-    return response.data;
+    try {
+      const response = await api.get(`/projects/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Get project error:", error);
+      throw error;
+    }
   },
   createProject: async (data) => {
-    const response = await api.post("/projects", data);
-    return response.data;
+    try {
+      const response = await api.post("/projects", data);
+      return response.data;
+    } catch (error) {
+      console.error("Create project error:", error);
+      throw error;
+    }
   },
   updateProject: async (id, data) => {
-    const response = await api.put(`/projects/${id}`, data);
-    return response.data;
+    try {
+      const response = await api.put(`/projects/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Update project error:", error);
+      throw error;
+    }
   },
   deleteProject: async (id) => {
     const response = await api.delete(`/projects/${id}`);

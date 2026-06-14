@@ -1,9 +1,8 @@
-import Layout from "@/components/Layout";
-import ProjectCard from "@/components/ProjectCard";
-import ProjectModal from "@/components/ProjectModal";
-import projectService from "@/services/projectService";
-import { useEffect, useState } from "react";
+import Layout from "@/layouts/Layout";
+import ProjectCard from "@/features/projects/ProjectCard";
+import ProjectModal from "@/features/projects/ProjectModal";
 import { useNavigate } from "react-router-dom";
+import { useProjects } from "@/hooks/useProjects";
 import {
   FolderKanban,
   CheckSquare,
@@ -12,24 +11,8 @@ import {
 } from "lucide-react";
 
 function Dashboard() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { projects, loading, error, fetchProjects } = useProjects();
   const navigate = useNavigate();
-
-  async function fetchProjects() {
-    try {
-      const response = await projectService.getProjects();
-      setProjects(response);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
 
   const activeProjects = projects.filter((p) => p.status === "Active");
   const completedProjects = projects.filter((p) => p.status === "Completed");
@@ -55,6 +38,27 @@ function Dashboard() {
     },
   ];
 
+  if (error) {
+    return (
+      <Layout>
+        <div className="text-center py-20">
+          <p className="text-sm text-slate-400 mb-4">
+            {error?.response?.status === 404
+              ? "Projects not found."
+              : error?.response?.status === 403
+                ? "You don't have permission to view this."
+                : "Something went wrong."}
+          </p>
+          <button
+            onClick={fetchProjects}
+            className="text-sm text-indigo-600 hover:text-indigo-700"
+          >
+            Try again
+          </button>
+        </div>
+      </Layout>
+    );
+  }
   return (
     <Layout>
       {/* Stats */}

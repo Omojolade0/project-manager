@@ -1,30 +1,16 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 import ItemsNav from "./ItemsNav";
-import authService from "@/services/authService";
 import { LayoutDashboard, FolderKanban, Settings, LogOut } from "lucide-react";
+import useAuth from "@/hooks/useAuth";
 
 function Sidebar({ isCollapsed, setIsCollapsed }) {
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   function handleLogout() {
-    localStorage.removeItem("token");
+    logout();
     navigate("/login");
   }
-
-  useEffect(() => {
-    async function getData() {
-      try {
-        const result = await authService.getMe();
-        setUser(result);
-      } catch (error) {
-        handleLogout();
-        console.error("Error fetching user data:", error);
-      }
-    }
-    getData();
-  }, []);
 
   const navItems = [
     { label: "Dashboard", to: "/dashboard", Icon: LayoutDashboard },

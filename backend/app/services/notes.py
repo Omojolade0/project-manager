@@ -8,7 +8,12 @@ from fastapi import HTTPException
 
 def get_all_project_notes(project_id: int, user_id: int, page: int, limit: int, session: Session) -> list[Note]:
   verify_project_ownership(project_id, user_id, session)
-  results = session.exec(select(Note).where(Note.project_id == project_id)).offset((page - 1) * limit).limit(limit).all()
+  results = session.exec(
+    select(Note)
+    .where(Note.project_id == project_id)
+    .offset((page - 1) * limit)
+    .limit(limit)
+    ).all()
   return results
 
 def get_note_by_id(project_id: int, note_id: int, user_id: int, session: Session) -> Note:

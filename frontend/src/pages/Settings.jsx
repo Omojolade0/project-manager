@@ -1,4 +1,4 @@
-import Layout from "@/components/Layout";
+import Layout from "@/layouts/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,59 +6,41 @@ import authService from "@/services/authService";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import useAuth from "@/hooks/useAuth";
 
 export default function Settings() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+  const [loadingPassword, setLoadingPassword] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
   const [username, setUsername] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [toDelete, setToDelete] = useState(false);
+
+  const { user, logout } = useAuth();
 
   useEffect(() => {
-    async function getData() {
-      try {
-        setLoading(true);
-        const result = await authService.getMe();
-        setUser(result);
-        setEmail(result.email);
-        setUsername(result.username);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    getData();
-  }, []);
+    if (!user) return;
+    setEmail(user.email);
+    setUsername(user.username);
+  }, [user]);
 
-  async function handleUsernameChange() {
+  async function handleDetailsChange() {
     try {
-      setLoading(true);
-      await authService.updateMe({ username });
+      setLoadingProfile(true);
+      await authService.updateMe({ username, email });
 
-      toast.success("Username updated!");
+      toast.success("Details updated!");
     } catch (error) {
-      console.error("Error updating username:", error);
+      console.error("Error updating details:", error);
 
-      toast.error("Failed to update username");
+      toast.error("Failed to update details");
     } finally {
-      setLoading(false);
-    }
-  }
-  async function handleEmailChange() {
-    try {
-      setLoading(true);
-      await authService.updateMe({ email });
-
-      toast.success("Email updated!");
-    } catch (error) {
-      console.error("Error updating email:", error);
-
-      toast.error("Failed to update email");
-    } finally {
-      setLoading(false);
+      setLoadingProfile(false);
     }
   }
   async function handleChangePassword() {
@@ -66,12 +48,12 @@ export default function Settings() {
       toast.error("Please fill in both password fields");
       return;
     }
-    if (newPassword.length < 6) {
-      toast.error("New password must be at least 6 characters");
+    if (newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters");
       return;
     }
     try {
-      setLoading(true);
+      setLoadingPassword(true);
       await authService.login({ email: user.email, password: oldPassword });
       await authService.updateMe({ password: newPassword });
 
@@ -81,7 +63,7 @@ export default function Settings() {
 
       toast.error("Failed to update password");
     } finally {
-      setLoading(false);
+      setLoadingPassword(false);
       setOldPassword("");
       setNewPassword("");
     }
@@ -89,16 +71,16 @@ export default function Settings() {
 
   async function handleDeleteAccount() {
     try {
-      setLoading(true);
-      await authService.deleteMe();
+      setLoadingDelete(true);
+      await authService.deleteMe(); // ← delete from database
       toast.success("Account deleted successfully.");
-      localStorage.removeItem("token");
+      await logout();
       navigate("/login");
     } catch (error) {
       console.error("Error deleting account:", error);
       toast.error("Failed to delete account.");
     } finally {
-      setLoading(false);
+      setLoadingDelete(false);
     }
   }
   return (
@@ -126,14 +108,13 @@ export default function Settings() {
             />
           </div>
           <Button
-            disabled={loading}
+            disabled={loadingProfile}
             onClick={() => {
-              handleUsernameChange();
-              handleEmailChange();
+              handleDetailsChange();
             }}
             className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl"
           >
-            {loading ? "Saving..." : "Save Changes"}
+            {loadingProfile ? "Saving..." : "Save Changes"}
           </Button>
         </div>
 
@@ -165,11 +146,11 @@ export default function Settings() {
             />
           </div>
           <Button
-            disabled={loading}
+            disabled={loadingPassword}
             onClick={handleChangePassword}
             className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl"
           >
-            {loading ? "Saving..." : "Update Password"}
+            {loadingPassword ? "Saving..." : "Update Password"}
           </Button>
         </div>
 
@@ -182,11 +163,37 @@ export default function Settings() {
           </p>
           <Button
             variant="destructive"
-            onClick={handleDeleteAccount}
+            onClick={() => {
+              setToDelete(true);
+            }}
             className="rounded-xl"
           >
             Delete Account
           </Button>
+          {toDelete && (
+            <div className="space-y-4">
+              <p className="text-sm text-red-500">
+                Are you sure you want to delete your account? This action cannot
+                be undone.
+              </p>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                className="rounded-xl"
+              >
+                Confirm Delete
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setToDelete(false);
+                }}
+                className="rounded-xl"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </Layout>
