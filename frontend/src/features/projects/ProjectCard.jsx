@@ -1,10 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { Trash2 } from "lucide-react";
-import projectService from "@/services/projectService";
 import ProjectModal from "./ProjectModal";
-import StatusDropdown from "./StatusDropdown";
+import StatusDropdown from "../../components/StatusDropdown";
 import toast from "react-hot-toast";
 import { useState } from "react";
+import { useProjects } from "@/hooks/useProjects";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const statusStyles = {
   Active: "bg-green-50 text-green-700",
@@ -12,42 +23,41 @@ const statusStyles = {
   Inactive: "bg-slate-50 text-slate-500",
 };
 
-function ProjectCard({ project, onDelete }) {
+function ProjectCard({ project }) {
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const { removeProject, editProject } = useProjects();
 
   function handleNavigate() {
     navigate(`/projects/${project.id}`);
   }
 
-  async function handleDelete(e) {
-    e.stopPropagation();
+  async function handleDelete() {
     try {
       setDeleting(true);
-      await projectService.deleteProject(project.id);
+      await removeProject(project.id);
       toast.success("Project deleted");
-      onDelete();
     } catch (error) {
       console.error("Error deleting project:", error);
       toast.error("Failed to delete project");
     } finally {
       setDeleting(false);
+      navigate(`/dashboard`);
     }
   }
   async function handleStatusChange(newStatus) {
     try {
       setUpdatingStatus(true);
-      await projectService.updateProject(project.id, {
+      await editProject(project.id, {
         status: newStatus,
       });
       toast.success("Project updated");
     } catch (error) {
-      console.error("Error updating task:", error);
-      toast.error("Failed to update task status");
+      console.error("Error updating project:", error);
+      toast.error("Failed to update project status");
     } finally {
       setUpdatingStatus(false);
-      onDelete();
     }
   }
 
@@ -71,15 +81,37 @@ function ProjectCard({ project, onDelete }) {
           className="opacity-0 group-hover:opacity-100 transition-opacity"
           onClick={(e) => e.stopPropagation()}
         >
-          <ProjectModal project={project} onSuccess={onDelete} />
+          <ProjectModal project={project} />
         </div>
-        <button
-          onClick={handleDelete}
-          disabled={deleting}
-          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-red-50 shrink-0"
-        >
-          <Trash2 className="w-3.5 h-3.5 text-slate-300 hover:text-red-500 transition-colors" />
-        </button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button
+              disabled={deleting}
+              onClick={(e) => e.stopPropagation()}
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-red-50 shrink-0"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-slate-300 hover:text-red-500 transition-colors" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the
+                project.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {/* Description */}

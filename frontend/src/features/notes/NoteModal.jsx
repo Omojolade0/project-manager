@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,14 +12,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import noteService from "@/services/noteService";
 import { Plus, Edit } from "lucide-react";
 import toast from "react-hot-toast";
+import { useNotes } from "@/hooks/useNotes";
 
-function NoteModal({ projectId, onSuccess, note }) {
+function NoteModal({ projectId, note }) {
   const [content, setContent] = useState(note ? note.content : "");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [isPinned, setIsPinned] = useState(
+    note ? note.is_pinned || false : false,
+  );
+  const { createNote, editNote } = useNotes(projectId);
 
   async function handleCreate() {
     if (!content.trim()) {
@@ -28,9 +32,8 @@ function NoteModal({ projectId, onSuccess, note }) {
     }
     try {
       setLoading(true);
-      await noteService.createNote(projectId, { content });
+      await createNote({ content, is_pinned: isPinned });
       setContent("");
-      onSuccess();
       setOpen(false);
       toast.success("Note created");
     } catch (error) {
@@ -44,19 +47,25 @@ function NoteModal({ projectId, onSuccess, note }) {
   function handleCancel() {
     setContent("");
     setOpen(false);
+    setIsPinned(false);
   }
+
+  useEffect(() => {
+    if (note) {
+      setContent(note.content);
+      setIsPinned(note.is_pinned || false);
+    }
+  }, [note]);
 
   async function handleEdit(noteId) {
     try {
       setLoading(true);
-      await noteService.updateNote(projectId, noteId, { content });
-      setContent("");
-      setOpen(false);
+      await editNote(noteId, { content, is_pinned: isPinned });
+      setOpen(false); // ← just close, don't reset content
       toast.success("Note updated");
-      onSuccess();
     } catch (error) {
-      console.error("Error updating note:", error);
       toast.error("Failed to update note");
+      console.error("Error updating note:", error);
     } finally {
       setLoading(false);
     }
@@ -110,6 +119,17 @@ function NoteModal({ projectId, onSuccess, note }) {
               required={true}
             />
           </div>
+        </div>
+        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100">
+          <Label className="text-sm font-medium text-slate-700">
+            Pin to the top
+          </Label>
+          <input
+            type="checkbox"
+            checked={isPinned}
+            onChange={(e) => setIsPinned(e.target.checked)}
+            className="h-4 w-4 text-slate-600 rounded border-slate-300 focus:ring-slate-500"
+          />
         </div>
 
         <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-2">

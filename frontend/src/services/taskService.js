@@ -7,23 +7,45 @@ import api from "@/api/api";
 
 const taskService = {
   getTasks: async (projectId) => {
-    const response = await api.get(`/projects/${projectId}/tasks`);
-    return response.data;
+    try {
+      const response = await api.get(`/projects/${projectId}/tasks`);
+      return response.data;
+    } catch (error) {
+      console.error("Get tasks error:", error);
+      throw error;
+    }
   },
   createTask: async (projectId, data) => {
-    const response = await api.post(`/projects/${projectId}/tasks`, data);
-    return response.data;
+    try {
+      const response = await api.post(`/projects/${projectId}/tasks`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Create task error:", error);
+      throw error;
+    }
   },
   updateTask: async (projectId, taskId, data) => {
-    const response = await api.put(
-      `/projects/${projectId}/tasks/${taskId}`,
-      data,
-    );
-    return response.data;
+    try {
+      const response = await api.put(
+        `/projects/${projectId}/tasks/${taskId}`,
+        data,
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Update task error:", error);
+      throw error;
+    }
   },
   deleteTask: async (projectId, taskId) => {
-    const response = await api.delete(`/projects/${projectId}/tasks/${taskId}`);
-    return response.data;
+    try {
+      const response = await api.delete(
+        `/projects/${projectId}/tasks/${taskId}`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Delete task error:", error);
+      throw error;
+    }
   },
 };
 

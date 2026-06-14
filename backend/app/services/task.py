@@ -8,7 +8,12 @@ from datetime import datetime
 
 def get_all_project_tasks(project_id:int, page:int, limit:int, user_id:int, session: Session)-> list[Task]:
   verify_project_ownership(project_id, user_id, session)
-  results = session.exec(select(Task).where(Task.project_id == project_id)).offset((page - 1) * limit).limit(limit).all()
+  results = session.exec(
+    select(Task)
+    .where(Task.project_id == project_id)
+    .offset((page - 1) * limit)
+    .limit(limit)
+    ).all()
   return results
 
 def create_task(project_id:int, data: TaskCreate, user_id:int, session:Session) -> Task:

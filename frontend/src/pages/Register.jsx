@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import authService from "@/services/authService";
 import toast from "react-hot-toast";
+import useAuth from "@/hooks/useAuth";
 
 function Register() {
   const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ function Register() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -20,13 +22,16 @@ function Register() {
       toast.error("Username is required");
       return;
     }
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters long");
+      return;
+    }
 
     setError("");
     setLoading(true);
     try {
       await authService.register({ email, password, username });
-      const result = await authService.login({ email, password });
-      localStorage.setItem("token", result.access_token);
+      await login({ email, password });
       navigate("/dashboard");
       toast.success("Account created!");
     } catch (err) {

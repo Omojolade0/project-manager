@@ -5,10 +5,14 @@ from fastapi import HTTPException
 from sqlmodel import Session, select
 
 
-def get_all_projects (user_id: int, session:Session) -> list[Project]:
-  results = session.exec(select(Project).where(Project.user_id == user_id)).all()
-  return results 
-
+def get_all_projects(user_id: int, page: int, limit: int, session: Session) -> list[Project]:
+    results = session.exec(
+        select(Project)
+        .where(Project.user_id == user_id)
+        .offset((page - 1) * limit)
+        .limit(limit)
+    ).all()
+    return results
 def get_project_by_id(project_id: int , user_id:int,  session: Session) -> Project:
   result = session.exec(select(Project).where((Project.id == project_id) & (Project.user_id == user_id))).first()
   if not result:
@@ -41,4 +45,3 @@ def delete_project(project_id: int , user_id:int,  session: Session) -> None:
   session.delete(deleter)
   session.commit()
     
- 
