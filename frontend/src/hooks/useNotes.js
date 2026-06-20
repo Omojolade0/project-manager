@@ -21,33 +21,42 @@ export function useNotes(projectId) {
 
   async function createNote(data) {
     try {
+      setLoading(true);
       const response = await noteService.createNote(projectId, data);
       addNote(response); // ← updates store directly, no refetch
       return response;
     } catch (error) {
       setError(error);
-      // rethrow so UI can handle it (e.g. show toast)
+      throw error; // rethrow so UI can handle it (e.g. show toast)
+    } finally {
+      setLoading(false);
     }
   }
 
   async function editNote(noteId, data) {
     try {
+      setLoading(true);
       const response = await noteService.updateNote(projectId, noteId, data);
       updateNote(response);
       return response;
     } catch (error) {
       setError(error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   }
 
   async function removeNote(noteId) {
     try {
+      setLoading(true);
       await noteService.deleteNote(projectId, noteId);
       deleteNote(noteId);
     } catch (error) {
       setError(error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   }
 

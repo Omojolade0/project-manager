@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import TaskCard from "@/features/tasks/TaskCard";
 import NoteCard from "@/features/notes/NoteCard";
 import TaskModal from "@/features/tasks/TaskModal";
@@ -38,7 +38,8 @@ function ProjectDetail() {
   } = useNotes(id);
   const { fetchProjectById } = useProjects();
 
-  async function loadProject() {
+  const loadProject = useCallback(async () => {
+    // 2. wrap the function
     try {
       setProjectLoading(true);
       const response = await fetchProjectById(id);
@@ -49,11 +50,11 @@ function ProjectDetail() {
     } finally {
       setProjectLoading(false);
     }
-  }
+  }, [id]);
 
   useEffect(() => {
     loadProject();
-  }, [id]);
+  }, [id, loadProject]);
 
   if (projectLoading) {
     return (

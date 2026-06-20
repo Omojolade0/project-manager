@@ -15,7 +15,7 @@ class Project(SQLModel, table=True):
     name: str
     description: Optional[str] = None
     status: ProjectStatus = Field(default=ProjectStatus.Active)
-    user_id: int = Field(foreign_key="user.id")
+    user_id: int = Field(foreign_key="user.id", ondelete="CASCADE")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: Optional[datetime] = None
 

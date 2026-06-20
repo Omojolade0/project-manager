@@ -26,7 +26,7 @@ export function useTasks(projectId) {
       return response;
     } catch (error) {
       setError(error);
-      // rethrow so UI can handle it (e.g. show toast)
+      throw error; // rethrow so UI can handle it (e.g. show toast)
     }
   }
 
@@ -48,7 +48,7 @@ export function useTasks(projectId) {
       deleteTask(taskId); // ← removes from store directly
     } catch (error) {
       setError(error);
-      // rethrow so UI can handle it (e.g. show toast)
+      throw error; // rethrow so UI can handle it (e.g. show toast)
     }
   }
 

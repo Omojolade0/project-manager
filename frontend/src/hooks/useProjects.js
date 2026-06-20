@@ -28,7 +28,7 @@ export function useProjects() {
       return response;
     } catch (error) {
       setError(error);
-      // rethrow so UI can handle it (e.g. show toast)
+      throw error; // rethrow so UI can handle it (e.g. show toast)
     } finally {
       setLoading(false);
     }
@@ -36,23 +36,30 @@ export function useProjects() {
 
   async function createProject(data) {
     try {
+      setLoading(true);
       const response = await projectService.createProject(data);
       addProject(response); // ← updates store directly, no refetch
       return response;
     } catch (error) {
       setError(error);
-      // rethrow so UI can handle it (e.g. show toast)
+      throw error; // rethrow so UI can handle it (e.g. show toast)
+    } finally {
+      setLoading(false);
     }
   }
 
   async function editProject(id, data) {
     try {
+      setLoading(true);
       const response = await projectService.updateProject(id, data);
       updateProject(response); // ← updates store directly
       return response;
     } catch (error) {
       setError(error);
+      throw error;
       // rethrow so UI can handle it (e.g. show toast)
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -62,6 +69,7 @@ export function useProjects() {
       deleteProject(id); // ← removes from store directly
     } catch (error) {
       setError(error); // rethrow so UI can handle it (e.g. show toast)
+      throw error;
     }
   }
 
