@@ -19,5 +19,6 @@ class Project(SQLModel, table=True):
     user_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE", index=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
 
 

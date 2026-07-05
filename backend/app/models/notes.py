@@ -10,3 +10,4 @@ class Note(SQLModel, table=True):
     is_pinned: bool = Field(default=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None

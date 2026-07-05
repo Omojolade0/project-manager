@@ -28,6 +28,7 @@ class Task(SQLModel, table=True):
     is_pinned: bool = Field(default=False)
     assigned_to: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
     position: int = Field(default=0)
+    deleted_at: Optional[datetime] = None
 
 
 
