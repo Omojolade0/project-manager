@@ -30,6 +30,7 @@ const priorityStyles = {
 function TaskCard({ task, projectId }) {
   const [deleting, setDeleting] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [pinning, setPinning] = useState(false);
   const { removeTask, editTask } = useTasks(projectId);
 
   // add this helper above the component
@@ -73,6 +74,7 @@ function TaskCard({ task, projectId }) {
   }
   async function handlePin() {
     try {
+      setPinning(true);
       await editTask(task.id, {
         is_pinned: !task.is_pinned,
       });
@@ -80,6 +82,8 @@ function TaskCard({ task, projectId }) {
     } catch (error) {
       toast.error("Failed to pin task");
       console.error("Error pinning task:", error);
+    } finally {
+      setPinning(false);
     }
   }
 
@@ -143,6 +147,7 @@ function TaskCard({ task, projectId }) {
 
       <button
         onClick={handlePin}
+        disabled={pinning}
         className={`p-1 rounded-lg ${task.is_pinned ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
       >
         <Pin

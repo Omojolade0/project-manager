@@ -1,7 +1,8 @@
+import uuid
 from sqlmodel import SQLModel, Field
 from enum import Enum
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class ProjectStatus(str, Enum):
@@ -11,12 +12,12 @@ class ProjectStatus(str, Enum):
 
 
 class Project(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str
     description: Optional[str] = None
     status: ProjectStatus = Field(default=ProjectStatus.Active)
-    user_id: int = Field(foreign_key="user.id", ondelete="CASCADE")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    user_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE", index=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
 
 

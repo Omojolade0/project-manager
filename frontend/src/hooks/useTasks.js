@@ -2,31 +2,47 @@ import { useState, useEffect } from "react";
 import taskService from "@/services/taskService";
 import { useTaskStore } from "@/store/useTaskStore";
 
-export function useTasks(projectId) {
-  const { tasks, setTasks, addTask, updateTask, deleteTask } = useTaskStore();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const LIMIT = 10;
 
-  async function fetchTasks(projectId) {
+export function useTasks(projectId, { autoFetch = false } = {}) {
+  const { tasks, setTasks, addTask, updateTask, deleteTask } = useTaskStore();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+
+  async function fetchTasks(pid, pageNum = page) {
     try {
       setLoading(true);
-      const response = await taskService.getTasks(projectId);
-      setTasks(response);
-    } catch (error) {
-      setError(error);
+      const response = await taskService.getTasks(pid, pageNum, LIMIT);
+      setTasks(response.items);
+      setTotal(response.total);
+      setHasMore(response.has_more);
+      setPage(pageNum);
+    } catch (err) {
+      setError(err);
     } finally {
       setLoading(false);
     }
   }
 
+  function goToNextPage() {
+    if (hasMore) fetchTasks(projectId, page + 1);
+  }
+
+  function goToPrevPage() {
+    if (page > 1) fetchTasks(projectId, page - 1);
+  }
+
   async function createTask(data) {
     try {
       const response = await taskService.createTask(projectId, data);
-      addTask(response); // ← updates store directly, no refetch
+      addTask(response);
       return response;
-    } catch (error) {
-      setError(error);
-      throw error; // rethrow so UI can handle it (e.g. show toast)
+    } catch (err) {
+      setError(err);
+      throw err;
     }
   }
 
@@ -35,33 +51,39 @@ export function useTasks(projectId) {
       const response = await taskService.updateTask(projectId, taskId, data);
       updateTask(response);
       return response;
-    } catch (error) {
-      console.error("Update task error:", error);
-      setError(error);
-      throw error;
+    } catch (err) {
+      console.error("Update task error:", err);
+      setError(err);
+      throw err;
     }
   }
 
   async function removeTask(taskId) {
     try {
       await taskService.deleteTask(projectId, taskId);
-      deleteTask(taskId); // ← removes from store directly
-    } catch (error) {
-      setError(error);
-      throw error; // rethrow so UI can handle it (e.g. show toast)
+      deleteTask(taskId);
+    } catch (err) {
+      setError(err);
+      throw err;
     }
   }
 
   useEffect(() => {
-    if (!projectId) return; // ← don't fetch if no projectId
-    fetchTasks(projectId);
-  }, [projectId]);
+    if (!autoFetch) return;
+    if (!projectId) return;
+    fetchTasks(projectId, 1);
+  }, [projectId, autoFetch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     tasks,
     loading,
     error,
+    page,
+    total,
+    hasMore,
     fetchTasks,
+    goToNextPage,
+    goToPrevPage,
     createTask,
     editTask,
     removeTask,

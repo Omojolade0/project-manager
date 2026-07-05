@@ -5,7 +5,7 @@ import TaskModal from "@/features/tasks/TaskModal";
 import NoteModal from "@/features/notes/NoteModal";
 import Layout from "@/layouts/Layout";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, CheckSquare, FileText } from "lucide-react";
+import { ArrowLeft, CheckSquare, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTasks } from "@/hooks/useTasks";
 import { useNotes } from "@/hooks/useNotes";
 import { useProjects } from "@/hooks/useProjects";
@@ -28,18 +28,29 @@ function ProjectDetail() {
     tasks,
     error: tasksError,
     loading: tasksLoading,
+    page: tasksPage,
+    total: tasksTotal,
+    hasMore: tasksHasMore,
     fetchTasks,
-  } = useTasks(id);
+    goToNextPage: tasksNextPage,
+    goToPrevPage: tasksPrevPage,
+  } = useTasks(id, { autoFetch: true });
+
   const {
     notes,
     error: notesError,
     loading: notesLoading,
+    page: notesPage,
+    total: notesTotal,
+    hasMore: notesHasMore,
     fetchNotes,
-  } = useNotes(id);
+    goToNextPage: notesNextPage,
+    goToPrevPage: notesPrevPage,
+  } = useNotes(id, { autoFetch: true });
+
   const { fetchProjectById } = useProjects();
 
   const loadProject = useCallback(async () => {
-    // 2. wrap the function
     try {
       setProjectLoading(true);
       const response = await fetchProjectById(id);
@@ -50,7 +61,7 @@ function ProjectDetail() {
     } finally {
       setProjectLoading(false);
     }
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     loadProject();
@@ -154,7 +165,7 @@ function ProjectDetail() {
                   <h3 className="text-sm font-semibold text-slate-900">
                     Tasks
                   </h3>
-                  <p className="text-xs text-slate-400">{tasks.length} total</p>
+                  <p className="text-xs text-slate-400">{tasksTotal} total</p>
                 </div>
               </div>
               <TaskModal projectId={id} />
@@ -174,11 +185,32 @@ function ProjectDetail() {
                 <p className="text-sm text-slate-400">No tasks yet</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {tasks.map((task) => (
-                  <TaskCard key={task.id} task={task} projectId={id} />
-                ))}
-              </div>
+              <>
+                <div className="space-y-3">
+                  {tasks.map((task) => (
+                    <TaskCard key={task.id} task={task} projectId={id} />
+                  ))}
+                </div>
+                {tasksTotal > 0 && (
+                  <div className="flex items-center justify-center gap-3 mt-4 pt-4 border-t border-slate-100">
+                    <button
+                      onClick={tasksPrevPage}
+                      disabled={tasksPage === 1}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                    </button>
+                    <span className="text-xs text-slate-400">Page {tasksPage}</span>
+                    <button
+                      onClick={tasksNextPage}
+                      disabled={!tasksHasMore}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
@@ -205,7 +237,7 @@ function ProjectDetail() {
                   <h3 className="text-sm font-semibold text-slate-900">
                     Notes
                   </h3>
-                  <p className="text-xs text-slate-400">{notes.length} total</p>
+                  <p className="text-xs text-slate-400">{notesTotal} total</p>
                 </div>
               </div>
               <NoteModal projectId={id} />
@@ -225,11 +257,32 @@ function ProjectDetail() {
                 <p className="text-sm text-slate-400">No notes yet</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {notes.map((note) => (
-                  <NoteCard key={note.id} note={note} projectId={id} />
-                ))}
-              </div>
+              <>
+                <div className="space-y-3">
+                  {notes.map((note) => (
+                    <NoteCard key={note.id} note={note} projectId={id} />
+                  ))}
+                </div>
+                {notesTotal > 0 && (
+                  <div className="flex items-center justify-center gap-3 mt-4 pt-4 border-t border-slate-100">
+                    <button
+                      onClick={notesPrevPage}
+                      disabled={notesPage === 1}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                    </button>
+                    <span className="text-xs text-slate-400">Page {notesPage}</span>
+                    <button
+                      onClick={notesNextPage}
+                      disabled={!notesHasMore}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

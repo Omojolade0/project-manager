@@ -7,9 +7,9 @@
 import api from "@/api/api";
 
 const projectService = {
-  getProjects: async () => {
+  getProjects: async (page = 1, limit = 10) => {
     try {
-      const response = await api.get("/projects");
+      const response = await api.get("/projects", { params: { page, limit } });
       return response.data;
     } catch (error) {
       console.error("Get projects error:", error);
