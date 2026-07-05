@@ -20,5 +20,6 @@ class Project(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
     deleted_at: Optional[datetime] = None
+    owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
 
 
