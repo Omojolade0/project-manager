@@ -1,3 +1,4 @@
+import uuid
 from app.schemas.user import UserPublic
 from pydantic import BaseModel
 
@@ -7,7 +8,7 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    user_id: int | None = None
+    user_id: uuid.UUID | None = None
 
 
 class LoginResponse(BaseModel):

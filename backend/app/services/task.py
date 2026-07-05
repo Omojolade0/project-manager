@@ -1,22 +1,33 @@
+import uuid
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
-from sqlmodel import Session,select 
+from sqlmodel import Session, select
+from sqlalchemy import func
 from fastapi import HTTPException
-from app.core.permissions import verify_project_ownership 
-from datetime import datetime
+from app.core.permissions import verify_project_ownership
+from datetime import datetime, timezone
 
 
-def get_all_project_tasks(project_id:int, page:int, limit:int, user_id:int, session: Session)-> list[Task]:
+def get_all_project_tasks(project_id: uuid.UUID, page: int, limit: int, user_id: uuid.UUID, session: Session) -> dict:
   verify_project_ownership(project_id, user_id, session)
+  total = session.exec(
+    select(func.count()).select_from(Task).where(Task.project_id == project_id)
+  ).one()
   results = session.exec(
     select(Task)
     .where(Task.project_id == project_id)
     .offset((page - 1) * limit)
     .limit(limit)
-    ).all()
-  return results
+  ).all()
+  return {
+    "items": results,
+    "total": total,
+    "page": page,
+    "limit": limit,
+    "has_more": (page * limit) < total,
+  }
 
-def create_task(project_id:int, data: TaskCreate, user_id:int, session:Session) -> Task:
+def create_task(project_id: uuid.UUID, data: TaskCreate, user_id: uuid.UUID, session:Session) -> Task:
   verify_project_ownership(project_id, user_id, session)
   task = Task(title=data.title, 
               description=data.description, 
@@ -30,7 +41,7 @@ def create_task(project_id:int, data: TaskCreate, user_id:int, session:Session) 
   session.refresh(task)
   return task
 
-def get_task_by_id(project_id: int, task_id:int, user_id:int, session: Session) -> Task:
+def get_task_by_id(project_id: uuid.UUID, task_id: uuid.UUID, user_id: uuid.UUID, session: Session) -> Task:
   verify_project_ownership(project_id, user_id, session)
   result = session.exec(select(Task).where((Task.project_id == project_id) & (Task.id == task_id ))).first()
   if not result:
@@ -38,8 +49,7 @@ def get_task_by_id(project_id: int, task_id:int, user_id:int, session: Session) 
   return result
 
 
-def update_task(project_id: int, task_id:int, data: TaskUpdate, user_id:int, session: Session) -> Task:
-  verify_project_ownership(project_id, user_id, session)
+def update_task(project_id: uuid.UUID, task_id: uuid.UUID, data: TaskUpdate, user_id: uuid.UUID, session: Session) -> Task:
   updater = get_task_by_id(project_id, task_id, user_id, session)
   if data.title is not None:
     updater.title = data.title
@@ -55,15 +65,14 @@ def update_task(project_id: int, task_id:int, data: TaskUpdate, user_id:int, ses
     updater.assigned_to = data.assigned_to
   if data.is_pinned is not None:
     updater.is_pinned = data.is_pinned    
-  updater.updated_at = datetime.utcnow()
+  updater.updated_at = datetime.now(timezone.utc)
   session.add(updater)
   session.commit()
   session.refresh(updater)
   return updater
   
 
-def delete_task(project_id: int, task_id:int, user_id:int, session: Session) -> None:
-  verify_project_ownership(project_id, user_id, session=session)
+def delete_task(project_id: uuid.UUID, task_id: uuid.UUID, user_id: uuid.UUID, session: Session) -> None:
   deleter = get_task_by_id(project_id, task_id, user_id, session)
   session.delete(deleter)
   session.commit()

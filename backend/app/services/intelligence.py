@@ -1,5 +1,6 @@
+import uuid
 from sqlmodel import Session
-from app.core.permissions import verify_project_ownership 
+from app.core.permissions import verify_project_ownership
 import json
 from app.schemas.intelligence import GenerateTaskRequest, GenerateTaskResponse, TaskSuggestion
 import logging
@@ -11,7 +12,7 @@ client = OPENAI_CLIENT
 logger = logging.getLogger(__name__)
 
 
-def get_ai_generated_tasks(project_id: int, data: GenerateTaskRequest, user_id: int, session: Session) -> GenerateTaskResponse:
+def get_ai_generated_tasks(project_id: uuid.UUID, data: GenerateTaskRequest, user_id: uuid.UUID, session: Session) -> GenerateTaskResponse:
     verify_project_ownership(project_id, user_id, session)
 
     prompt = generate_tasks_prompt(data.project_name, data.project_description)

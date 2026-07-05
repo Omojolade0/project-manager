@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
 
   useEffect(() => {
     async function loadUser() {
@@ -19,6 +20,16 @@ export function AuthProvider({ children }) {
         setUser(response);
       } catch (error) {
         console.error("Error fetching user:", error);
+        if (error.response?.status === 401) {
+          // api.js's response interceptor already clears the token and
+          // redirects to /login on 401 — nothing to duplicate here.
+          setUser(null);
+        } else {
+          // Network error / server unreachable / 5xx: the token may still
+          // be valid, so keep it and let a refresh retry getMe().
+          setConnectionError(true);
+          setUser(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -40,7 +51,9 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, connectionError, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

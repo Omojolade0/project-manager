@@ -1,4 +1,5 @@
 
+import uuid
 from app.schemas.intelligence import GenerateTaskRequest, GenerateTaskResponse
 from app.core.dependencies import get_current_user, get_session
 from app.models.user import User
@@ -10,7 +11,7 @@ router = APIRouter(prefix="/projects/{project_id}/intelligence", tags=["Intellig
 
 @router.post("/generate-tasks", response_model=GenerateTaskResponse)
 def generate_tasks(
-    project_id: int,
+    project_id: uuid.UUID,
     request: GenerateTaskRequest,
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)

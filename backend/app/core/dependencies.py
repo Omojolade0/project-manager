@@ -1,3 +1,4 @@
+import uuid
 from app.models.user import User
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlmodel import Session
@@ -30,8 +31,8 @@ def get_current_user(
         userId = payload.get("user_id")
         if userId is None:
             raise credentials_exception
-        token_data = TokenData(user_id=userId)
-    except JWTError:
+        token_data = TokenData(user_id=uuid.UUID(userId))
+    except (JWTError, ValueError):
         raise credentials_exception
     user = service.get_user_by_id(token_data.user_id, session)
     if user is None:

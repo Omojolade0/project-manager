@@ -2,33 +2,48 @@ import { useState, useEffect } from "react";
 import projectService from "@/services/projectService";
 import { useProjectStore } from "@/store/useProjectStore";
 
-export function useProjects() {
+const LIMIT = 10;
+
+export function useProjects({ autoFetch = false } = {}) {
   const { projects, setProjects, addProject, updateProject, deleteProject } =
     useProjectStore();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
-  async function fetchProjects() {
+  async function fetchProjects(pageNum = page) {
     try {
       setLoading(true);
-      const response = await projectService.getProjects();
-      setProjects(response);
-    } catch (error) {
-      setError(error);
+      const response = await projectService.getProjects(pageNum, LIMIT);
+      setProjects(response.items);
+      setTotal(response.total);
+      setHasMore(response.has_more);
+      setPage(pageNum);
+    } catch (err) {
+      setError(err);
     } finally {
       setLoading(false);
     }
   }
+
+  function goToNextPage() {
+    if (hasMore) fetchProjects(page + 1);
+  }
+
+  function goToPrevPage() {
+    if (page > 1) fetchProjects(page - 1);
+  }
+
   async function fetchProjectById(id) {
     try {
       setLoading(true);
       const response = await projectService.getProjectById(id);
-      setSelectedProject(response);
       return response;
-    } catch (error) {
-      setError(error);
-      // rethrow so UI can handle it (e.g. show toast)
+    } catch (err) {
+      setError(err);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -36,44 +51,57 @@ export function useProjects() {
 
   async function createProject(data) {
     try {
+      setLoading(true);
       const response = await projectService.createProject(data);
-      addProject(response); // ← updates store directly, no refetch
+      addProject(response);
       return response;
-    } catch (error) {
-      setError(error);
-      // rethrow so UI can handle it (e.g. show toast)
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
     }
   }
 
   async function editProject(id, data) {
     try {
+      setLoading(true);
       const response = await projectService.updateProject(id, data);
-      updateProject(response); // ← updates store directly
+      updateProject(response);
       return response;
-    } catch (error) {
-      setError(error);
-      // rethrow so UI can handle it (e.g. show toast)
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
     }
   }
 
   async function removeProject(id) {
     try {
       await projectService.deleteProject(id);
-      deleteProject(id); // ← removes from store directly
-    } catch (error) {
-      setError(error); // rethrow so UI can handle it (e.g. show toast)
+      deleteProject(id);
+    } catch (err) {
+      setError(err);
+      throw err;
     }
   }
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    if (!autoFetch) return;
+    fetchProjects(1);
+  }, [autoFetch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     projects,
     loading,
     error,
+    page,
+    total,
+    hasMore,
     fetchProjects,
+    goToNextPage,
+    goToPrevPage,
     fetchProjectById,
     createProject,
     editProject,

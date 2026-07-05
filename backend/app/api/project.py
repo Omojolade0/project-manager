@@ -1,5 +1,6 @@
+import uuid
 from fastapi import APIRouter, Depends
-from app.schemas.project import ProjectUpdate, ProjectCreate, ProjectPublic 
+from app.schemas.project import ProjectUpdate, ProjectCreate, ProjectPublic, ProjectPage
 from app.models.user import User
 from sqlmodel import Session
 from app.services import project as service
@@ -9,7 +10,7 @@ from app.core.dependencies import get_session, get_current_user
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
 
-@router.get("", response_model=list[ProjectPublic])
+@router.get("", response_model=ProjectPage)
 def list_projects(
     current_user: User= Depends(get_current_user), 
     page: int = 1, 
@@ -22,7 +23,7 @@ def list_projects(
         session=session)
 
 @router.get("/{project_id}", response_model=ProjectPublic)
-def retrieve_project(project_id: int, 
+def retrieve_project(project_id: uuid.UUID,
                      current_user: User= Depends(get_current_user), 
                      session: Session = Depends(get_session)):
     return service.get_project_by_id(project_id, 
@@ -38,7 +39,7 @@ def create_project( data: ProjectCreate,
                                    session=session)
 
 @router.put("/{project_id}", response_model=ProjectPublic)
-def update_project(project_id: int, 
+def update_project(project_id: uuid.UUID,
                    data: ProjectUpdate, 
                    current_user: User = Depends(get_current_user),
                    session:Session = Depends(get_session)):
@@ -47,7 +48,7 @@ def update_project(project_id: int,
                                    session=session)
 
 @router.delete("/{project_id}", status_code=204)
-def delete_project(project_id: int, 
+def delete_project(project_id: uuid.UUID,
                      current_user: User= Depends(get_current_user), 
                      session: Session = Depends(get_session)):
     service.delete_project(project_id, 

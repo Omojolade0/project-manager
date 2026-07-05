@@ -17,6 +17,7 @@ import {
 
 function NoteCard({ note, projectId }) {
   const [deleting, setDeleting] = useState(false);
+  const [pinning, setPinning] = useState(false);
   const { removeNote, editNote } = useNotes(projectId);
   async function handleDelete() {
     try {
@@ -32,12 +33,15 @@ function NoteCard({ note, projectId }) {
   }
   async function handlePin() {
     try {
+      setPinning(true);
       await editNote(note.id, {
         is_pinned: !note.is_pinned,
       });
     } catch (error) {
       toast.error("Failed to pin note");
       console.error("Error pinning note:", error);
+    } finally {
+      setPinning(false);
     }
   }
 
@@ -52,6 +56,7 @@ function NoteCard({ note, projectId }) {
         <p className="text-sm text-slate-600 leading-relaxed">{note.content}</p>
         <button
           onClick={handlePin}
+          disabled={pinning}
           className={`p-1 rounded-lg ${note.is_pinned ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
         >
           <Pin

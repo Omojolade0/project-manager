@@ -2,14 +2,24 @@ import Layout from "@/layouts/Layout";
 import ProjectCard from "@/features/projects/ProjectCard";
 import ProjectModal from "@/features/projects/ProjectModal";
 import { useState } from "react";
-import { FolderKanban } from "lucide-react";
+import { FolderKanban, ChevronLeft, ChevronRight } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useProjects } from "@/hooks/useProjects";
 
 function ProjectList() {
   const [searchParams] = useSearchParams();
   const [filter, setFilter] = useState("All");
-  const { projects, loading, error, fetchProjects } = useProjects();
+  const {
+    projects,
+    loading,
+    error,
+    page,
+    total,
+    hasMore,
+    fetchProjects,
+    goToNextPage,
+    goToPrevPage,
+  } = useProjects({ autoFetch: true });
 
   const filters = ["All", "Active", "Completed", "Inactive"];
   const search = searchParams.get("search") || "";
@@ -30,7 +40,7 @@ function ProjectList() {
                 : "Something went wrong."}
           </p>
           <button
-            onClick={fetchProjects}
+            onClick={() => fetchProjects(1)}
             className="text-sm text-indigo-600 hover:text-indigo-700"
           >
             Try again
@@ -50,10 +60,10 @@ function ProjectList() {
               All Projects
             </h2>
             <p className="text-sm text-slate-400 mt-0.5">
-              {projects.length} total
+              {total} total
             </p>
           </div>
-          <ProjectModal onSuccess={fetchProjects} />
+          <ProjectModal onSuccess={() => fetchProjects(1)} />
         </div>
 
         {/* Filter tabs */}
@@ -104,9 +114,30 @@ function ProjectList() {
               <ProjectCard
                 key={project.id}
                 project={project}
-                onDelete={fetchProjects}
+                onDelete={() => fetchProjects(page)}
               />
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {total > 0 && (
+          <div className="flex items-center justify-center gap-3 mt-6 pt-5 border-t border-slate-100">
+            <button
+              onClick={goToPrevPage}
+              disabled={page === 1}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" /> Previous
+            </button>
+            <span className="text-sm text-slate-400">Page {page}</span>
+            <button
+              onClick={goToNextPage}
+              disabled={!hasMore}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Next <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         )}
       </div>

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 function Dashboard() {
-  const { projects, loading, error, fetchProjects } = useProjects();
+  const { projects, loading, error, total, fetchProjects } = useProjects({ autoFetch: true });
   const navigate = useNavigate();
 
   const activeProjects = projects.filter((p) => p.status === "Active");
@@ -20,7 +20,7 @@ function Dashboard() {
   const stats = [
     {
       label: "Total Projects",
-      value: projects.length,
+      value: total,
       icon: FolderKanban,
       color: "bg-indigo-50 text-indigo-600",
     },
