@@ -68,6 +68,16 @@ export function useTasks(projectId, { autoFetch = false } = {}) {
     }
   }
 
+  async function reorderTasks(columns) {
+    try {
+      const response = await taskService.reorderTasks(projectId, columns);
+      return response;
+    } catch (err) {
+      console.error("Reorder tasks error:", err);
+      throw err;
+    }
+  }
+
   useEffect(() => {
     if (!autoFetch) return;
     if (!projectId) return;
@@ -87,5 +97,6 @@ export function useTasks(projectId, { autoFetch = false } = {}) {
     createTask,
     editTask,
     removeTask,
+    reorderTasks,
   };
 }

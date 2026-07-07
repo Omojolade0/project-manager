@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import TaskCard from "@/features/tasks/TaskCard";
+import TaskBoard from "@/features/tasks/TaskBoard";
 import NoteCard from "@/features/notes/NoteCard";
 import TaskModal from "@/features/tasks/TaskModal";
 import NoteModal from "@/features/notes/NoteModal";
 import Layout from "@/layouts/Layout";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, CheckSquare, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, CheckSquare, FileText, ChevronLeft, ChevronRight, List, LayoutGrid } from "lucide-react";
 import { useTasks } from "@/hooks/useTasks";
 import { useNotes } from "@/hooks/useNotes";
 import { useProjects } from "@/hooks/useProjects";
@@ -23,6 +24,7 @@ function ProjectDetail() {
   const [project, setProject] = useState(null);
   const [projectError, setProjectError] = useState(null);
   const [projectLoading, setProjectLoading] = useState(true);
+  const [tasksView, setTasksView] = useState("list");
 
   const {
     tasks,
@@ -142,7 +144,7 @@ function ProjectDetail() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Tasks */}
         {tasksError ? (
           <div className="bg-white rounded-2xl border border-slate-100 p-6 text-center py-10">
@@ -168,7 +170,31 @@ function ProjectDetail() {
                   <p className="text-xs text-slate-400">{tasksTotal} total</p>
                 </div>
               </div>
-              <TaskModal projectId={id} />
+              <div className="flex items-center gap-3">
+                <div className="flex items-center bg-slate-50 rounded-lg p-0.5">
+                  <button
+                    onClick={() => setTasksView("list")}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      tasksView === "list"
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-400 hover:text-slate-600"
+                    }`}
+                  >
+                    <List className="w-3.5 h-3.5" /> List
+                  </button>
+                  <button
+                    onClick={() => setTasksView("board")}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      tasksView === "board"
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-400 hover:text-slate-600"
+                    }`}
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" /> Board
+                  </button>
+                </div>
+                <TaskModal projectId={id} />
+              </div>
             </div>
             {tasksLoading ? (
               <div className="space-y-3">
@@ -184,6 +210,8 @@ function ProjectDetail() {
                 <CheckSquare className="w-8 h-8 text-slate-200 mx-auto mb-3" />
                 <p className="text-sm text-slate-400">No tasks yet</p>
               </div>
+            ) : tasksView === "board" ? (
+              <TaskBoard tasks={tasks} projectId={id} />
             ) : (
               <>
                 <div className="space-y-3">

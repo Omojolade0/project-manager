@@ -47,6 +47,18 @@ const taskService = {
       throw error;
     }
   },
+  reorderTasks: async (projectId, columns) => {
+    try {
+      const response = await api.patch(
+        `/projects/${projectId}/tasks/reorder`,
+        { columns },
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Reorder tasks error:", error);
+      throw error;
+    }
+  },
 };
 
 export default taskService;
