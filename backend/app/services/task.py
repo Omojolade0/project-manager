@@ -1,6 +1,6 @@
 import uuid
 from app.models.task import Task
-from app.schemas.task import TaskCreate, TaskUpdate
+from app.schemas.task import TaskCreate, TaskUpdate, ReorderColumn
 from sqlmodel import Session, select
 from sqlalchemy import func
 from fastapi import HTTPException
@@ -64,7 +64,9 @@ def update_task(project_id: uuid.UUID, task_id: uuid.UUID, data: TaskUpdate, use
   if data.assigned_to is not None:
     updater.assigned_to = data.assigned_to
   if data.is_pinned is not None:
-    updater.is_pinned = data.is_pinned    
+    updater.is_pinned = data.is_pinned
+  if data.position is not None:
+    updater.position = data.position
   updater.updated_at = datetime.now(timezone.utc)
   session.add(updater)
   session.commit()
@@ -76,4 +78,20 @@ def delete_task(project_id: uuid.UUID, task_id: uuid.UUID, user_id: uuid.UUID, s
   deleter = get_task_by_id(project_id, task_id, user_id, session)
   session.delete(deleter)
   session.commit()
-    
+
+
+def reorder_tasks(project_id: uuid.UUID, columns: list[ReorderColumn], user_id: uuid.UUID, session: Session) -> dict:
+  verify_project_ownership(project_id, user_id, session)
+  for column in columns:
+    for index, task_id in enumerate(column.task_ids):
+      task = session.exec(
+        select(Task).where((Task.id == task_id) & (Task.project_id == project_id))
+      ).first()
+      if not task:
+        continue
+      task.position = index
+      task.status = column.status
+      session.add(task)
+  session.commit()
+  return {"success": True}
+

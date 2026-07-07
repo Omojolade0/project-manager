@@ -144,6 +144,7 @@ function TaskCard({ task, projectId }) {
         {task.priority}
       </p>
       <p>{formatDate(task.due_date) || "No date"}</p>
+      <p>{task.position}</p>
 
       <button
         onClick={handlePin}

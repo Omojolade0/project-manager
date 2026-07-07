@@ -1,6 +1,6 @@
 import uuid
 from fastapi import APIRouter, Depends
-from app.schemas.task import TaskCreate, TaskUpdate, TaskPublic, TaskPage
+from app.schemas.task import TaskCreate, TaskUpdate, TaskPublic, TaskPage, TaskReorderRequest
 from app.services import task as service
 from sqlmodel import Session
 from app.core.dependencies import get_session, get_current_user
@@ -21,6 +21,12 @@ def create_task(project_id: uuid.UUID, data: TaskCreate,
                 current_user: User = Depends(get_current_user),
                 session: Session = Depends(get_session)):
   return service.create_task(project_id, data, user_id = current_user.id, session = session)
+
+@router.patch("/reorder")
+def reorder_tasks(project_id: uuid.UUID, data: TaskReorderRequest,
+                   current_user: User = Depends(get_current_user),
+                   session: Session = Depends(get_session)):
+  return service.reorder_tasks(project_id, data.columns, user_id = current_user.id, session = session)
 
 @router.get("/{task_id}", response_model=TaskPublic)
 def get_task(project_id: uuid.UUID, task_id: uuid.UUID,

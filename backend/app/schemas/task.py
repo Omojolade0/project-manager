@@ -24,6 +24,7 @@ class TaskUpdate(BaseModel):
     due_date: Optional[datetime] = None
     assigned_to: Optional[uuid.UUID] = None
     is_pinned: Optional[bool] = None
+    position: Optional[int] = None
 
 class TaskPublic(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -36,6 +37,7 @@ class TaskPublic(BaseModel):
     created_at: datetime
     assigned_to: Optional[uuid.UUID] = None
     is_pinned: bool
+    position: int
     updated_at: Optional[datetime] = None
 
 
@@ -45,3 +47,12 @@ class TaskPage(BaseModel):
     page: int
     limit: int
     has_more: bool
+
+
+class ReorderColumn(BaseModel):
+    status: TaskStatus
+    task_ids: list[uuid.UUID]
+
+
+class TaskReorderRequest(BaseModel):
+    columns: list[ReorderColumn]
