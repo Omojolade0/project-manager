@@ -8,6 +8,7 @@ const titles = {
   "/dashboard": "Dashboard",
   "/projects": "Projects",
   "/settings": "Settings",
+  "/search": "Search",
 };
 
 const getTitle = (pathname) => {
@@ -24,15 +25,33 @@ function Topbar() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState(null);
   const [open, setOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const containerRef = useRef(null);
+  const itemRefs = useRef([]);
   const title = useMemo(() => getTitle(pathname), [pathname]);
   const navigate = useNavigate();
+
+  const flatResults = useMemo(() => {
+    const projectItems = (results?.projects ?? []).map((project) => ({
+      type: "project",
+      id: project.id,
+      label: project.name,
+    }));
+    const taskItems = (results?.tasks ?? []).map((task) => ({
+      type: "task",
+      id: task.id,
+      label: task.title,
+      projectId: task.project_id,
+    }));
+    return [...projectItems, ...taskItems];
+  }, [results]);
 
   useEffect(() => {
     const text = query.trim();
     if (!text) {
       setResults(null);
       setOpen(false);
+      setHighlightedIndex(-1);
       return;
     }
 
@@ -41,8 +60,10 @@ function Topbar() {
         const response = await searchService.search(text);
         setResults(response);
         setOpen(true);
+        setHighlightedIndex(-1);
       } catch {
         setResults(null);
+        setHighlightedIndex(-1);
       }
     }, SEARCH_DEBOUNCE_MS);
 
@@ -57,16 +78,60 @@ function Topbar() {
     function handleClickOutside(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setOpen(false);
+        setHighlightedIndex(-1);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (highlightedIndex >= 0) {
+      itemRefs.current[highlightedIndex]?.scrollIntoView({ block: "nearest" });
+    }
+  }, [highlightedIndex]);
+
   function goToProject(projectId) {
     setOpen(false);
     setQuery("");
+    setHighlightedIndex(-1);
     navigate(`/projects/${projectId}`);
+  }
+
+  function selectItem(item) {
+    if (!item) return;
+    goToProject(item.type === "project" ? item.id : item.projectId);
+  }
+
+  function handleKeyDown(e) {
+    if (!open || flatResults.length === 0) {
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((i) => (i + 1) % flatResults.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((i) => (i <= 0 ? flatResults.length - 1 : i - 1));
+    } else if (e.key === "Enter") {
+      if (highlightedIndex >= 0) {
+        e.preventDefault();
+        selectItem(flatResults[highlightedIndex]);
+      }
+    } else if (e.key === "Escape") {
+      setOpen(false);
+      setHighlightedIndex(-1);
+      e.currentTarget.blur();
+    }
+  }
+
+  function goToFullResults() {
+    const text = query.trim();
+    setOpen(false);
+    setQuery("");
+    setHighlightedIndex(-1);
+    navigate(`/search?q=${encodeURIComponent(text)}&type=all`);
   }
 
   const hasResults =
@@ -86,21 +151,41 @@ function Topbar() {
               placeholder="Search..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onFocus={() => hasResults && setOpen(true)}
+              onFocus={() => {
+                if (hasResults) {
+                  setOpen(true);
+                  setHighlightedIndex(-1);
+                }
+              }}
+              onKeyDown={handleKeyDown}
+              role="combobox"
+              aria-expanded={open}
+              aria-controls="topbar-search-listbox"
             />
             {open && (
-              <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl border border-slate-100 shadow-lg py-2 max-h-80 overflow-y-auto">
+              <div
+                id="topbar-search-listbox"
+                role="listbox"
+                className="absolute right-0 mt-2 w-72 bg-white rounded-xl border border-slate-100 shadow-lg py-2 max-h-80 overflow-y-auto"
+              >
                 {!hasResults ? (
                   <p className="text-xs text-slate-400 text-center py-4">
                     No results
                   </p>
                 ) : (
                   <>
-                    {results.projects?.map((project) => (
+                    {results.projects?.map((project, i) => (
                       <button
                         key={`project-${project.id}`}
+                        ref={(el) => (itemRefs.current[i] = el)}
+                        role="option"
+                        aria-selected={highlightedIndex === i}
+                        onMouseEnter={() => setHighlightedIndex(i)}
                         onClick={() => goToProject(project.id)}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-slate-50 transition-colors"
+                        className={[
+                          "w-full flex items-center gap-2 px-3 py-2 text-left transition-colors",
+                          highlightedIndex === i ? "bg-slate-100" : "hover:bg-slate-50",
+                        ].join(" ")}
                       >
                         <FolderKanban className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                         <span className="text-sm text-slate-900 truncate">
@@ -111,21 +196,37 @@ function Topbar() {
                         </span>
                       </button>
                     ))}
-                    {results.tasks?.map((task) => (
-                      <button
-                        key={`task-${task.id}`}
-                        onClick={() => goToProject(task.project_id)}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-slate-50 transition-colors"
-                      >
-                        <CheckSquare className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="text-sm text-slate-900 truncate">
-                          {task.title}
-                        </span>
-                        <span className="ml-auto text-[10px] uppercase tracking-wide text-slate-400 shrink-0">
-                          Task
-                        </span>
-                      </button>
-                    ))}
+                    {results.tasks?.map((task, j) => {
+                      const i = (results.projects?.length ?? 0) + j;
+                      return (
+                        <button
+                          key={`task-${task.id}`}
+                          ref={(el) => (itemRefs.current[i] = el)}
+                          role="option"
+                          aria-selected={highlightedIndex === i}
+                          onMouseEnter={() => setHighlightedIndex(i)}
+                          onClick={() => goToProject(task.project_id)}
+                          className={[
+                            "w-full flex items-center gap-2 px-3 py-2 text-left transition-colors",
+                            highlightedIndex === i ? "bg-slate-100" : "hover:bg-slate-50",
+                          ].join(" ")}
+                        >
+                          <CheckSquare className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="text-sm text-slate-900 truncate">
+                            {task.title}
+                          </span>
+                          <span className="ml-auto text-[10px] uppercase tracking-wide text-slate-400 shrink-0">
+                            Task
+                          </span>
+                        </button>
+                      );
+                    })}
+                    <button
+                      onClick={goToFullResults}
+                      className="w-full text-center text-xs font-medium text-indigo-600 hover:text-indigo-700 py-2 mt-1 border-t border-slate-100"
+                    >
+                      See all results
+                    </button>
                   </>
                 )}
               </div>
