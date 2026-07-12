@@ -9,6 +9,7 @@ const titles = {
   "/projects": "Projects",
   "/settings": "Settings",
   "/search": "Search",
+  "/tasks": "Upcoming Tasks",
 };
 
 const getTitle = (pathname) => {

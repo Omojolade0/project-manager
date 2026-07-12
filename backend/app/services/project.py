@@ -1,6 +1,7 @@
 import uuid
-from datetime import datetime, timezone
-from app.models.project import Project
+from datetime import datetime, timezone, timedelta
+from app.models.project import Project, ProjectStatus
+from app.models.task import Task, TaskStatus
 from app.schemas.project import ProjectCreate, ProjectUpdate
 from fastapi import HTTPException
 from sqlmodel import Session, select
@@ -55,4 +56,47 @@ def delete_project(project_id: uuid.UUID , user_id: uuid.UUID,  session: Session
   deleter = get_project_by_id(project_id, user_id, session)
   session.delete(deleter)
   session.commit()
-    
+
+def get_project_stats(user_id: uuid.UUID, session: Session) -> dict:
+  now = datetime.now(timezone.utc)
+  week_from_now = now + timedelta(days=7)
+
+  overdue_tasks = session.exec(
+    select(func.count())
+    .select_from(Task)
+    .join(Project, Task.project_id == Project.id)
+    .where(Project.user_id == user_id)
+    .where(Task.due_date < now)
+    .where(Task.status != TaskStatus.Done)
+  ).one()
+
+  due_this_week_tasks = session.exec(
+    select(func.count())
+    .select_from(Task)
+    .join(Project, Task.project_id == Project.id)
+    .where(Project.user_id == user_id)
+    .where(Task.due_date >= now)
+    .where(Task.due_date <= week_from_now)
+    .where(Task.status != TaskStatus.Done)
+  ).one()
+
+  active_projects = session.exec(
+    select(func.count())
+    .select_from(Project)
+    .where(Project.user_id == user_id)
+    .where(Project.status == ProjectStatus.Active)
+  ).one()
+
+  completed_projects = session.exec(
+    select(func.count())
+    .select_from(Project)
+    .where(Project.user_id == user_id)
+    .where(Project.status == ProjectStatus.Completed)
+  ).one()
+
+  return {
+    "overdue_tasks": overdue_tasks,
+    "due_this_week_tasks": due_this_week_tasks,
+    "active_projects": active_projects,
+    "completed_projects": completed_projects,
+  }

@@ -14,11 +14,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTasks } from "@/hooks/useTasks";
+import projectService from "@/services/projectService";
 
-function TaskModal({ projectId, task }) {
+function TaskModal({ projectId, task, onSuccess }) {
   const [selectedStatus, setSelectedStatus] = useState(
     task ? task.status : "Todo",
   );
@@ -35,7 +43,35 @@ function TaskModal({ projectId, task }) {
   const [isPinned, setIsPinned] = useState(
     task ? task.is_pinned || false : false,
   );
-  const { createTask, editTask } = useTasks(projectId);
+
+  // No projectId was supplied (e.g. "New Task" from a cross-project page) —
+  // the user must pick which project this task belongs to.
+  const needsProjectPicker = !projectId;
+  const [selectedProjectId, setSelectedProjectId] = useState("");
+  const [availableProjects, setAvailableProjects] = useState([]);
+  const [projectsLoading, setProjectsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!needsProjectPicker || !open) return;
+    let ignore = false;
+    (async () => {
+      try {
+        setProjectsLoading(true);
+        const response = await projectService.getProjects(1, 100);
+        if (!ignore) setAvailableProjects(response.items);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      } finally {
+        if (!ignore) setProjectsLoading(false);
+      }
+    })();
+    return () => {
+      ignore = true;
+    };
+  }, [needsProjectPicker, open]);
+
+  const effectiveProjectId = projectId || selectedProjectId || task?.project_id;
+  const { createTask, editTask } = useTasks(effectiveProjectId);
 
   useEffect(() => {
     if (task) {
@@ -94,6 +130,10 @@ function TaskModal({ projectId, task }) {
       toast.error("Task title is required");
       return;
     }
+    if (needsProjectPicker && !selectedProjectId) {
+      toast.error("Please select a project");
+      return;
+    }
     try {
       setLoading(true);
       await createTask({
@@ -110,8 +150,10 @@ function TaskModal({ projectId, task }) {
       setSelectedPriority(null);
       setDate(null);
       setIsPinned(false);
+      setSelectedProjectId("");
       setOpen(false);
       toast.success("Task created");
+      onSuccess?.();
     } catch (error) {
       console.error("Error creating task:", error);
       toast.error("Failed to create task");
@@ -128,6 +170,7 @@ function TaskModal({ projectId, task }) {
       setSelectedPriority(null);
       setDate(null);
       setIsPinned(false);
+      setSelectedProjectId("");
     }
     setOpen(false);
   }
@@ -145,6 +188,7 @@ function TaskModal({ projectId, task }) {
       });
       setOpen(false);
       toast.success("Task updated");
+      onSuccess?.();
     } catch (error) {
       console.error("Error updating task:", error);
       toast.error("Failed to update task");
@@ -176,11 +220,41 @@ function TaskModal({ projectId, task }) {
               {task ? "Edit Task" : "New Task"}
             </DialogTitle>
             <DialogDescription className="text-sm text-slate-400">
-              {task ? "Update this task" : "Add a task to this project"}
+              {task
+                ? "Update this task"
+                : needsProjectPicker
+                  ? "Add a task and choose which project it belongs to"
+                  : "Add a task to this project"}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
+            {needsProjectPicker && (
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium text-slate-700">
+                  Project
+                </Label>
+                <Select
+                  value={selectedProjectId}
+                  onValueChange={setSelectedProjectId}
+                >
+                  <SelectTrigger className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm">
+                    <SelectValue
+                      placeholder={
+                        projectsLoading ? "Loading projects..." : "Select a project"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableProjects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-1.5">
               <Label className="text-sm font-medium text-slate-700">
                 Task Name

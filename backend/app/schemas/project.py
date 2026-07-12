@@ -34,3 +34,10 @@ class ProjectPage(BaseModel):
     page: int
     limit: int
     has_more: bool
+
+
+class ProjectStats(BaseModel):
+    overdue_tasks: int
+    due_this_week_tasks: int
+    active_projects: int
+    completed_projects: int

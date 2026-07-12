@@ -17,7 +17,7 @@ import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProjects } from "@/hooks/useProjects";
 
-function ProjectModal({ project }) {
+function ProjectModal({ project, onSuccess }) {
   const [open, setOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("Active");
   const [projectName, setProjectName] = useState("");
@@ -71,6 +71,7 @@ function ProjectModal({ project }) {
       setSelectedPlan("Active");
       setOpen(false);
       toast.success("Project created!");
+      onSuccess?.();
     } catch (error) {
       console.error("Error creating project:", error);
       toast.error("Failed to create project");
@@ -95,7 +96,7 @@ function ProjectModal({ project }) {
         status: selectedPlan,
       });
       setOpen(false);
-      // onSuccess();
+      onSuccess?.();
       toast.success("Project updated!");
     } catch (error) {
       console.error("Error updating project:", error);

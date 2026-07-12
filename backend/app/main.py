@@ -26,6 +26,7 @@ app.add_middleware(
 
 app.include_router(project.router)
 app.include_router(task.router)
+app.include_router(task.all_tasks_router)
 app.include_router(notes.router)
 app.include_router(auth.auth_router)
 app.include_router(intelligence.router)

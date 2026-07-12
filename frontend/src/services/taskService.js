@@ -59,6 +59,17 @@ const taskService = {
       throw error;
     }
   },
+  getAllTasks: async ({ sort, page = 1, limit = 10 } = {}) => {
+    try {
+      const response = await api.get("/tasks", {
+        params: { sort: sort || undefined, page, limit },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Get all tasks error:", error);
+      throw error;
+    }
+  },
 };
 
 export default taskService;

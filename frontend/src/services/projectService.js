@@ -47,6 +47,15 @@ const projectService = {
     const response = await api.delete(`/projects/${id}`);
     return response.data;
   },
+  getStats: async () => {
+    try {
+      const response = await api.get("/projects/stats");
+      return response.data;
+    } catch (error) {
+      console.error("Get project stats error:", error);
+      throw error;
+    }
+  },
 };
 
 export default projectService;

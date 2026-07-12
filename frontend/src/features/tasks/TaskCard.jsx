@@ -1,4 +1,5 @@
-import { Trash2, Pin } from "lucide-react";
+import { Trash2, Pin, FolderKanban } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import TaskModal from "@/features/tasks/TaskModal";
 import StatusDropdown from "@/components/StatusDropdown";
 import toast from "react-hot-toast";
@@ -27,11 +28,16 @@ const priorityStyles = {
   High: "bg-red-50 text-red-700",
 };
 
-function TaskCard({ task, projectId }) {
+function TaskCard({ task, projectId, project, onChange }) {
   const [deleting, setDeleting] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [pinning, setPinning] = useState(false);
   const { removeTask, editTask } = useTasks(projectId);
+  const navigate = useNavigate();
+
+  function handleNavigateToProject() {
+    if (project) navigate(`/projects/${project.id}`);
+  }
 
   // add this helper above the component
   function formatDate(dateStr) {
@@ -49,7 +55,7 @@ function TaskCard({ task, projectId }) {
       setDeleting(true);
       await removeTask(task.id);
       toast.success("Task deleted");
-      // onRefresh();
+      onChange?.();
     } catch (error) {
       console.error("Error deleting task:", error);
       toast.error("Failed to delete task");
@@ -64,7 +70,7 @@ function TaskCard({ task, projectId }) {
         status: newStatus,
       });
       toast.success("Task Status Updated");
-      // onRefresh();
+      onChange?.();
     } catch (error) {
       console.error("Error updating task:", error);
       toast.error("Failed to Update task");
@@ -78,7 +84,7 @@ function TaskCard({ task, projectId }) {
       await editTask(task.id, {
         is_pinned: !task.is_pinned,
       });
-      // onRefresh();
+      onChange?.();
     } catch (error) {
       toast.error("Failed to pin task");
       console.error("Error pinning task:", error);
@@ -88,20 +94,29 @@ function TaskCard({ task, projectId }) {
   }
 
   return (
-    <div className="group bg-[#FAFAF8] border border-slate-100 rounded-2xl p-5 hover:border-slate-200 hover:shadow-sm transition-all duration-150">
+    <div
+      onClick={project ? handleNavigateToProject : undefined}
+      className={`group bg-[#FAFAF8] border border-slate-100 rounded-2xl p-5 hover:border-slate-200 hover:shadow-sm transition-all duration-150 ${project ? "cursor-pointer" : ""}`}
+    >
       {/* Header */}
       {deleting && (
         <div className="mb-3">
           <span className="text-sm text-slate-500">Deleting...</span>
         </div>
       )}
+      {project && (
+        <div className="flex items-center gap-1.5 mb-2 text-[10px] font-medium uppercase tracking-wide text-indigo-500">
+          <FolderKanban className="w-3 h-3" />
+          {project.name}
+        </div>
+      )}
       <div className="flex items-start justify-between mb-2">
         <h3 className="text-sm font-semibold text-slate-900 leading-snug pr-2 line-clamp-1">
           {task.title}
         </h3>
-        <div className="flex">
+        <div className="flex" onClick={(e) => e.stopPropagation()}>
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <TaskModal task={task} projectId={projectId} />
+            <TaskModal task={task} projectId={projectId} onSuccess={onChange} />
           </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -147,7 +162,10 @@ function TaskCard({ task, projectId }) {
       <p>{task.position}</p>
 
       <button
-        onClick={handlePin}
+        onClick={(e) => {
+          e.stopPropagation();
+          handlePin();
+        }}
         disabled={pinning}
         className={`p-1 rounded-lg ${task.is_pinned ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
       >
@@ -156,13 +174,15 @@ function TaskCard({ task, projectId }) {
         />
       </button>
 
-      <StatusDropdown
-        currentStatus={task.status}
-        statuses={["Todo", "Inprogress", "Done"]}
-        onStatusChange={handleStatusChange}
-        statusStyles={statusStyles}
-        updatingStatus={updatingStatus}
-      />
+      <div onClick={(e) => e.stopPropagation()}>
+        <StatusDropdown
+          currentStatus={task.status}
+          statuses={["Todo", "Inprogress", "Done"]}
+          onStatusChange={handleStatusChange}
+          statusStyles={statusStyles}
+          updatingStatus={updatingStatus}
+        />
+      </div>
     </div>
   );
 }

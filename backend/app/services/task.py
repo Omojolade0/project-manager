@@ -1,8 +1,10 @@
 import uuid
-from app.models.task import Task
+from typing import Optional
+from app.models.task import Task, TaskStatus
+from app.models.project import Project, ProjectStatus
 from app.schemas.task import TaskCreate, TaskUpdate, ReorderColumn
 from sqlmodel import Session, select
-from sqlalchemy import func
+from sqlalchemy import func, case
 from fastapi import HTTPException
 from app.core.permissions import verify_project_ownership
 from datetime import datetime, timezone
@@ -94,4 +96,69 @@ def reorder_tasks(project_id: uuid.UUID, columns: list[ReorderColumn], user_id: 
       session.add(task)
   session.commit()
   return {"success": True}
+
+
+def _pin_priority():
+  return case(
+    (
+      (Task.is_pinned == True)
+      & (Project.status == ProjectStatus.Active)
+      & (Task.status != TaskStatus.Done),
+      0,
+    ),
+    else_=1,
+  )
+
+
+def _sort_columns(sort: Optional[str]):
+  if sort == "created":
+    return [Task.created_at.desc()]
+  if sort == "updated":
+    return [Task.updated_at.desc().nulls_last()]
+  if sort == "status":
+    status_order = case(
+      (Task.status == TaskStatus.Todo, 0),
+      (Task.status == TaskStatus.Inprogress, 1),
+      (Task.status == TaskStatus.Done, 2),
+      else_=3,
+    )
+    return [status_order, Task.due_date.asc().nulls_last()]
+  # "deadline" and default: nearest/past due date first
+  return [Task.due_date.asc().nulls_last()]
+
+
+def get_all_user_tasks(user_id: uuid.UUID, sort: Optional[str], page: int, limit: int, session: Session) -> dict:
+  total = session.exec(
+    select(func.count())
+    .select_from(Task)
+    .join(Project, Task.project_id == Project.id)
+    .where(Project.user_id == user_id)
+  ).one()
+
+  order_by = [_pin_priority(), *_sort_columns(sort), Task.id]
+
+  rows = session.exec(
+    select(Task, Project)
+    .join(Project, Task.project_id == Project.id)
+    .where(Project.user_id == user_id)
+    .order_by(*order_by)
+    .offset((page - 1) * limit)
+    .limit(limit)
+  ).all()
+
+  items = [
+    {
+      **task.model_dump(),
+      "project": {"id": project.id, "name": project.name},
+    }
+    for task, project in rows
+  ]
+
+  return {
+    "items": items,
+    "total": total,
+    "page": page,
+    "limit": limit,
+    "has_more": (page * limit) < total,
+  }
 

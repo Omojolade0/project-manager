@@ -9,6 +9,7 @@ import ProjectDetail from "@/pages/ProjectDetail";
 import LandingPage from "@/pages/LandingPage";
 import Settings from "@/pages/Settings";
 import SearchResults from "@/pages/SearchResults";
+import UpcomingTasks from "@/pages/UpcomingTasks";
 
 function AppRoutes() {
   return (
@@ -20,6 +21,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/projects" element={<ProjectList />} />
         <Route path="/projects/:id" element={<ProjectDetail />} />
+        <Route path="/tasks" element={<UpcomingTasks />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

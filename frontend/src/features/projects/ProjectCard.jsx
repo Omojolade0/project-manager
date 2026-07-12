@@ -23,7 +23,7 @@ const statusStyles = {
   Inactive: "bg-slate-50 text-slate-500",
 };
 
-function ProjectCard({ project }) {
+function ProjectCard({ project, onDelete, onStatusChange }) {
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -38,6 +38,7 @@ function ProjectCard({ project }) {
       setDeleting(true);
       await removeProject(project.id);
       toast.success("Project deleted");
+      onDelete?.();
     } catch (error) {
       console.error("Error deleting project:", error);
       toast.error("Failed to delete project");
@@ -53,6 +54,7 @@ function ProjectCard({ project }) {
         status: newStatus,
       });
       toast.success("Project updated");
+      onStatusChange?.();
     } catch (error) {
       console.error("Error updating project:", error);
       toast.error("Failed to update project status");
