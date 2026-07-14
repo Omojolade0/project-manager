@@ -23,9 +23,12 @@ def get_all_tasks(sort: Optional[Literal["deadline", "created", "updated", "stat
 @router.get("", response_model=TaskPage)
 def get_project_tasks(project_id: uuid.UUID,
                       current_user: User = Depends(get_current_user),
+                      status: Optional[Literal["Todo", "Inprogress", "Done"]] = None,
+                      sort: Optional[Literal["deadline", "created", "updated", "priority"]] = None,
                       page: int = 1, limit: int = 10,
                       session: Session = Depends(get_session)):
-  return service.get_all_project_tasks(project_id, page=page, limit=limit, user_id = current_user.id, session =session)
+  return service.get_all_project_tasks(project_id, page=page, limit=limit, user_id=current_user.id,
+                                        session=session, status=status, sort=sort)
 
 @router.post("", response_model=TaskPublic)
 def create_task(project_id: uuid.UUID, data: TaskCreate,

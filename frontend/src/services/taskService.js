@@ -6,9 +6,11 @@
 import api from "@/api/api";
 
 const taskService = {
-  getTasks: async (projectId, page = 1, limit = 10) => {
+  getTasks: async (projectId, page = 1, limit = 10, { status, sort } = {}) => {
     try {
-      const response = await api.get(`/projects/${projectId}/tasks`, { params: { page, limit } });
+      const response = await api.get(`/projects/${projectId}/tasks`, {
+        params: { page, limit, status: status || undefined, sort: sort || undefined },
+      });
       return response.data;
     } catch (error) {
       console.error("Get tasks error:", error);

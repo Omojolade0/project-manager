@@ -1,4 +1,5 @@
 import uuid
+from typing import Literal, Optional
 from fastapi import APIRouter, Depends
 from app.schemas.project import ProjectUpdate, ProjectCreate, ProjectPublic, ProjectPage, ProjectStats
 from app.models.user import User
@@ -13,6 +14,8 @@ router = APIRouter(prefix="/projects", tags=["Projects"])
 @router.get("", response_model=ProjectPage)
 def list_projects(
     current_user: User= Depends(get_current_user),
+    status: Optional[Literal["Active", "Completed", "Inactive"]] = None,
+    sort: Optional[Literal["updated", "created", "alphabetical"]] = None,
     page: int = 1,
     limit: int = 10,
     session: Session = Depends(get_session)):
@@ -20,7 +23,7 @@ def list_projects(
     """Retrieve a list of all project."""
     return service.get_all_projects(
         user_id=current_user.id, page=page, limit=limit,
-        session=session)
+        session=session, status=status, sort=sort)
 
 @router.get("/stats", response_model=ProjectStats)
 def get_project_stats(current_user: User = Depends(get_current_user),
@@ -29,9 +32,9 @@ def get_project_stats(current_user: User = Depends(get_current_user),
 
 @router.get("/{project_id}", response_model=ProjectPublic)
 def retrieve_project(project_id: uuid.UUID,
-                     current_user: User= Depends(get_current_user), 
+                     current_user: User= Depends(get_current_user),
                      session: Session = Depends(get_session)):
-    return service.get_project_by_id(project_id, 
+    return service.get_project_by_id_public(project_id,
                                      user_id=current_user.id,
                                   session=session)
 

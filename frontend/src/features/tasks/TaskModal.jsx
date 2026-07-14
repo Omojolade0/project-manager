@@ -26,7 +26,14 @@ import toast from "react-hot-toast";
 import { useTasks } from "@/hooks/useTasks";
 import projectService from "@/services/projectService";
 
-function TaskModal({ projectId, task, onSuccess }) {
+function TaskModal({
+  projectId,
+  task,
+  onSuccess,
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
+  hideTrigger = false,
+}) {
   const [selectedStatus, setSelectedStatus] = useState(
     task ? task.status : "Todo",
   );
@@ -35,7 +42,9 @@ function TaskModal({ projectId, task, onSuccess }) {
   );
   const [title, setTitle] = useState(task ? task.title : "");
   const [description, setDescription] = useState(task ? task.description : "");
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp !== undefined ? openProp : internalOpen;
+  const setOpen = onOpenChangeProp !== undefined ? onOpenChangeProp : setInternalOpen;
   const [loading, setLoading] = useState(false);
   const [date, setDate] = useState(
     task ? (task.due_date ? task.due_date.split("T")[0] : null) : null,
@@ -199,19 +208,20 @@ function TaskModal({ projectId, task, onSuccess }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {task ? (
-        <DialogTrigger asChild>
-          <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-          </Button>
-        </DialogTrigger>
-      ) : (
-        <DialogTrigger asChild>
-          <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
-            <Plus className="w-4 h-4" /> New Task
-          </Button>
-        </DialogTrigger>
-      )}
+      {!hideTrigger &&
+        (task ? (
+          <DialogTrigger asChild>
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+            </Button>
+          </DialogTrigger>
+        ) : (
+          <DialogTrigger asChild>
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+              <Plus className="w-4 h-4" /> New Task
+            </Button>
+          </DialogTrigger>
+        ))}
 
       <DialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
         <div className="p-6">

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pin } from "lucide-react";
 import ProjectModal from "./ProjectModal";
 import StatusDropdown from "../../components/StatusDropdown";
 import toast from "react-hot-toast";
@@ -32,6 +32,20 @@ function ProjectCard({ project, onDelete, onStatusChange }) {
   function handleNavigate() {
     navigate(`/projects/${project.id}`);
   }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return null;
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  const taskCount = project.task_count ?? 0;
+  const completedCount = project.completed_count ?? 0;
+  const progressPct =
+    taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0;
 
   async function handleDelete() {
     try {
@@ -120,6 +134,34 @@ function ProjectCard({ project, onDelete, onStatusChange }) {
       <p className="text-xs text-slate-400 leading-relaxed mb-4 line-clamp-2">
         {project.description || "No description"}
       </p>
+
+      {/* Progress + meta */}
+      <div className="mb-4">
+        {taskCount > 0 && (
+          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden mb-2">
+            <div
+              className="h-full bg-indigo-500 rounded-full transition-all"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+        )}
+        <div className="flex items-center justify-between text-[11px] text-slate-400">
+          <span>
+            {completedCount}/{taskCount} tasks
+          </span>
+          <span>
+            {project.updated_at
+              ? `Updated ${formatDate(project.updated_at)}`
+              : "Never updated"}
+          </span>
+        </div>
+        {project.one_pinned_task && (
+          <div className="flex items-center gap-1.5 mt-2 text-xs text-indigo-600">
+            <Pin className="w-3 h-3 shrink-0" />
+            <span className="truncate">{project.one_pinned_task.title}</span>
+          </div>
+        )}
+      </div>
 
       {/* Footer */}
       <div

@@ -4,6 +4,19 @@ import ProjectModal from "@/features/projects/ProjectModal";
 import { useState } from "react";
 import { FolderKanban, ChevronLeft, ChevronRight } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const SORTS = [
+  { value: "updated", label: "Last updated" },
+  { value: "created", label: "Date created" },
+  { value: "alphabetical", label: "Alphabetical" },
+];
 
 function ProjectList() {
   const [filter, setFilter] = useState("All");
@@ -14,16 +27,23 @@ function ProjectList() {
     page,
     total,
     hasMore,
+    sort,
     fetchProjects,
     goToNextPage,
     goToPrevPage,
   } = useProjects({ autoFetch: true });
 
   const filters = ["All", "Active", "Completed", "Inactive"];
+  const activeSort = sort ?? "updated";
 
-  const filtered = projects.filter(
-    (p) => filter === "All" || p.status === filter,
-  );
+  function changeFilter(nextFilter) {
+    setFilter(nextFilter);
+    fetchProjects(1, { status: nextFilter === "All" ? null : nextFilter });
+  }
+
+  function changeSort(nextSort) {
+    fetchProjects(1, { sort: nextSort });
+  }
 
   if (error) {
     return (
@@ -63,22 +83,36 @@ function ProjectList() {
           <ProjectModal onSuccess={() => fetchProjects(1)} />
         </div>
 
-        {/* Filter tabs */}
-        <div className="flex gap-2 mb-6">
-          {filters.map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={[
-                "px-4 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                filter === f
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-400 hover:text-slate-900 hover:bg-slate-50",
-              ].join(" ")}
-            >
-              {f}
-            </button>
-          ))}
+        {/* Filter tabs + sort */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex gap-2">
+            {filters.map((f) => (
+              <button
+                key={f}
+                onClick={() => changeFilter(f)}
+                className={[
+                  "px-4 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                  filter === f
+                    ? "bg-slate-900 text-white"
+                    : "text-slate-400 hover:text-slate-900 hover:bg-slate-50",
+                ].join(" ")}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          <Select value={activeSort} onValueChange={changeSort}>
+            <SelectTrigger className="w-44 h-9 rounded-lg border-slate-200 text-sm">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              {SORTS.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Content */}
@@ -91,7 +125,7 @@ function ProjectList() {
               />
             ))}
           </div>
-        ) : filtered.length === 0 ? (
+        ) : projects.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
               <FolderKanban className="w-6 h-6 text-slate-300" />
@@ -107,7 +141,7 @@ function ProjectList() {
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-4">
-            {filtered.map((project) => (
+            {projects.map((project) => (
               <ProjectCard
                 key={project.id}
                 project={project}

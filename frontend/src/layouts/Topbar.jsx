@@ -3,6 +3,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { Bell, Search, FolderKanban, CheckSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import searchService from "@/services/searchService";
+import CommandPalette from "@/components/CommandPalette";
 
 const titles = {
   "/dashboard": "Dashboard",
@@ -233,6 +234,7 @@ function Topbar() {
               </div>
             )}
           </div>
+          <CommandPalette />
           <button
             type="button"
             aria-label="Notifications"

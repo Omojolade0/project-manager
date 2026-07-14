@@ -17,8 +17,16 @@ import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProjects } from "@/hooks/useProjects";
 
-function ProjectModal({ project, onSuccess }) {
-  const [open, setOpen] = useState(false);
+function ProjectModal({
+  project,
+  onSuccess,
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
+  hideTrigger = false,
+}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp !== undefined ? openProp : internalOpen;
+  const setOpen = onOpenChangeProp !== undefined ? onOpenChangeProp : setInternalOpen;
   const [selectedPlan, setSelectedPlan] = useState("Active");
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
@@ -108,17 +116,19 @@ function ProjectModal({ project, onSuccess }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {project ? (
-          <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-          </Button>
-        ) : (
-          <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
-            <Plus className="w-4 h-4" /> New Project
-          </Button>
-        )}
-      </DialogTrigger>
+      {!hideTrigger && (
+        <DialogTrigger asChild>
+          {project ? (
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+              <Plus className="w-4 h-4" /> New Project
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
 
       <DialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
         <div className="p-6">
