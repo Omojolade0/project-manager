@@ -26,7 +26,7 @@ class Task(SQLModel, table=True):
     priority: Optional[Priority] = None
     due_date: Optional[datetime] = None
     is_pinned: bool = Field(default=False)
-    assigned_to: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
+    assigned_to: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id", ondelete="SET NULL")
     position: int = Field(default=0)
     deleted_at: Optional[datetime] = None
 
