@@ -7,9 +7,11 @@
 import api from "@/api/api";
 
 const projectService = {
-  getProjects: async (page = 1, limit = 10) => {
+  getProjects: async (page = 1, limit = 10, { status, sort } = {}) => {
     try {
-      const response = await api.get("/projects", { params: { page, limit } });
+      const response = await api.get("/projects", {
+        params: { page, limit, status: status || undefined, sort: sort || undefined },
+      });
       return response.data;
     } catch (error) {
       console.error("Get projects error:", error);
@@ -46,6 +48,15 @@ const projectService = {
   deleteProject: async (id) => {
     const response = await api.delete(`/projects/${id}`);
     return response.data;
+  },
+  getStats: async () => {
+    try {
+      const response = await api.get("/projects/stats");
+      return response.data;
+    } catch (error) {
+      console.error("Get project stats error:", error);
+      throw error;
+    }
   },
 };
 

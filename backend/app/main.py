@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.database import create_db_tables
-from app.api import project, task, notes, auth, intelligence 
+from app.api import project, task, notes, auth, intelligence, search
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.config import FRONTEND_URL
@@ -26,9 +26,11 @@ app.add_middleware(
 
 app.include_router(project.router)
 app.include_router(task.router)
+app.include_router(task.all_tasks_router)
 app.include_router(notes.router)
 app.include_router(auth.auth_router)
 app.include_router(intelligence.router)
+app.include_router(search.router)
 
 
 

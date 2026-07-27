@@ -37,7 +37,8 @@ function groupTasksByStatus(tasks) {
 }
 
 function findColumnByTaskId(board, taskId) {
-  return COLUMNS.find((c) => board[c.status].some((t) => t.id === taskId))?.status;
+  return COLUMNS.find((c) => board[c.status].some((t) => t.id === taskId))
+    ?.status;
 }
 
 function findTaskById(board, taskId) {
@@ -49,8 +50,14 @@ function findTaskById(board, taskId) {
 }
 
 function SortableTaskCard({ task, projectId }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: task.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -70,7 +77,10 @@ function Column({ column, tasks, projectId }) {
   const taskIds = tasks.map((t) => t.id);
 
   return (
-    <div ref={setNodeRef} className="bg-slate-50/60 rounded-xl p-3 min-h-[120px]">
+    <div
+      ref={setNodeRef}
+      className="bg-slate-50/60 rounded-xl p-3 min-h-[120px]"
+    >
       <div className="flex items-center justify-between mb-3 px-1">
         <h4 className="text-xs font-semibold text-slate-900">{column.label}</h4>
         <span className="text-xs text-slate-400 bg-white rounded-full px-2 py-0.5">
@@ -83,7 +93,11 @@ function Column({ column, tasks, projectId }) {
             <p className="text-xs text-slate-300 text-center py-6">No tasks</p>
           ) : (
             tasks.map((task) => (
-              <SortableTaskCard key={task.id} task={task} projectId={projectId} />
+              <SortableTaskCard
+                key={task.id}
+                task={task}
+                projectId={projectId}
+              />
             ))
           )}
         </div>
@@ -103,7 +117,9 @@ function TaskBoard({ tasks, projectId }) {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   function handleDragStart(event) {
@@ -131,7 +147,9 @@ function TaskBoard({ tasks, projectId }) {
     if (!sourceStatus) return;
 
     const overIsColumn = COLUMNS.some((c) => c.status === overId);
-    const destStatus = overIsColumn ? overId : findColumnByTaskId(previousBoard, overId);
+    const destStatus = overIsColumn
+      ? overId
+      : findColumnByTaskId(previousBoard, overId);
     if (!destStatus) return;
 
     const sourceItems = previousBoard[sourceStatus];
@@ -162,7 +180,11 @@ function TaskBoard({ tasks, projectId }) {
       const movedTask = { ...sourceItems[activeIndex], status: destStatus };
       const newSourceItems = sourceItems.filter((t) => t.id !== activeId);
       const newDestItems = [...destItems];
-      newDestItems.splice(overIndex === -1 ? newDestItems.length : overIndex, 0, movedTask);
+      newDestItems.splice(
+        overIndex === -1 ? newDestItems.length : overIndex,
+        0,
+        movedTask,
+      );
 
       newBoard = {
         ...previousBoard,

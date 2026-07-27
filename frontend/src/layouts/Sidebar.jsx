@@ -1,6 +1,12 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import ItemsNav from "./ItemsNav";
-import { LayoutDashboard, FolderKanban, Settings, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  FolderKanban,
+  ListTodo,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import useAuth from "@/hooks/useAuth";
 
 function Sidebar({ isCollapsed, setIsCollapsed }) {
@@ -15,6 +21,7 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
   const navItems = [
     { label: "Dashboard", to: "/dashboard", Icon: LayoutDashboard },
     { label: "Projects", to: "/projects", Icon: FolderKanban },
+    { label: "Upcoming Tasks", to: "/tasks", Icon: ListTodo },
   ];
 
   return (

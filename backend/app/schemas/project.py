@@ -17,6 +17,12 @@ class ProjectCreate(BaseModel):
     status: ProjectStatus = Field(default=ProjectStatus.Active)
 
 
+class ProjectPinnedTask(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    title: str
+
+
 class ProjectPublic(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
@@ -26,6 +32,9 @@ class ProjectPublic(BaseModel):
     description: Optional[str] = None
     status: ProjectStatus
     updated_at: Optional[datetime] = None
+    task_count: int = 0
+    completed_count: int = 0
+    one_pinned_task: Optional[ProjectPinnedTask] = None
 
 
 class ProjectPage(BaseModel):
@@ -34,3 +43,10 @@ class ProjectPage(BaseModel):
     page: int
     limit: int
     has_more: bool
+
+
+class ProjectStats(BaseModel):
+    overdue_tasks: int
+    due_this_week_tasks: int
+    active_projects: int
+    completed_projects: int

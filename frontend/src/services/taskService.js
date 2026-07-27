@@ -6,9 +6,11 @@
 import api from "@/api/api";
 
 const taskService = {
-  getTasks: async (projectId, page = 1, limit = 10) => {
+  getTasks: async (projectId, page = 1, limit = 10, { status, sort } = {}) => {
     try {
-      const response = await api.get(`/projects/${projectId}/tasks`, { params: { page, limit } });
+      const response = await api.get(`/projects/${projectId}/tasks`, {
+        params: { page, limit, status: status || undefined, sort: sort || undefined },
+      });
       return response.data;
     } catch (error) {
       console.error("Get tasks error:", error);
@@ -56,6 +58,17 @@ const taskService = {
       return response.data;
     } catch (error) {
       console.error("Reorder tasks error:", error);
+      throw error;
+    }
+  },
+  getAllTasks: async ({ sort, page = 1, limit = 10 } = {}) => {
+    try {
+      const response = await api.get("/tasks", {
+        params: { sort: sort || undefined, page, limit },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Get all tasks error:", error);
       throw error;
     }
   },

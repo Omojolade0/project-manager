@@ -11,15 +11,26 @@ export function useTasks(projectId, { autoFetch = false } = {}) {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const [status, setStatus] = useState(null);
+  const [sort, setSort] = useState(null);
 
-  async function fetchTasks(pid, pageNum = page) {
+  async function fetchTasks(
+    pid,
+    pageNum = page,
+    { status: statusValue = status, sort: sortValue = sort } = {},
+  ) {
     try {
       setLoading(true);
-      const response = await taskService.getTasks(pid, pageNum, LIMIT);
+      const response = await taskService.getTasks(pid, pageNum, LIMIT, {
+        status: statusValue,
+        sort: sortValue,
+      });
       setTasks(response.items);
       setTotal(response.total);
       setHasMore(response.has_more);
       setPage(pageNum);
+      setStatus(statusValue);
+      setSort(sortValue);
     } catch (err) {
       setError(err);
     } finally {
@@ -91,6 +102,8 @@ export function useTasks(projectId, { autoFetch = false } = {}) {
     page,
     total,
     hasMore,
+    status,
+    sort,
     fetchTasks,
     goToNextPage,
     goToPrevPage,

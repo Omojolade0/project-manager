@@ -3,36 +3,47 @@ import ProjectCard from "@/features/projects/ProjectCard";
 import ProjectModal from "@/features/projects/ProjectModal";
 import { useNavigate } from "react-router-dom";
 import { useProjects } from "@/hooks/useProjects";
+import { useProjectStats } from "@/hooks/useProjectStats";
 import {
   FolderKanban,
-  CheckSquare,
   FolderCheck,
+  AlertTriangle,
+  Clock,
   ArrowRight,
 } from "lucide-react";
 
 function Dashboard() {
-  const { projects, loading, error, total, fetchProjects } = useProjects({ autoFetch: true });
+  const { projects, loading, error, fetchProjects } = useProjects({ autoFetch: true });
+  const { stats: projectStats, fetchStats } = useProjectStats({ autoFetch: true });
   const navigate = useNavigate();
 
-  const activeProjects = projects.filter((p) => p.status === "Active");
-  const completedProjects = projects.filter((p) => p.status === "Completed");
+  function refetchDashboard() {
+    fetchProjects();
+    fetchStats();
+  }
 
   const stats = [
     {
-      label: "Total Projects",
-      value: total,
+      label: "Overdue Tasks",
+      value: projectStats?.overdue_tasks ?? 0,
+      icon: AlertTriangle,
+      color: "bg-red-50 text-red-600",
+    },
+    {
+      label: "Due This Week",
+      value: projectStats?.due_this_week_tasks ?? 0,
+      icon: Clock,
+      color: "bg-amber-50 text-amber-600",
+    },
+    {
+      label: "Active Projects",
+      value: projectStats?.active_projects ?? 0,
       icon: FolderKanban,
       color: "bg-indigo-50 text-indigo-600",
     },
     {
-      label: "Active",
-      value: activeProjects.length,
-      icon: CheckSquare,
-      color: "bg-amber-50 text-amber-600",
-    },
-    {
-      label: "Completed",
-      value: completedProjects.length,
+      label: "Completed Projects",
+      value: projectStats?.completed_projects ?? 0,
       icon: FolderCheck,
       color: "bg-green-50 text-green-600",
     },
@@ -62,7 +73,7 @@ function Dashboard() {
   return (
     <Layout>
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-4 gap-4 mb-8">
         {stats.map((s, i) => (
           <div
             key={i}
@@ -99,7 +110,7 @@ function Dashboard() {
             >
               View all <ArrowRight className="w-3.5 h-3.5" />
             </button>
-            <ProjectModal onSuccess={fetchProjects} />
+            <ProjectModal onSuccess={refetchDashboard} />
           </div>
         </div>
 
@@ -130,7 +141,8 @@ function Dashboard() {
               <ProjectCard
                 key={project.id}
                 project={project}
-                onDelete={fetchProjects}
+                onDelete={refetchDashboard}
+                onStatusChange={refetchDashboard}
               />
             ))}
           </div>

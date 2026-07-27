@@ -10,12 +10,33 @@ import { ArrowLeft, CheckSquare, FileText, ChevronLeft, ChevronRight, List, Layo
 import { useTasks } from "@/hooks/useTasks";
 import { useNotes } from "@/hooks/useNotes";
 import { useProjects } from "@/hooks/useProjects";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const statusStyles = {
   Active: "bg-green-50 text-green-700",
   Completed: "bg-blue-50 text-blue-700",
   Inactive: "bg-slate-50 text-slate-500",
 };
+
+const TASK_STATUS_FILTERS = [
+  { value: "", label: "All" },
+  { value: "Todo", label: "Todo" },
+  { value: "Inprogress", label: "In Progress" },
+  { value: "Done", label: "Done" },
+];
+
+const TASK_SORTS = [
+  { value: "deadline", label: "Deadline" },
+  { value: "created", label: "Created" },
+  { value: "updated", label: "Updated" },
+  { value: "priority", label: "Priority" },
+];
 
 function ProjectDetail() {
   const navigate = useNavigate();
@@ -25,6 +46,8 @@ function ProjectDetail() {
   const [projectError, setProjectError] = useState(null);
   const [projectLoading, setProjectLoading] = useState(true);
   const [tasksView, setTasksView] = useState("list");
+  const [taskStatusFilter, setTaskStatusFilter] = useState("");
+  const [taskSort, setTaskSort] = useState("");
 
   const {
     tasks,
@@ -37,6 +60,27 @@ function ProjectDetail() {
     goToNextPage: tasksNextPage,
     goToPrevPage: tasksPrevPage,
   } = useTasks(id, { autoFetch: true });
+
+  // The Kanban board must always show the full, unfiltered task set — list-view
+  // filter/sort selections are intentionally not applied there.
+  function changeTasksView(view) {
+    setTasksView(view);
+    if (view === "board") {
+      fetchTasks(id, 1, { status: null, sort: null });
+    } else {
+      fetchTasks(id, 1, { status: taskStatusFilter || null, sort: taskSort || null });
+    }
+  }
+
+  function changeTaskStatusFilter(value) {
+    setTaskStatusFilter(value);
+    fetchTasks(id, 1, { status: value || null, sort: taskSort || null });
+  }
+
+  function changeTaskSort(value) {
+    setTaskSort(value);
+    fetchTasks(id, 1, { status: taskStatusFilter || null, sort: value || null });
+  }
 
   const {
     notes,
@@ -173,7 +217,7 @@ function ProjectDetail() {
               <div className="flex items-center gap-3">
                 <div className="flex items-center bg-slate-50 rounded-lg p-0.5">
                   <button
-                    onClick={() => setTasksView("list")}
+                    onClick={() => changeTasksView("list")}
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                       tasksView === "list"
                         ? "bg-white text-slate-900 shadow-sm"
@@ -183,7 +227,7 @@ function ProjectDetail() {
                     <List className="w-3.5 h-3.5" /> List
                   </button>
                   <button
-                    onClick={() => setTasksView("board")}
+                    onClick={() => changeTasksView("board")}
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                       tasksView === "board"
                         ? "bg-white text-slate-900 shadow-sm"
@@ -193,9 +237,43 @@ function ProjectDetail() {
                     <LayoutGrid className="w-3.5 h-3.5" /> Board
                   </button>
                 </div>
-                <TaskModal projectId={id} />
+                <TaskModal projectId={id} onSuccess={() => fetchTasks(id, 1)} />
               </div>
             </div>
+            {tasksView === "list" && (
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex gap-1.5">
+                  {TASK_STATUS_FILTERS.map((f) => (
+                    <button
+                      key={f.value}
+                      onClick={() => changeTaskStatusFilter(f.value)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                        taskStatusFilter === f.value
+                          ? "bg-slate-900 text-white"
+                          : "text-slate-400 hover:text-slate-900 hover:bg-slate-50"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+                <Select
+                  value={taskSort || "deadline"}
+                  onValueChange={changeTaskSort}
+                >
+                  <SelectTrigger className="w-36 h-8 rounded-lg border-slate-200 text-xs">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TASK_SORTS.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {tasksLoading ? (
               <div className="space-y-3">
                 {[1, 2].map((i) => (
@@ -208,7 +286,9 @@ function ProjectDetail() {
             ) : tasks.length === 0 ? (
               <div className="text-center py-10">
                 <CheckSquare className="w-8 h-8 text-slate-200 mx-auto mb-3" />
-                <p className="text-sm text-slate-400">No tasks yet</p>
+                <p className="text-sm text-slate-400">
+                  {taskStatusFilter ? "No matching tasks" : "No tasks yet"}
+                </p>
               </div>
             ) : tasksView === "board" ? (
               <TaskBoard tasks={tasks} projectId={id} />
@@ -216,7 +296,12 @@ function ProjectDetail() {
               <>
                 <div className="space-y-3">
                   {tasks.map((task) => (
-                    <TaskCard key={task.id} task={task} projectId={id} />
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      projectId={id}
+                      onChange={() => fetchTasks(id)}
+                    />
                   ))}
                 </div>
                 {tasksTotal > 0 && (

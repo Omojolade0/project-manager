@@ -49,6 +49,24 @@ class TaskPage(BaseModel):
     has_more: bool
 
 
+class TaskProjectSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    name: str
+
+
+class TaskWithProject(TaskPublic):
+    project: TaskProjectSummary
+
+
+class AllTasksPage(BaseModel):
+    items: list[TaskWithProject]
+    total: int
+    page: int
+    limit: int
+    has_more: bool
+
+
 class ReorderColumn(BaseModel):
     status: TaskStatus
     task_ids: list[uuid.UUID]

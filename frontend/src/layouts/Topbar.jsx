@@ -1,12 +1,16 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useMemo, useState, useEffect } from "react";
-import { Bell, Search } from "lucide-react";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { Bell, Search, FolderKanban, CheckSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import searchService from "@/services/searchService";
+import CommandPalette from "@/components/CommandPalette";
 
 const titles = {
   "/dashboard": "Dashboard",
   "/projects": "Projects",
   "/settings": "Settings",
+  "/search": "Search",
+  "/tasks": "Upcoming Tasks",
 };
 
 const getTitle = (pathname) => {
@@ -16,22 +20,124 @@ const getTitle = (pathname) => {
   return titles[match] ?? "Page";
 };
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 function Topbar() {
   const { pathname } = useLocation();
-  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const containerRef = useRef(null);
+  const itemRefs = useRef([]);
   const title = useMemo(() => getTitle(pathname), [pathname]);
-  const showSearch = pathname === "/projects";
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (pathname === "/projects") {
-      navigate(`/projects?search=${search}`);
-    }
-  }, [search]);
+  const flatResults = useMemo(() => {
+    const projectItems = (results?.projects ?? []).map((project) => ({
+      type: "project",
+      id: project.id,
+      label: project.name,
+    }));
+    const taskItems = (results?.tasks ?? []).map((task) => ({
+      type: "task",
+      id: task.id,
+      label: task.title,
+      projectId: task.project_id,
+    }));
+    return [...projectItems, ...taskItems];
+  }, [results]);
 
   useEffect(() => {
-    setSearch("");
+    const text = query.trim();
+    if (!text) {
+      setResults(null);
+      setOpen(false);
+      setHighlightedIndex(-1);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const response = await searchService.search(text);
+        setResults(response);
+        setOpen(true);
+        setHighlightedIndex(-1);
+      } catch {
+        setResults(null);
+        setHighlightedIndex(-1);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(timeoutId);
+  }, [query]);
+
+  useEffect(() => {
+    setQuery("");
   }, [pathname]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setOpen(false);
+        setHighlightedIndex(-1);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (highlightedIndex >= 0) {
+      itemRefs.current[highlightedIndex]?.scrollIntoView({ block: "nearest" });
+    }
+  }, [highlightedIndex]);
+
+  function goToProject(projectId) {
+    setOpen(false);
+    setQuery("");
+    setHighlightedIndex(-1);
+    navigate(`/projects/${projectId}`);
+  }
+
+  function selectItem(item) {
+    if (!item) return;
+    goToProject(item.type === "project" ? item.id : item.projectId);
+  }
+
+  function handleKeyDown(e) {
+    if (!open || flatResults.length === 0) {
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((i) => (i + 1) % flatResults.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((i) => (i <= 0 ? flatResults.length - 1 : i - 1));
+    } else if (e.key === "Enter") {
+      if (highlightedIndex >= 0) {
+        e.preventDefault();
+        selectItem(flatResults[highlightedIndex]);
+      }
+    } else if (e.key === "Escape") {
+      setOpen(false);
+      setHighlightedIndex(-1);
+      e.currentTarget.blur();
+    }
+  }
+
+  function goToFullResults() {
+    const text = query.trim();
+    setOpen(false);
+    setQuery("");
+    setHighlightedIndex(-1);
+    navigate(`/search?q=${encodeURIComponent(text)}&type=all`);
+  }
+
+  const hasResults =
+    results && ((results.projects?.length ?? 0) > 0 || (results.tasks?.length ?? 0) > 0);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[#FAFAF8] border-b border-slate-100">
@@ -40,17 +146,95 @@ function Topbar() {
           {title}
         </h2>
         <div className="flex items-center gap-3">
-          {showSearch && (
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input
-                className="w-56 rounded-xl pl-9 bg-white border-slate-200 text-sm"
-                placeholder="Search..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-          )}
+          <div className="relative" ref={containerRef}>
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              className="w-56 rounded-xl pl-9 bg-white border-slate-200 text-sm"
+              placeholder="Search..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => {
+                if (hasResults) {
+                  setOpen(true);
+                  setHighlightedIndex(-1);
+                }
+              }}
+              onKeyDown={handleKeyDown}
+              role="combobox"
+              aria-expanded={open}
+              aria-controls="topbar-search-listbox"
+            />
+            {open && (
+              <div
+                id="topbar-search-listbox"
+                role="listbox"
+                className="absolute right-0 mt-2 w-72 bg-white rounded-xl border border-slate-100 shadow-lg py-2 max-h-80 overflow-y-auto"
+              >
+                {!hasResults ? (
+                  <p className="text-xs text-slate-400 text-center py-4">
+                    No results
+                  </p>
+                ) : (
+                  <>
+                    {results.projects?.map((project, i) => (
+                      <button
+                        key={`project-${project.id}`}
+                        ref={(el) => (itemRefs.current[i] = el)}
+                        role="option"
+                        aria-selected={highlightedIndex === i}
+                        onMouseEnter={() => setHighlightedIndex(i)}
+                        onClick={() => goToProject(project.id)}
+                        className={[
+                          "w-full flex items-center gap-2 px-3 py-2 text-left transition-colors",
+                          highlightedIndex === i ? "bg-slate-100" : "hover:bg-slate-50",
+                        ].join(" ")}
+                      >
+                        <FolderKanban className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="text-sm text-slate-900 truncate">
+                          {project.name}
+                        </span>
+                        <span className="ml-auto text-[10px] uppercase tracking-wide text-slate-400 shrink-0">
+                          Project
+                        </span>
+                      </button>
+                    ))}
+                    {results.tasks?.map((task, j) => {
+                      const i = (results.projects?.length ?? 0) + j;
+                      return (
+                        <button
+                          key={`task-${task.id}`}
+                          ref={(el) => (itemRefs.current[i] = el)}
+                          role="option"
+                          aria-selected={highlightedIndex === i}
+                          onMouseEnter={() => setHighlightedIndex(i)}
+                          onClick={() => goToProject(task.project_id)}
+                          className={[
+                            "w-full flex items-center gap-2 px-3 py-2 text-left transition-colors",
+                            highlightedIndex === i ? "bg-slate-100" : "hover:bg-slate-50",
+                          ].join(" ")}
+                        >
+                          <CheckSquare className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="text-sm text-slate-900 truncate">
+                            {task.title}
+                          </span>
+                          <span className="ml-auto text-[10px] uppercase tracking-wide text-slate-400 shrink-0">
+                            Task
+                          </span>
+                        </button>
+                      );
+                    })}
+                    <button
+                      onClick={goToFullResults}
+                      className="w-full text-center text-xs font-medium text-indigo-600 hover:text-indigo-700 py-2 mt-1 border-t border-slate-100"
+                    >
+                      See all results
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          <CommandPalette />
           <button
             type="button"
             aria-label="Notifications"
