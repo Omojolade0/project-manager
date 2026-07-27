@@ -3,6 +3,7 @@ from typing import Literal, Optional
 from pydantic import BaseModel, Field, ConfigDict
 
 
+# Search Dropdown 
 class SearchRequest(BaseModel):
     text: str = Field(min_length=1, max_length=200)
 
@@ -24,6 +25,9 @@ class SearchResponse(BaseModel):
     projects: Optional[list[SearchResultProject]] = None
     tasks: Optional[list[SearchResultTask]] = None
 
+
+
+# Search Full Page 
 
 SearchType = Literal["all", "projects", "tasks"]
 
