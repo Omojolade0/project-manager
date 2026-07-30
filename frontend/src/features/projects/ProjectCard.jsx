@@ -131,9 +131,11 @@ function ProjectCard({ project, onDelete, onStatusChange }) {
       </div>
 
       {/* Description */}
-      <p className="text-xs text-slate-400 leading-relaxed mb-4 line-clamp-2">
-        {project.description || "No description"}
-      </p>
+      {project.description && (
+        <p className="text-xs text-slate-400 leading-relaxed mb-4 line-clamp-2">
+          {project.description}
+        </p>
+      )}
 
       {/* Progress + meta */}
       <div className="mb-4">
@@ -145,15 +147,13 @@ function ProjectCard({ project, onDelete, onStatusChange }) {
             />
           </div>
         )}
-        <div className="flex items-center justify-between text-[11px] text-slate-400">
+        <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] text-slate-400">
           <span>
             {completedCount}/{taskCount} tasks
           </span>
-          <span>
-            {project.updated_at
-              ? `Updated ${formatDate(project.updated_at)}`
-              : "Never updated"}
-          </span>
+          {project.updated_at && (
+            <span>{`Updated ${formatDate(project.updated_at)}`}</span>
+          )}
         </div>
         {project.one_pinned_task && (
           <div className="flex items-center gap-1.5 mt-2 text-xs text-indigo-600">

@@ -1,6 +1,9 @@
 import Layout from "@/layouts/Layout";
 import TaskCard from "@/features/tasks/TaskCard";
 import TaskModal from "@/features/tasks/TaskModal";
+import Skeleton from "@/components/common/Skeleton";
+import EmptyState from "@/components/common/EmptyState";
+import ErrorState from "@/components/common/ErrorState";
 import { useAllTasks } from "@/hooks/useAllTasks";
 import { ListTodo, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -35,19 +38,17 @@ function UpcomingTasks() {
   if (error) {
     return (
       <Layout>
-        <div className="text-center py-20">
-          <p className="text-sm text-slate-400 mb-4">
-            {error?.response?.status === 403
+        <ErrorState
+          variant="page"
+          title="Couldn't load your tasks"
+          message={
+            error?.response?.status === 403
               ? "You don't have permission to view this."
-              : "Something went wrong."}
-          </p>
-          <button
-            onClick={() => fetchTasks({ pageNum: 1 })}
-            className="text-sm text-indigo-600 hover:text-indigo-700"
-          >
-            Try again
-          </button>
-        </div>
+              : "Something went wrong."
+          }
+          actionLabel="Retry"
+          onAction={() => fetchTasks({ pageNum: 1 })}
+        />
       </Layout>
     );
   }
@@ -55,7 +56,7 @@ function UpcomingTasks() {
   return (
     <Layout>
       <div className="bg-white rounded-2xl border border-slate-100 p-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <div>
             <h2 className="text-base font-semibold text-slate-900">
               Upcoming Tasks
@@ -68,7 +69,7 @@ function UpcomingTasks() {
         </div>
 
         {/* Sort controls */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-6">
           {SORTS.map((s) => (
             <button
               key={s.value}
@@ -88,24 +89,15 @@ function UpcomingTasks() {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-28 bg-slate-50 rounded-xl animate-pulse"
-              />
+              <Skeleton key={i} variant="card" />
             ))}
           </div>
         ) : tasks.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <ListTodo className="w-6 h-6 text-slate-300" />
-            </div>
-            <p className="text-sm font-medium text-slate-900 mb-1">
-              No tasks yet
-            </p>
-            <p className="text-sm text-slate-400">
-              Tasks across your projects will show up here
-            </p>
-          </div>
+          <EmptyState
+            icon={ListTodo}
+            title="No tasks yet"
+            subtext="Tasks across your projects will show up here"
+          />
         ) : (
           <div className="space-y-3">
             {tasks.map((task) => (

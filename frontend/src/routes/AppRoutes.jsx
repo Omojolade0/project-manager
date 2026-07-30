@@ -10,12 +10,14 @@ import LandingPage from "@/pages/LandingPage";
 import Settings from "@/pages/Settings";
 import SearchResults from "@/pages/SearchResults";
 import UpcomingTasks from "@/pages/UpcomingTasks";
+import UnauthorizedPage from "@/pages/UnauthorizedPage";
 
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
       <Route path="/" element={<LandingPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />

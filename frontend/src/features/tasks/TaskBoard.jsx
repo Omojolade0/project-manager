@@ -20,6 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import EmptyState from "@/components/common/EmptyState";
 
 const COLUMNS = [
   { status: "Todo", label: "Todo" },
@@ -90,7 +91,7 @@ function Column({ column, tasks, projectId }) {
       <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
         <div className="space-y-3 min-h-[60px]">
           {tasks.length === 0 ? (
-            <p className="text-xs text-slate-300 text-center py-6">No tasks</p>
+            <EmptyState compact title="No tasks" />
           ) : (
             tasks.map((task) => (
               <SortableTaskCard
@@ -223,15 +224,21 @@ function TaskBoard({ tasks, projectId }) {
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div className="grid grid-cols-3 gap-4">
-        {COLUMNS.map((column) => (
-          <Column
-            key={column.status}
-            column={column}
-            tasks={board[column.status]}
-            projectId={projectId}
-          />
-        ))}
+      <div className="overflow-x-auto md:overflow-visible -mx-1 px-1 pb-2">
+        <div className="flex gap-4 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-4">
+          {COLUMNS.map((column) => (
+            <div
+              key={column.status}
+              className="w-[280px] shrink-0 snap-start md:w-auto md:shrink"
+            >
+              <Column
+                column={column}
+                tasks={board[column.status]}
+                projectId={projectId}
+              />
+            </div>
+          ))}
+        </div>
       </div>
       <DragOverlay>
         {activeTask ? (

@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 function Login() {
   const { login } = useAuth();
@@ -105,9 +106,13 @@ function Login() {
               type="submit"
               disabled={loadingLogin}
               onClick={handleSubmit}
-              className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium mt-2"
+              className="w-full h-11 bg-primary hover:opacity-90 text-primary-foreground font-medium mt-2"
             >
-              {loadingLogin ? "Signing in..." : "Sign in"}
+              {loadingLogin ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Sign in"
+              )}
             </Button>
           </form>
 

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { useTasks } from "@/hooks/useTasks";
 import projectService from "@/services/projectService";
 
@@ -211,13 +212,13 @@ function TaskModal({
       {!hideTrigger &&
         (task ? (
           <DialogTrigger asChild>
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
         ) : (
           <DialogTrigger asChild>
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" /> New Task
             </Button>
           </DialogTrigger>
@@ -371,18 +372,26 @@ function TaskModal({
               onClick={() => handleEdit(task.id)}
               type="submit"
               disabled={loading}
-              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+              className="flex-1 h-10 bg-primary hover:opacity-90 text-primary-foreground rounded-xl text-sm font-medium"
             >
-              {loading ? "Saving..." : "Save Changes"}
+              {loading ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           ) : (
             <Button
               onClick={handleCreate}
               type="submit"
               disabled={loading}
-              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+              className="flex-1 h-10 bg-primary hover:opacity-90 text-primary-foreground rounded-xl text-sm font-medium"
             >
-              {loading ? "Creating..." : "Create Task"}
+              {loading ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Create Task"
+              )}
             </Button>
           )}
         </DialogFooter>

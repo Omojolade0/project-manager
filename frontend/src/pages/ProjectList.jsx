@@ -1,6 +1,9 @@
 import Layout from "@/layouts/Layout";
 import ProjectCard from "@/features/projects/ProjectCard";
 import ProjectModal from "@/features/projects/ProjectModal";
+import Skeleton from "@/components/common/Skeleton";
+import EmptyState from "@/components/common/EmptyState";
+import ErrorState from "@/components/common/ErrorState";
 import { useState } from "react";
 import { FolderKanban, ChevronLeft, ChevronRight } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
@@ -48,21 +51,19 @@ function ProjectList() {
   if (error) {
     return (
       <Layout>
-        <div className="text-center py-20">
-          <p className="text-sm text-slate-400 mb-4">
-            {error?.response?.status === 404
+        <ErrorState
+          variant="page"
+          title="Couldn't load projects"
+          message={
+            error?.response?.status === 404
               ? "Projects not found."
               : error?.response?.status === 403
                 ? "You don't have permission to view this."
-                : "Something went wrong."}
-          </p>
-          <button
-            onClick={() => fetchProjects(1)}
-            className="text-sm text-indigo-600 hover:text-indigo-700"
-          >
-            Try again
-          </button>
-        </div>
+                : "Something went wrong."
+          }
+          actionLabel="Retry"
+          onAction={() => fetchProjects(1)}
+        />
       </Layout>
     );
   }
@@ -71,7 +72,7 @@ function ProjectList() {
     <Layout>
       <div className="bg-white rounded-2xl border border-slate-100 p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <div>
             <h2 className="text-base font-semibold text-slate-900">
               All Projects
@@ -84,8 +85,8 @@ function ProjectList() {
         </div>
 
         {/* Filter tabs + sort */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+          <div className="flex flex-wrap gap-2">
             {filters.map((f) => (
               <button
                 key={f}
@@ -102,7 +103,7 @@ function ProjectList() {
             ))}
           </div>
           <Select value={activeSort} onValueChange={changeSort}>
-            <SelectTrigger className="w-44 h-9 rounded-lg border-slate-200 text-sm">
+            <SelectTrigger className="w-full sm:w-44 h-9 rounded-lg border-slate-200 text-sm">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -117,30 +118,28 @@ function ProjectList() {
 
         {/* Content */}
         {loading ? (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="h-36 bg-slate-50 rounded-xl animate-pulse"
-              />
+              <Skeleton key={i} variant="card" />
             ))}
           </div>
         ) : projects.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <FolderKanban className="w-6 h-6 text-slate-300" />
-            </div>
-            <p className="text-sm font-medium text-slate-900 mb-1">
-              {filter === "All" ? "No projects yet" : `No ${filter} projects`}
-            </p>
-            <p className="text-sm text-slate-400">
-              {filter === "All"
+          <EmptyState
+            icon={FolderKanban}
+            title={filter === "All" ? "No projects yet" : `No ${filter} projects`}
+            subtext={
+              filter === "All"
                 ? "Create your first project to get started"
-                : "Try a different filter"}
-            </p>
-          </div>
+                : "Try a different filter"
+            }
+            action={
+              filter === "All" ? (
+                <ProjectModal onSuccess={() => fetchProjects(1)} />
+              ) : undefined
+            }
+          />
         ) : (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {projects.map((project) => (
               <ProjectCard
                 key={project.id}

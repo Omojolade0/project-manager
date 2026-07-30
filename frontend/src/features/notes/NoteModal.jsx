@@ -23,6 +23,7 @@ import { Plus, Edit } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNotes } from "@/hooks/useNotes";
 import projectService from "@/services/projectService";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 function NoteModal({
   projectId,
@@ -132,13 +133,13 @@ function NoteModal({
       {!hideTrigger &&
         (note ? (
           <DialogTrigger asChild>
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
               <Edit className="w-4 h-4" />
             </Button>
           </DialogTrigger>
         ) : (
           <DialogTrigger asChild>
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" /> Add Note
             </Button>
           </DialogTrigger>
@@ -232,18 +233,26 @@ function NoteModal({
               onClick={() => handleEdit(note.id)}
               type="submit"
               disabled={loading}
-              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+              className="flex-1 h-10 bg-primary hover:opacity-90 text-primary-foreground rounded-xl text-sm font-medium"
             >
-              {loading ? "Saving..." : "Save Changes"}
+              {loading ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           ) : (
             <Button
               onClick={handleCreate}
               type="submit"
               disabled={loading}
-              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+              className="flex-1 h-10 bg-primary hover:opacity-90 text-primary-foreground rounded-xl text-sm font-medium"
             >
-              {loading ? "Creating..." : "Create Note"}
+              {loading ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Create Note"
+              )}
             </Button>
           )}
         </DialogFooter>

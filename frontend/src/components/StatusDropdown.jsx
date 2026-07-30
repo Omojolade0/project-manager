@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,13 +33,15 @@ export default function StatusDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger asChild disabled={updatingStatus}>
         <span
-          className={`cursor-pointer text-xs font-medium px-2.5 py-1 rounded-lg ${statusStyles[currentStatus]}`}
+          className={`cursor-pointer text-xs font-medium px-2.5 py-1 rounded-lg inline-flex items-center ${statusStyles[currentStatus]}`}
         >
-          {updatingStatus
-            ? "Updating..."
-            : currentStatus === "Inprogress"
-              ? "In Progress"
-              : currentStatus}
+          {updatingStatus ? (
+            <LoadingSpinner size="sm" className="border-current border-t-transparent" />
+          ) : currentStatus === "Inprogress" ? (
+            "In Progress"
+          ) : (
+            currentStatus
+          )}
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-32">

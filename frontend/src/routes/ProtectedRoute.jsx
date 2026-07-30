@@ -1,17 +1,21 @@
 import { Navigate, Outlet } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
+import ErrorState from "@/components/common/ErrorState";
 
 function ProtectedRoute() {
-  const { user, loading, connectionError } = useAuth();
-
-  if (loading) return null; // replace with spinner if needed
+  // `loading` is already gated at the app root (see App.jsx) — by the time
+  // this route can render, the bootstrap auth check has resolved.
+  const { user, connectionError } = useAuth();
 
   if (connectionError) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-4">
-        <p>Couldn't connect to the server. Please refresh to try again.</p>
-        <button onClick={() => window.location.reload()}>Refresh</button>
-      </div>
+      <ErrorState
+        variant="page"
+        title="Couldn't connect to the server"
+        message="Please check your connection and try again."
+        actionLabel="Refresh"
+        onAction={() => window.location.reload()}
+      />
     );
   }
 

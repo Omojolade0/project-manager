@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProjects } from "@/hooks/useProjects";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 function ProjectModal({
   project,
@@ -119,11 +120,11 @@ function ProjectModal({
       {!hideTrigger && (
         <DialogTrigger asChild>
           {project ? (
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" />
             </Button>
           ) : (
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" /> New Project
             </Button>
           )}
@@ -205,17 +206,25 @@ function ProjectModal({
             <Button
               onClick={() => handleEdit(project.id)}
               disabled={loading}
-              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+              className="flex-1 h-10 bg-primary hover:opacity-90 text-primary-foreground rounded-xl text-sm font-medium"
             >
-              {loading ? "Saving..." : "Save Changes"}
+              {loading ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           ) : (
             <Button
               onClick={handleCreate}
               disabled={loading}
-              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+              className="flex-1 h-10 bg-primary hover:opacity-90 text-primary-foreground rounded-xl text-sm font-medium"
             >
-              {loading ? "Creating..." : "Create Project"}
+              {loading ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Create Project"
+              )}
             </Button>
           )}
         </DialogFooter>

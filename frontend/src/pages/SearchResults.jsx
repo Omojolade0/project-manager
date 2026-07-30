@@ -4,6 +4,9 @@ import { FolderKanban, CheckSquare, ChevronLeft, ChevronRight, Search } from "lu
 import Layout from "@/layouts/Layout";
 import { Input } from "@/components/ui/input";
 import searchService from "@/services/searchService";
+import Skeleton from "@/components/common/Skeleton";
+import EmptyState from "@/components/common/EmptyState";
+import ErrorState from "@/components/common/ErrorState";
 
 const LIMIT = 10;
 
@@ -123,27 +126,24 @@ function SearchResults() {
         </div>
 
         {error ? (
-          <div className="text-center py-16">
-            <p className="text-sm text-slate-400 mb-4">Something went wrong.</p>
-            <button
-              onClick={() => setSearchParams({ q, type, page: String(page) })}
-              className="text-sm text-indigo-600 hover:text-indigo-700"
-            >
-              Try again
-            </button>
-          </div>
+          <ErrorState
+            variant="page"
+            title="Couldn't load search results"
+            actionLabel="Retry"
+            onAction={() => setSearchParams({ q, type, page: String(page) })}
+          />
         ) : loading ? (
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-slate-50 rounded-xl animate-pulse" />
+              <Skeleton key={i} variant="list-row" />
             ))}
           </div>
         ) : !q.trim() ? null : isEmpty ? (
-          <div className="text-center py-16">
-            <p className="text-sm font-medium text-slate-900">
-              No results for &quot;{q}&quot;
-            </p>
-          </div>
+          <EmptyState
+            icon={Search}
+            title={`No results for "${q}"`}
+            subtext="Try a different search term"
+          />
         ) : (
           <>
             {(type === "all" || type === "projects") && projectsPage && (
@@ -164,7 +164,7 @@ function SearchResults() {
                         className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-slate-50 transition-colors"
                       >
                         <FolderKanban className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span className="text-sm text-slate-900 truncate">{project.name}</span>
+                        <span className="flex-1 min-w-0 text-sm text-slate-900 truncate">{project.name}</span>
                         <span className="ml-auto text-[10px] uppercase tracking-wide text-slate-400 shrink-0">
                           Project
                         </span>

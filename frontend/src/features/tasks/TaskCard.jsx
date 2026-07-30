@@ -149,17 +149,20 @@ function TaskCard({ task, projectId, project, onChange }) {
         </div>
       </div>
       {/* Description */}
-      <p className="text-xs text-slate-400 leading-relaxed mb-4 line-clamp-2">
-        {task.description || "No description"}
-      </p>
+      {task.description && (
+        <p className="text-xs text-slate-400 leading-relaxed mb-4 line-clamp-2">
+          {task.description}
+        </p>
+      )}
 
-      <p
-        className={`px-2 py-1 rounded-full text-xs font-medium ${priorityStyles[task.priority] || "bg-slate-50 text-slate-500"}`}
-      >
-        {task.priority}
-      </p>
-      <p>{formatDate(task.due_date) || "No date"}</p>
-      <p>{task.position}</p>
+      {task.priority && (
+        <p
+          className={`px-2 py-1 rounded-full text-xs font-medium ${priorityStyles[task.priority] || "bg-slate-50 text-slate-500"}`}
+        >
+          {task.priority}
+        </p>
+      )}
+      {task.due_date && <p>{formatDate(task.due_date)}</p>}
 
       <button
         onClick={(e) => {
