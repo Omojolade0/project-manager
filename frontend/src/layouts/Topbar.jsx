@@ -146,7 +146,7 @@ function Topbar({ onOpenMobileNav }) {
     results && ((results.projects?.length ?? 0) > 0 || (results.tasks?.length ?? 0) > 0);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#FAFAF8] border-b border-slate-100">
+    <header className="sticky top-0 z-40 w-full bg-background border-b border-border">
       <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 py-4 gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <button

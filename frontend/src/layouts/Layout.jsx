@@ -7,7 +7,7 @@ function Layout({ children }) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8]">
+    <div className="min-h-screen bg-background">
       <Sidebar
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}

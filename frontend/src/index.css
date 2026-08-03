@@ -28,7 +28,7 @@ body {
 
 @layer base {
   :root {
-    --background: 225 40% 98%;
+    --background: 228 25% 95.3%;
     --foreground: 240 11.6% 18.6%;
     --card: 0 0% 100%;
     --card-foreground: 240 11.6% 18.6%;
@@ -38,6 +38,7 @@ body {
     --primary-foreground: 0 0% 100%;
     --secondary: 228 29.4% 96.7%;
     --secondary-foreground: 240 11.6% 18.6%;
+    --secondary-tint: 250 64% 94.5%;
     --muted: 240 22.2% 96.5%;
     --muted-foreground: 240 3.8% 46.1%;
     --accent: 240 22.2% 96.5%;
@@ -77,6 +78,7 @@ body {
     --primary-foreground: 0 0% 100%;
     --secondary: 240 10% 18%;
     --secondary-foreground: 240 20% 95%;
+    --secondary-tint: 250 30% 20%;
     --muted: 240 10% 16%;
     --muted-foreground: 240 8% 65%;
     --accent: 240 10% 18%;

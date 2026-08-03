@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,11 +20,83 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Plus, ListChecks, Pin, ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { useTasks } from "@/hooks/useTasks";
 import projectService from "@/services/projectService";
+import { daysLate } from "@/lib/taskUrgency";
+
+const STATUSES = [
+  { id: "Todo", label: "Todo", dot: "bg-status-todo" },
+  { id: "Inprogress", label: "In Progress", dot: "bg-status-progress" },
+  { id: "Done", label: "Done", dot: "bg-status-done" },
+];
+
+const PRIORITIES = [
+  {
+    id: "Low",
+    label: "Low",
+    bar: "bg-status-done",
+    ring: "border-status-done",
+    tint: "bg-status-done-tint",
+    hoverRing: "hover:border-status-done",
+    hoverTint: "hover:bg-status-done-tint",
+    hoverBar: "group-hover:bg-status-done",
+  },
+  {
+    id: "Medium",
+    label: "Medium",
+    bar: "bg-status-progress",
+    ring: "border-status-progress",
+    tint: "bg-status-progress-tint",
+    hoverRing: "hover:border-status-progress",
+    hoverTint: "hover:bg-status-progress-tint",
+    hoverBar: "group-hover:bg-status-progress",
+  },
+  {
+    id: "High",
+    label: "High",
+    bar: "bg-status-overdue",
+    ring: "border-status-overdue",
+    tint: "bg-status-overdue-tint",
+    hoverRing: "hover:border-status-overdue",
+    hoverTint: "hover:bg-status-overdue-tint",
+    hoverBar: "group-hover:bg-status-overdue",
+  },
+];
+
+function toDateInputValue(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function addDays(base, days) {
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function dueHint(dateStr) {
+  if (!dateStr) return null;
+  const late = daysLate(dateStr);
+  if (late > 0) return `${late} day${late === 1 ? "" : "s"} late`;
+  if (late === 0) return "Today";
+  const remaining = Math.abs(late);
+  if (remaining === 1) return "Tomorrow";
+  return `In ${remaining} days`;
+}
+
+function quickDateClass(active) {
+  return cn(
+    "px-3.5 py-1.5 rounded-full text-small font-medium border transition-colors shrink-0",
+    active
+      ? "border-primary text-primary bg-primary/5"
+      : "border-border text-foreground hover:bg-muted",
+  );
+}
 
 function TaskModal({
   projectId,
@@ -39,7 +110,7 @@ function TaskModal({
     task ? task.status : "Todo",
   );
   const [selectedPriority, setSelectedPriority] = useState(
-    task ? task.priority : null,
+    task ? task.priority : "Low",
   );
   const [title, setTitle] = useState(task ? task.title : "");
   const [description, setDescription] = useState(task ? task.description : "");
@@ -94,46 +165,15 @@ function TaskModal({
     }
   }, [task]);
 
-  const statuses = [
-    {
-      id: "Todo",
-      label: "Todo",
-      color: "text-slate-500 border-slate-200 bg-slate-50",
-      active: "border-slate-400 bg-slate-50",
-    },
-    {
-      id: "Inprogress",
-      label: "In Progress",
-      color: "text-amber-700 border-amber-200 bg-amber-50",
-      active: "border-amber-500 bg-amber-50",
-    },
-    {
-      id: "Done",
-      label: "Done",
-      color: "text-green-700 border-green-200 bg-green-50",
-      active: "border-green-500 bg-green-50",
-    },
-  ];
-  const Priority = [
-    {
-      id: "Low",
-      label: "Low",
-      color: "text-green-700 border-green-200 bg-green-50",
-      active: "border-green-500 bg-green-50",
-    },
-    {
-      id: "Medium",
-      label: "Medium",
-      color: "text-amber-700 border-amber-200 bg-amber-50",
-      active: "border-amber-500 bg-amber-50",
-    },
-    {
-      id: "High",
-      label: "High",
-      color: "text-red-700 border-red-200 bg-red-50",
-      active: "border-red-500 bg-red-50",
-    },
-  ];
+  const todayValue = toDateInputValue(new Date());
+  const tomorrowValue = toDateInputValue(addDays(new Date(), 1));
+  const nextWeekValue = toDateInputValue(addDays(new Date(), 7));
+
+  function selectQuickDate(days) {
+    setDate(toDateInputValue(addDays(new Date(), days)));
+  }
+
+  const isValid = title.trim() && (!needsProjectPicker || selectedProjectId);
 
   async function handleCreate() {
     if (!title.trim()) {
@@ -157,7 +197,7 @@ function TaskModal({
       setTitle("");
       setDescription("");
       setSelectedStatus("Todo");
-      setSelectedPriority(null);
+      setSelectedPriority("Low");
       setDate(null);
       setIsPinned(false);
       setSelectedProjectId("");
@@ -177,7 +217,7 @@ function TaskModal({
       setTitle("");
       setDescription("");
       setSelectedStatus("Todo");
-      setSelectedPriority(null);
+      setSelectedPriority("Low");
       setDate(null);
       setIsPinned(false);
       setSelectedProjectId("");
@@ -224,176 +264,302 @@ function TaskModal({
           </DialogTrigger>
         ))}
 
-      <DialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
-        <div className="p-6">
-          <DialogHeader className="mb-5">
-            <DialogTitle className="text-lg font-semibold text-slate-900">
-              {task ? "Edit Task" : "New Task"}
+      <DialogContent className="w-[calc(100%-2rem)] sm:w-full max-w-xl rounded-2xl border border-border bg-card shadow-xl p-6">
+        <DialogHeader className="flex-row items-start gap-3 space-y-0 text-left">
+          <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary text-primary-foreground shrink-0">
+            <ListChecks className="w-5 h-5" />
+          </span>
+          <div className="min-w-0">
+            <DialogTitle className="text-lg font-semibold text-foreground">
+              {task ? "Edit task" : "New task"}
             </DialogTitle>
-            <DialogDescription className="text-sm text-slate-400">
+            <DialogDescription className="text-small text-muted-foreground">
               {task
-                ? "Update this task"
+                ? "Update this task's details."
                 : needsProjectPicker
                   ? "Add a task and choose which project it belongs to"
                   : "Add a task to this project"}
             </DialogDescription>
-          </DialogHeader>
+          </div>
+        </DialogHeader>
 
-          <div className="space-y-4">
-            {needsProjectPicker && (
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-slate-700">
-                  Project
-                </Label>
-                <Select
-                  value={selectedProjectId}
-                  onValueChange={setSelectedProjectId}
-                >
-                  <SelectTrigger className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm">
+        <div className="space-y-5">
+          <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
+            <Input
+              placeholder="What needs to be done?"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="h-12 border-0 rounded-none shadow-none bg-transparent px-4 text-body focus-visible:ring-0"
+            />
+            <Textarea
+              placeholder="Add more details (optional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="min-h-[70px] border-0 rounded-none shadow-none bg-muted/50 px-4 py-3 text-small resize-none focus-visible:ring-0"
+            />
+          </div>
+
+          {needsProjectPicker && (
+            <div className="space-y-1.5">
+              <Label className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
+                Project
+              </Label>
+              <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
+                <SelectTrigger className="h-11 rounded-full bg-card border-border text-small">
+                  <span className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "w-1.5 h-1.5 rounded-full shrink-0",
+                        selectedProjectId ? "bg-primary" : "bg-muted-foreground/40",
+                      )}
+                    />
                     <SelectValue
                       placeholder={
                         projectsLoading ? "Loading projects..." : "Select a project"
                       }
                     />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableProjects.map((project) => (
+                  </span>
+                </SelectTrigger>
+                <SelectContent>
+                  {availableProjects.map((project) => {
+                    const open = Math.max(
+                      (project.task_count ?? 0) - (project.completed_count ?? 0),
+                      0,
+                    );
+                    return (
                       <SelectItem key={project.id} value={project.id}>
-                        {project.name}
+                        <span className="flex items-center justify-between w-full gap-4">
+                          <span className="flex items-center gap-2 truncate">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                            <span className="truncate">{project.name}</span>
+                          </span>
+                          <span className="text-caption text-muted-foreground shrink-0">
+                            {open} open
+                          </span>
+                        </span>
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
-                Task Name
-              </Label>
-              <Input
-                placeholder="What needs to be done?"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm"
-                required={true}
-              />
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
+          )}
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
-                Description
-              </Label>
-              <Textarea
-                placeholder="Add more details..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="min-h-[80px] bg-slate-50 border-slate-200 rounded-xl text-sm resize-none"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
-                Pin to the top
-              </Label>
-              <input
-                type="checkbox"
-                checked={isPinned}
-                onChange={(e) => setIsPinned(e.target.checked)}
-                className="h-4 w-4 text-slate-600 rounded border-slate-300 focus:ring-slate-500"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
+              <Label className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
                 Status
               </Label>
-              <div className="grid grid-cols-3 gap-2">
-                {statuses.map((s) => (
+              <div className="inline-flex items-center gap-0.5 bg-muted rounded-full p-1 w-full">
+                {STATUSES.map((s) => (
                   <button
                     key={s.id}
                     type="button"
                     onClick={() => setSelectedStatus(s.id)}
                     className={cn(
-                      "py-2 rounded-xl border text-xs font-medium transition-all",
+                      "flex items-center justify-center gap-1 px-2 py-1.5 rounded-full text-caption font-medium transition-colors whitespace-nowrap flex-1",
                       selectedStatus === s.id
-                        ? `${s.active} border-2`
-                        : `${s.color} border hover:opacity-80`,
+                        ? "bg-card text-foreground shadow-card"
+                        : "text-muted-foreground hover:text-foreground",
                     )}
                   >
+                    <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", s.dot)} />
                     {s.label}
                   </button>
                 ))}
               </div>
             </div>
+
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
+              <Label className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
                 Priority
               </Label>
               <div className="grid grid-cols-3 gap-2">
-                {Priority.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setSelectedPriority(p.id)}
-                    className={cn(
-                      "py-2 rounded-xl border text-xs font-medium transition-all",
-                      selectedPriority === p.id
-                        ? `${p.active} border-2`
-                        : `${p.color} border hover:opacity-80`,
-                    )}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+                {PRIORITIES.map((p) => {
+                  const selected = selectedPriority === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setSelectedPriority(p.id)}
+                      className={cn(
+                        "group flex flex-col items-center gap-1.5 rounded-xl border-2 py-2.5 transition-colors",
+                        selected
+                          ? `${p.ring} ${p.tint}`
+                          : `border-border ${p.hoverRing} ${p.hoverTint}`,
+                      )}
+                    >
+                      <span className="flex items-end gap-0.5">
+                        <span
+                          className={cn(
+                            "w-1 h-1.5 rounded-sm transition-colors",
+                            selected ? p.bar : `bg-muted-foreground/30 ${p.hoverBar}`,
+                          )}
+                        />
+                        <span
+                          className={cn(
+                            "w-1 h-2.5 rounded-sm transition-colors",
+                            selected ? p.bar : `bg-muted-foreground/30 ${p.hoverBar}`,
+                          )}
+                        />
+                        <span
+                          className={cn(
+                            "w-1 h-3.5 rounded-sm transition-colors",
+                            selected ? p.bar : `bg-muted-foreground/30 ${p.hoverBar}`,
+                          )}
+                        />
+                      </span>
+                      <span className="text-small font-medium text-foreground">
+                        {p.label}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-            <div>
-              <Label className="text-sm font-medium text-slate-700">Date</Label>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
+              Due date
+            </Label>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => selectQuickDate(0)}
+                className={quickDateClass(date === todayValue)}
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                onClick={() => selectQuickDate(1)}
+                className={quickDateClass(date === tomorrowValue)}
+              >
+                Tomorrow
+              </button>
+              <button
+                type="button"
+                onClick={() => selectQuickDate(7)}
+                className={quickDateClass(date === nextWeekValue)}
+              >
+                Next week
+              </button>
               <Input
-                placeholder="Any additional data?"
                 type="date"
                 value={date || ""}
-                onChange={(e) => setDate(e.target.value)}
-                className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm"
+                onChange={(e) => setDate(e.target.value || null)}
+                className="h-9 w-[150px] rounded-full bg-card border-border text-small"
               />
+              {date && (
+                <span className="text-caption text-muted-foreground whitespace-nowrap">
+                  {dueHint(date)}
+                </span>
+              )}
             </div>
+          </div>
+
+          <div
+            className={cn(
+              "flex items-center justify-between gap-3 rounded-2xl p-4 transition-colors",
+              isPinned ? "bg-secondary-tint" : "bg-muted",
+            )}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                className={cn(
+                  "flex items-center justify-center w-9 h-9 rounded-lg shrink-0",
+                  isPinned ? "bg-primary/10 text-primary" : "bg-card text-muted-foreground",
+                )}
+              >
+                <Pin className="w-4 h-4" />
+              </span>
+              <div className="min-w-0">
+                <p
+                  className={cn(
+                    "text-small font-semibold",
+                    isPinned ? "text-primary" : "text-foreground",
+                  )}
+                >
+                  Pin to the top
+                </p>
+                <p className="text-caption text-muted-foreground truncate">
+                  Show this task first on the project card
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isPinned}
+              onClick={() => setIsPinned((v) => !v)}
+              className={cn(
+                "relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0",
+                isPinned ? "bg-primary" : "bg-border",
+              )}
+            >
+              <span
+                className={cn(
+                  "inline-block h-5 w-5 transform rounded-full bg-card shadow transition-transform",
+                  isPinned ? "translate-x-5" : "translate-x-0.5",
+                )}
+              />
+            </button>
           </div>
         </div>
 
-        <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-2">
-          <DialogClose
-            onClick={handleCancel}
-            className="flex-1 h-10 rounded-xl border-slate-200 text-sm font-medium"
-          >
-            Cancel
-          </DialogClose>
-
-          {task ? (
-            <Button
-              onClick={() => handleEdit(task.id)}
-              type="submit"
-              disabled={loading}
-              className="flex-1 h-10 bg-primary hover:opacity-90 text-primary-foreground rounded-xl text-sm font-medium"
-            >
-              {loading ? (
-                <LoadingSpinner size="sm" className="border-primary-foreground" />
-              ) : (
-                "Save Changes"
-              )}
-            </Button>
-          ) : (
-            <Button
-              onClick={handleCreate}
-              type="submit"
-              disabled={loading}
-              className="flex-1 h-10 bg-primary hover:opacity-90 text-primary-foreground rounded-xl text-sm font-medium"
-            >
-              {loading ? (
-                <LoadingSpinner size="sm" className="border-primary-foreground" />
-              ) : (
-                "Create Task"
-              )}
-            </Button>
+        <DialogFooter className="flex-row items-center justify-between gap-4 pt-4 mt-1 border-t border-border sm:justify-between">
+          {!task && (
+            <p className="text-caption text-muted-foreground">Name and project required</p>
           )}
+          <div className="flex items-center gap-4 ml-auto">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="text-small font-medium text-muted-foreground hover:text-foreground transition-all duration-150 hover:-translate-y-0.5"
+            >
+              Cancel
+            </button>
+            {task ? (
+              <Button
+                onClick={() => handleEdit(task.id)}
+                disabled={loading || !isValid}
+                className={cn(
+                  "h-10 px-6 rounded-full text-small font-medium flex items-center gap-2 transition-all duration-150 hover:-translate-y-0.5",
+                  loading || !isValid
+                    ? "bg-muted text-muted-foreground"
+                    : "bg-primary hover:opacity-90 text-primary-foreground",
+                )}
+              >
+                {loading ? (
+                  <LoadingSpinner size="sm" />
+                ) : (
+                  <>
+                    Save changes <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleCreate}
+                disabled={loading || !isValid}
+                className={cn(
+                  "h-10 px-6 rounded-full text-small font-medium flex items-center gap-2 transition-all duration-150 hover:-translate-y-0.5",
+                  loading || !isValid
+                    ? "bg-muted text-muted-foreground"
+                    : "bg-primary hover:opacity-90 text-primary-foreground",
+                )}
+              >
+                {loading ? (
+                  <LoadingSpinner size="sm" />
+                ) : (
+                  <>
+                    Create task <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
