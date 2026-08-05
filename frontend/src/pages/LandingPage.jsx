@@ -5,7 +5,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#FAFAF8] text-slate-900">
       {/* Nav */}
       <nav className="sticky top-0 z-10 bg-[#FAFAF8] border-b border-slate-100 px-20 py-5 flex items-center justify-between">
-        <span className="text-2xl font-semibold tracking-tight">Coeus</span>
+        <span className="text-2xl font-semibold tracking-tight">Ceous</span>
         <div className="flex items-center gap-8">
           <a
             href="#features"
@@ -41,7 +41,7 @@ export default function LandingPage() {
           <span className="text-indigo-600">Stay in control.</span>
         </h1>
         <p className="text-lg text-slate-500 font-light leading-relaxed max-w-xl mx-auto mb-10">
-          Coeus brings your projects, tasks, and notes into one clean workspace.
+          Ceous brings your projects, tasks, and notes into one clean workspace.
           Built for focus, not complexity.
         </p>
         <div className="flex items-center justify-center gap-3">
@@ -84,7 +84,7 @@ export default function LandingPage() {
           </div>
           <div className="flex gap-5">
             <div className="w-44 bg-slate-50 rounded-xl p-4 shrink-0">
-              <p className="text-sm font-semibold text-slate-900 mb-4">Coeus</p>
+              <p className="text-sm font-semibold text-slate-900 mb-4">Ceous</p>
               {["Dashboard", "Projects", "Settings"].map((item, i) => (
                 <div
                   key={i}
@@ -220,7 +220,7 @@ export default function LandingPage() {
           Ready to get organised?
         </h2>
         <p className="text-lg text-slate-400 font-light mb-10">
-          Join Coeus and take control of your projects today.
+          Join Ceous and take control of your projects today.
         </p>
         <Link to="/register" className="btn-primary px-8 py-3.5 text-base">
           Get started for free
@@ -229,7 +229,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-100 px-20 py-8 flex items-center justify-between">
-        <span className="text-lg font-semibold text-slate-900">Coeus</span>
+        <span className="text-lg font-semibold text-slate-900">Ceous</span>
         <p className="text-sm text-slate-400">Built with FastAPI & React</p>
       </footer>
     </div>

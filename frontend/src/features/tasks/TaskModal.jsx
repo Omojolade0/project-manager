@@ -105,9 +105,10 @@ function TaskModal({
   open: openProp,
   onOpenChange: onOpenChangeProp,
   hideTrigger = false,
+  defaultStatus,
 }) {
   const [selectedStatus, setSelectedStatus] = useState(
-    task ? task.status : "Todo",
+    task ? task.status : defaultStatus || "Todo",
   );
   const [selectedPriority, setSelectedPriority] = useState(
     task ? task.priority : "Low",
@@ -196,7 +197,7 @@ function TaskModal({
       });
       setTitle("");
       setDescription("");
-      setSelectedStatus("Todo");
+      setSelectedStatus(defaultStatus || "Todo");
       setSelectedPriority("Low");
       setDate(null);
       setIsPinned(false);
@@ -216,7 +217,7 @@ function TaskModal({
     if (!task) {
       setTitle("");
       setDescription("");
-      setSelectedStatus("Todo");
+      setSelectedStatus(defaultStatus || "Todo");
       setSelectedPriority("Low");
       setDate(null);
       setIsPinned(false);

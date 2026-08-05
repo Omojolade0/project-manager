@@ -53,7 +53,7 @@ function Login() {
             to="/"
             className="text-xl font-semibold text-slate-900 mb-12 block"
           >
-            Coeus
+            Ceous
           </Link>
 
           <div className="mb-8">

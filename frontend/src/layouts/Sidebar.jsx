@@ -66,7 +66,7 @@ function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, onMobileClose }) {
           >
             {expanded ? (
               <span className="text-xl font-semibold text-slate-900 tracking-tight">
-                Coeus
+                Ceous
               </span>
             ) : (
               <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">

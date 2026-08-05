@@ -55,7 +55,7 @@ function Register() {
               Your projects, tasks and notes in one place
             </h3>
             <p className="text-slate-400 text-sm font-light leading-relaxed">
-              Join Coeus and take control of how you manage your work from day
+              Join Ceous and take control of how you manage your work from day
               one.
             </p>
           </div>
@@ -92,7 +92,7 @@ function Register() {
             to="/"
             className="text-xl font-semibold text-slate-900 mb-12 block"
           >
-            Coeus
+            Ceous
           </Link>
 
           <div className="mb-8">

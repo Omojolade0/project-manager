@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import TaskCard from "@/features/tasks/TaskCard";
+import TaskModal from "@/features/tasks/TaskModal";
+import { STATUS_META, STATUS_ORDER } from "@/lib/taskStatus";
 import { useTasks } from "@/hooks/useTasks";
 import {
   DndContext,
@@ -22,11 +25,10 @@ import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import EmptyState from "@/components/common/EmptyState";
 
-const COLUMNS = [
-  { status: "Todo", label: "Todo" },
-  { status: "Inprogress", label: "In Progress" },
-  { status: "Done", label: "Done" },
-];
+const COLUMNS = STATUS_ORDER.map((status) => ({
+  status,
+  label: STATUS_META[status].label,
+}));
 
 function groupTasksByStatus(tasks) {
   return COLUMNS.reduce((acc, column) => {
@@ -50,7 +52,7 @@ function findTaskById(board, taskId) {
   return null;
 }
 
-function SortableTaskCard({ task, projectId }) {
+function SortableTaskCard({ task, projectId, onChange, onDuplicate }) {
   const {
     attributes,
     listeners,
@@ -68,28 +70,35 @@ function SortableTaskCard({ task, projectId }) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <TaskCard task={task} projectId={projectId} />
+      <TaskCard
+        task={task}
+        projectId={projectId}
+        onChange={onChange}
+        onDuplicate={onDuplicate}
+      />
     </div>
   );
 }
 
-function Column({ column, tasks, projectId }) {
+function Column({ column, tasks, projectId, onChange, onDuplicate }) {
   const { setNodeRef } = useDroppable({ id: column.status });
   const taskIds = tasks.map((t) => t.id);
+  const [addOpen, setAddOpen] = useState(false);
+  const meta = STATUS_META[column.status];
 
   return (
-    <div
-      ref={setNodeRef}
-      className="bg-slate-50/60 rounded-xl p-3 min-h-[120px]"
-    >
+    <div ref={setNodeRef} className="bg-muted/60 rounded-2xl p-3 min-h-[120px]">
       <div className="flex items-center justify-between mb-3 px-1">
-        <h4 className="text-xs font-semibold text-slate-900">{column.label}</h4>
-        <span className="text-xs text-slate-400 bg-white rounded-full px-2 py-0.5">
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${meta.dot}`} />
+          <h4 className="text-small font-semibold text-foreground">{column.label}</h4>
+        </div>
+        <span className="text-caption text-muted-foreground bg-card rounded-full px-2 py-0.5">
           {tasks.length}
         </span>
       </div>
       <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-        <div className="space-y-3 min-h-[60px]">
+        <div className="space-y-2.5 min-h-[60px]">
           {tasks.length === 0 ? (
             <EmptyState compact title="No tasks" />
           ) : (
@@ -98,16 +107,33 @@ function Column({ column, tasks, projectId }) {
                 key={task.id}
                 task={task}
                 projectId={projectId}
+                onChange={onChange}
+                onDuplicate={onDuplicate}
               />
             ))
           )}
         </div>
       </SortableContext>
+
+      <button
+        onClick={() => setAddOpen(true)}
+        className="w-full mt-2.5 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-dashed border-border text-caption font-medium text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-colors"
+      >
+        <Plus className="w-3.5 h-3.5" /> Add task
+      </button>
+      <TaskModal
+        projectId={projectId}
+        defaultStatus={column.status}
+        hideTrigger
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onSuccess={onChange}
+      />
     </div>
   );
 }
 
-function TaskBoard({ tasks, projectId }) {
+function TaskBoard({ tasks, projectId, onChange, onDuplicate }) {
   const [board, setBoard] = useState(() => groupTasksByStatus(tasks));
   const [activeTask, setActiveTask] = useState(null);
   const { reorderTasks } = useTasks(projectId);
@@ -209,11 +235,13 @@ function TaskBoard({ tasks, projectId }) {
       task_ids: newBoard[status].map((t) => t.id),
     }));
 
-    reorderTasks(columns).catch((err) => {
-      console.error("Failed to save task order:", err);
-      setBoard(previousBoard);
-      toast.error("Failed to save order");
-    });
+    reorderTasks(columns)
+      .then(() => onChange?.())
+      .catch((err) => {
+        console.error("Failed to save task order:", err);
+        setBoard(previousBoard);
+        toast.error("Failed to save order");
+      });
   }
 
   return (
@@ -235,6 +263,8 @@ function TaskBoard({ tasks, projectId }) {
                 column={column}
                 tasks={board[column.status]}
                 projectId={projectId}
+                onChange={onChange}
+                onDuplicate={onDuplicate}
               />
             </div>
           ))}

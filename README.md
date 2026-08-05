@@ -1,4 +1,4 @@
-# Coeus — Project Management App
+# Ceous — Project Management App
 
 A full-stack project management application with user authentication, task tracking, and AI-powered features.
 
