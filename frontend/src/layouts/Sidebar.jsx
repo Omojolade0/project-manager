@@ -6,6 +6,7 @@ import {
   ListTodo,
   Settings,
   LogOut,
+  Search,
 } from "lucide-react";
 import useAuth from "@/hooks/useAuth";
 
@@ -77,6 +78,14 @@ function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, onMobileClose }) {
 
           {/* Nav links */}
           <nav className="flex flex-col gap-1">
+            {/* Search only lives in the topbar on desktop — on mobile the
+                topbar search is hidden, so it needs an entry point here. */}
+            <div className="md:hidden">
+              <ItemsNav
+                item={{ label: "Search", to: "/search", Icon: Search }}
+                collapsed={!expanded}
+              />
+            </div>
             {navItems.map((item) => (
               <ItemsNav key={item.to} item={item} collapsed={!expanded} />
             ))}
