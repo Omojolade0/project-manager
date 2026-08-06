@@ -18,6 +18,7 @@ app.add_middleware(
     allow_origins=[
         FRONTEND_URL,
         "https://project-manager-psi-eight.vercel.app",
+        "https://ceous.jolaogunleye.dev",
     ],
     allow_credentials=True,
     allow_methods=["*"],
