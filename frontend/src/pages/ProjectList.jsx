@@ -1,9 +1,13 @@
 import Layout from "@/layouts/Layout";
-import ProjectCard from "@/features/projects/ProjectCard";
+import DashboardProjectCard from "@/features/projects/DashboardProjectCard";
 import ProjectModal from "@/features/projects/ProjectModal";
-import { useState } from "react";
+import Skeleton from "@/components/common/Skeleton";
+import EmptyState from "@/components/common/EmptyState";
+import ErrorState from "@/components/common/ErrorState";
+import { useState, useEffect } from "react";
 import { FolderKanban, ChevronLeft, ChevronRight } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
+import { useProjectStatusCounts } from "@/hooks/useProjectStatusCounts";
 import {
   Select,
   SelectContent,
@@ -18,6 +22,13 @@ const SORTS = [
   { value: "alphabetical", label: "Alphabetical" },
 ];
 
+const FILTERS = [
+  { value: "All", label: "All" },
+  { value: "Active", label: "Active" },
+  { value: "Completed", label: "Completed" },
+  { value: "Inactive", label: "Inactive" },
+];
+
 function ProjectList() {
   const [filter, setFilter] = useState("All");
   const {
@@ -25,16 +36,24 @@ function ProjectList() {
     loading,
     error,
     page,
+    limit,
     total,
     hasMore,
     sort,
     fetchProjects,
-    goToNextPage,
-    goToPrevPage,
   } = useProjects({ autoFetch: true });
+  const { counts, fetchCounts } = useProjectStatusCounts();
 
-  const filters = ["All", "Active", "Completed", "Inactive"];
   const activeSort = sort ?? "updated";
+
+  useEffect(() => {
+    fetchCounts();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function refetchAll() {
+    fetchProjects(1);
+    fetchCounts();
+  }
 
   function changeFilter(nextFilter) {
     setFilter(nextFilter);
@@ -48,61 +67,66 @@ function ProjectList() {
   if (error) {
     return (
       <Layout>
-        <div className="text-center py-20">
-          <p className="text-sm text-slate-400 mb-4">
-            {error?.response?.status === 404
+        <ErrorState
+          variant="page"
+          title="Couldn't load projects"
+          message={
+            error?.response?.status === 404
               ? "Projects not found."
               : error?.response?.status === 403
                 ? "You don't have permission to view this."
-                : "Something went wrong."}
-          </p>
-          <button
-            onClick={() => fetchProjects(1)}
-            className="text-sm text-indigo-600 hover:text-indigo-700"
-          >
-            Try again
-          </button>
-        </div>
+                : "Something went wrong."
+          }
+          actionLabel="Retry"
+          onAction={() => fetchProjects(1)}
+        />
       </Layout>
     );
   }
 
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const rangeStart = total === 0 ? 0 : (page - 1) * limit + 1;
+  const rangeEnd = Math.min(page * limit, total);
+
   return (
     <Layout>
-      <div className="bg-white rounded-2xl border border-slate-100 p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-base font-semibold text-slate-900">
-              All Projects
-            </h2>
-            <p className="text-sm text-slate-400 mt-0.5">
-              {total} total
-            </p>
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-page-title text-foreground">Projects</h1>
+            <span className="text-caption font-medium text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+              {counts.All ?? total}
+            </span>
           </div>
-          <ProjectModal onSuccess={() => fetchProjects(1)} />
+          <p className="text-small text-muted-foreground mt-1">
+            {counts.All ?? total} projects · {counts.Active ?? 0} active
+          </p>
         </div>
 
-        {/* Filter tabs + sort */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex gap-2">
-            {filters.map((f) => (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-1 bg-muted rounded-full p-1">
+            {FILTERS.map((f) => (
               <button
-                key={f}
-                onClick={() => changeFilter(f)}
+                key={f.value}
+                onClick={() => changeFilter(f.value)}
                 className={[
-                  "px-4 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                  filter === f
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-400 hover:text-slate-900 hover:bg-slate-50",
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-small font-medium transition-colors",
+                  filter === f.value
+                    ? "bg-card text-foreground shadow-card"
+                    : "text-muted-foreground hover:text-foreground",
                 ].join(" ")}
               >
-                {f}
+                {f.label}
+                <span className="text-caption font-semibold text-primary">
+                  {counts[f.value] ?? 0}
+                </span>
               </button>
             ))}
           </div>
+
           <Select value={activeSort} onValueChange={changeSort}>
-            <SelectTrigger className="w-44 h-9 rounded-lg border-slate-200 text-sm">
+            <SelectTrigger className="w-full sm:w-44 h-9 rounded-full border-border bg-card text-small">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -113,65 +137,89 @@ function ProjectList() {
               ))}
             </SelectContent>
           </Select>
+
+          <ProjectModal onSuccess={refetchAll} />
         </div>
+      </div>
 
-        {/* Content */}
-        {loading ? (
-          <div className="grid grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="h-36 bg-slate-50 rounded-xl animate-pulse"
-              />
-            ))}
-          </div>
-        ) : projects.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <FolderKanban className="w-6 h-6 text-slate-300" />
-            </div>
-            <p className="text-sm font-medium text-slate-900 mb-1">
-              {filter === "All" ? "No projects yet" : `No ${filter} projects`}
-            </p>
-            <p className="text-sm text-slate-400">
-              {filter === "All"
-                ? "Create your first project to get started"
-                : "Try a different filter"}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-4">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onDelete={() => fetchProjects(page)}
-              />
-            ))}
-          </div>
-        )}
+      {/* Content */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} variant="card" />
+          ))}
+        </div>
+      ) : projects.length === 0 ? (
+        <EmptyState
+          icon={FolderKanban}
+          title={
+            filter === "All" ? "No projects yet" : `No ${filter.toLowerCase()} projects`
+          }
+          subtext={
+            filter === "All"
+              ? "Create your first project to get started"
+              : "Try a different filter"
+          }
+          action={
+            filter === "All" ? <ProjectModal onSuccess={refetchAll} /> : undefined
+          }
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {projects.map((project) => (
+            <DashboardProjectCard
+              key={project.id}
+              project={project}
+              manageable
+              surface="white"
+              onDelete={refetchAll}
+              onChange={refetchAll}
+            />
+          ))}
+        </div>
+      )}
 
-        {/* Pagination */}
-        {total > 0 && (
-          <div className="flex items-center justify-center gap-3 mt-6 pt-5 border-t border-slate-100">
+      {/* Pagination */}
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-5 border-t border-border">
+          <p className="text-small text-muted-foreground">
+            Showing {rangeStart}–{rangeEnd} of {total}
+          </p>
+          <div className="flex items-center gap-1.5">
             <button
-              onClick={goToPrevPage}
+              onClick={() => fetchProjects(page - 1)}
               disabled={page === 1}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 px-4 py-2 rounded-full text-small font-semibold bg-card text-foreground shadow-card hover:shadow-lg transition-all disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-4 h-4" /> Previous
             </button>
-            <span className="text-sm text-slate-400">Page {page}</span>
+            {Array.from({ length: totalPages }).map((_, i) => {
+              const pageNum = i + 1;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => fetchProjects(pageNum)}
+                  className={[
+                    "w-9 h-9 rounded-full text-small font-semibold shadow-card transition-all",
+                    pageNum === page
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card text-muted-foreground hover:text-foreground",
+                  ].join(" ")}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
             <button
-              onClick={goToNextPage}
+              onClick={() => fetchProjects(page + 1)}
               disabled={!hasMore}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 px-4 py-2 rounded-full text-small font-semibold bg-card text-foreground shadow-card hover:shadow-lg transition-all disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:cursor-not-allowed"
             >
               Next <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </Layout>
   );
 }

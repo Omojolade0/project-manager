@@ -1,9 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Bell, Search, FolderKanban, CheckSquare } from "lucide-react";
+import { Bell, Search, FolderKanban, CheckSquare, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import searchService from "@/services/searchService";
 import CommandPalette from "@/components/CommandPalette";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 const titles = {
   "/dashboard": "Dashboard",
@@ -22,12 +23,13 @@ const getTitle = (pathname) => {
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-function Topbar() {
+function Topbar({ onOpenMobileNav }) {
   const { pathname } = useLocation();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState(null);
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [searching, setSearching] = useState(false);
   const containerRef = useRef(null);
   const itemRefs = useRef([]);
   const title = useMemo(() => getTitle(pathname), [pathname]);
@@ -54,11 +56,13 @@ function Topbar() {
       setResults(null);
       setOpen(false);
       setHighlightedIndex(-1);
+      setSearching(false);
       return;
     }
 
     const timeoutId = setTimeout(async () => {
       try {
+        setSearching(true);
         const response = await searchService.search(text);
         setResults(response);
         setOpen(true);
@@ -66,6 +70,8 @@ function Topbar() {
       } catch {
         setResults(null);
         setHighlightedIndex(-1);
+      } finally {
+        setSearching(false);
       }
     }, SEARCH_DEBOUNCE_MS);
 
@@ -140,13 +146,23 @@ function Topbar() {
     results && ((results.projects?.length ?? 0) > 0 || (results.tasks?.length ?? 0) > 0);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#FAFAF8] border-b border-slate-100">
-      <div className="flex items-center justify-between px-8 py-4">
-        <h2 className="text-xl font-semibold text-slate-900 tracking-tight">
-          {title}
-        </h2>
-        <div className="flex items-center gap-3">
-          <div className="relative" ref={containerRef}>
+    <header className="sticky top-0 z-40 w-full bg-background border-b border-border">
+      <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 py-4 gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            type="button"
+            aria-label="Open navigation"
+            onClick={onOpenMobileNav}
+            className="md:hidden h-9 w-9 shrink-0 rounded-xl flex items-center justify-center hover:bg-white border border-transparent hover:border-slate-200 transition-all"
+          >
+            <Menu className="h-4 w-4 text-slate-500" />
+          </button>
+          <h2 className="text-xl font-semibold text-slate-900 tracking-tight truncate">
+            {title}
+          </h2>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="relative hidden md:block" ref={containerRef}>
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
               className="w-56 rounded-xl pl-9 bg-white border-slate-200 text-sm"
@@ -164,6 +180,12 @@ function Topbar() {
               aria-expanded={open}
               aria-controls="topbar-search-listbox"
             />
+            {searching && (
+              <LoadingSpinner
+                size="sm"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              />
+            )}
             {open && (
               <div
                 id="topbar-search-listbox"

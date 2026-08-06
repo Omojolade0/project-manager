@@ -23,6 +23,7 @@ import { Plus, Edit } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNotes } from "@/hooks/useNotes";
 import projectService from "@/services/projectService";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 function NoteModal({
   projectId,
@@ -132,35 +133,35 @@ function NoteModal({
       {!hideTrigger &&
         (note ? (
           <DialogTrigger asChild>
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
               <Edit className="w-4 h-4" />
             </Button>
           </DialogTrigger>
         ) : (
           <DialogTrigger asChild>
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" /> Add Note
             </Button>
           </DialogTrigger>
         ))}
 
-      <DialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
+      <DialogContent className="rounded-2xl border border-border shadow-xl p-0 overflow-hidden max-w-md bg-card">
         <div className="p-6">
           {note ? (
-            <DialogHeader className="mb-5">
-              <DialogTitle className="text-lg font-semibold text-slate-900">
+            <DialogHeader className="mb-5 text-left">
+              <DialogTitle className="text-lg font-semibold text-foreground">
                 Edit Note
               </DialogTitle>
-              <DialogDescription className="text-sm text-slate-400">
+              <DialogDescription className="text-small text-muted-foreground">
                 Update this note
               </DialogDescription>
             </DialogHeader>
           ) : (
-            <DialogHeader className="mb-5">
-              <DialogTitle className="text-lg font-semibold text-slate-900">
+            <DialogHeader className="mb-5 text-left">
+              <DialogTitle className="text-lg font-semibold text-foreground">
                 New Note
               </DialogTitle>
-              <DialogDescription className="text-sm text-slate-400">
+              <DialogDescription className="text-small text-muted-foreground">
                 {needsProjectPicker
                   ? "Add a note and choose which project it belongs to"
                   : "Add a note to this project"}
@@ -171,14 +172,14 @@ function NoteModal({
           <div className="space-y-4">
             {needsProjectPicker && (
               <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-slate-700">
+                <Label className="text-small font-medium text-foreground">
                   Project
                 </Label>
                 <Select
                   value={selectedProjectId}
                   onValueChange={setSelectedProjectId}
                 >
-                  <SelectTrigger className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm">
+                  <SelectTrigger className="h-10 bg-muted border-transparent rounded-xl text-small">
                     <SelectValue
                       placeholder={
                         projectsLoading ? "Loading projects..." : "Select a project"
@@ -196,33 +197,42 @@ function NoteModal({
               </div>
             )}
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">Note</Label>
+              <Label className="text-small font-medium text-foreground">Note</Label>
               <Textarea
                 placeholder="Write your note here..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="min-h-[120px] bg-slate-50 border-slate-200 rounded-xl text-sm resize-none"
+                className="min-h-[120px] bg-muted border-transparent rounded-xl text-small resize-none focus-visible:ring-primary"
                 required={true}
               />
             </div>
           </div>
         </div>
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100">
-          <Label className="text-sm font-medium text-slate-700">
+        <div className="flex items-center justify-between gap-3 px-6 py-4 bg-muted/60 border-t border-border">
+          <Label className="text-small font-medium text-foreground">
             Pin to the top
           </Label>
-          <input
-            type="checkbox"
-            checked={isPinned}
-            onChange={(e) => setIsPinned(e.target.checked)}
-            className="h-4 w-4 text-slate-600 rounded border-slate-300 focus:ring-slate-500"
-          />
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isPinned}
+            onClick={() => setIsPinned((v) => !v)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${
+              isPinned ? "bg-primary" : "bg-border"
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 transform rounded-full bg-card shadow transition-transform ${
+                isPinned ? "translate-x-5" : "translate-x-0.5"
+              }`}
+            />
+          </button>
         </div>
 
-        <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-2">
+        <DialogFooter className="px-6 py-4 bg-muted/60 border-t border-border flex gap-2">
           <DialogClose
             onClick={handleCancel}
-            className="flex-1 h-10 rounded-xl border-slate-200 text-sm font-medium"
+            className="flex-1 h-10 rounded-xl border-border text-small font-medium"
           >
             Cancel
           </DialogClose>
@@ -232,18 +242,26 @@ function NoteModal({
               onClick={() => handleEdit(note.id)}
               type="submit"
               disabled={loading}
-              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+              className="flex-1 h-10 bg-primary hover:opacity-90 text-primary-foreground rounded-xl text-small font-medium"
             >
-              {loading ? "Saving..." : "Save Changes"}
+              {loading ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           ) : (
             <Button
               onClick={handleCreate}
               type="submit"
               disabled={loading}
-              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+              className="flex-1 h-10 bg-primary hover:opacity-90 text-primary-foreground rounded-xl text-small font-medium"
             >
-              {loading ? "Creating..." : "Create Note"}
+              {loading ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Create Note"
+              )}
             </Button>
           )}
         </DialogFooter>

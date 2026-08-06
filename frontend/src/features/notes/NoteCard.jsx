@@ -15,6 +15,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+function formatDate(dateStr) {
+  if (!dateStr) return null;
+  return new Date(dateStr).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+  });
+}
+
 function NoteCard({ note, projectId }) {
   const [deleting, setDeleting] = useState(false);
   const [pinning, setPinning] = useState(false);
@@ -46,55 +54,67 @@ function NoteCard({ note, projectId }) {
   }
 
   return (
-    <div className="group bg-[#FAFAF8] border border-slate-100 rounded-2xl p-5 hover:border-slate-200 hover:shadow-sm transition-all duration-150">
-      {deleting && (
-        <div className="mb-3">
-          <span className="text-sm text-slate-500">Deleting...</span>
-        </div>
-      )}
+    <div
+      className={`group rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${
+        note.is_pinned ? "bg-secondary-tint" : "bg-muted/60 hover:bg-muted"
+      }`}
+    >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-slate-600 leading-relaxed">{note.content}</p>
-        <button
-          onClick={handlePin}
-          disabled={pinning}
-          className={`p-1 rounded-lg ${note.is_pinned ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
-        >
-          <Pin
-            className={`w-3.5 h-3.5 ${note.is_pinned ? "text-indigo-500" : "text-slate-300"}`}
-          />
-        </button>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <button
-              disabled={deleting}
-              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-red-50 shrink-0"
-            >
-              <Trash2 className="w-3.5 h-3.5 text-slate-300 hover:text-red-500 transition-colors" />
-            </button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the
-                note.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDelete}
-                className="bg-red-600 hover:bg-red-700"
+        <p className="text-small text-foreground leading-relaxed whitespace-pre-wrap">
+          {note.content}
+        </p>
+        <div className="flex items-center gap-0.5 shrink-0">
+          <button
+            onClick={handlePin}
+            disabled={pinning}
+            className={`p-1.5 rounded-lg transition-opacity ${
+              note.is_pinned
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100 hover:bg-card"
+            }`}
+          >
+            <Pin
+              className={`w-3.5 h-3.5 ${note.is_pinned ? "text-primary fill-primary" : "text-muted-foreground"}`}
+            />
+          </button>
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <NoteModal note={note} projectId={projectId} />
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                disabled={deleting}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-card"
               >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <NoteModal note={note} projectId={projectId} />
+                <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive transition-colors" />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the
+                  note.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-destructive text-destructive-foreground hover:opacity-90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
+      {note.created_at && (
+        <p className="text-caption text-muted-foreground mt-2.5">
+          Added {formatDate(note.created_at)}
+        </p>
+      )}
     </div>
   );
 }

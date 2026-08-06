@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import authService from "@/services/authService";
 import toast from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 function Register() {
   const [email, setEmail] = useState("");
@@ -54,7 +55,7 @@ function Register() {
               Your projects, tasks and notes in one place
             </h3>
             <p className="text-slate-400 text-sm font-light leading-relaxed">
-              Join Coeus and take control of how you manage your work from day
+              Join Ceous and take control of how you manage your work from day
               one.
             </p>
           </div>
@@ -91,7 +92,7 @@ function Register() {
             to="/"
             className="text-xl font-semibold text-slate-900 mb-12 block"
           >
-            Coeus
+            Ceous
           </Link>
 
           <div className="mb-8">
@@ -158,9 +159,13 @@ function Register() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium mt-2"
+              className="w-full h-11 bg-primary hover:opacity-90 text-primary-foreground font-medium mt-2"
             >
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Create account"
+              )}
             </Button>
           </form>
 

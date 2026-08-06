@@ -16,6 +16,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProjects } from "@/hooks/useProjects";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+
+const STATUSES = [
+  { id: "Active", label: "Active", blurb: "In flight now" },
+  { id: "Inactive", label: "Inactive", blurb: "Parked for later" },
+  { id: "Completed", label: "Completed", blurb: "Already wrapped" },
+];
+
+const STATUS_RING = {
+  Active: "border-status-done",
+  Inactive: "border-muted-foreground",
+  Completed: "border-primary",
+};
+
+const STATUS_DOT = {
+  Active: "bg-status-done",
+  Inactive: "bg-muted-foreground",
+  Completed: "bg-primary",
+};
 
 function ProjectModal({
   project,
@@ -40,27 +59,6 @@ function ProjectModal({
       setSelectedPlan(project.status);
     }
   }, [project]);
-
-  const statuses = [
-    {
-      id: "Active",
-      label: "Active",
-      color: "text-green-700 border-green-200 bg-green-50",
-      active: "border-green-500 bg-green-50",
-    },
-    {
-      id: "Inactive",
-      label: "Inactive",
-      color: "text-slate-500 border-slate-200 bg-slate-50",
-      active: "border-slate-400 bg-slate-50",
-    },
-    {
-      id: "Completed",
-      label: "Completed",
-      color: "text-blue-700 border-blue-200 bg-blue-50",
-      active: "border-blue-500 bg-blue-50",
-    },
-  ];
 
   async function handleCreate() {
     if (!projectName.trim()) {
@@ -119,103 +117,128 @@ function ProjectModal({
       {!hideTrigger && (
         <DialogTrigger asChild>
           {project ? (
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" />
             </Button>
           ) : (
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" /> New Project
             </Button>
           )}
         </DialogTrigger>
       )}
 
-      <DialogContent className="rounded-2xl border border-slate-100 shadow-xl p-0 overflow-hidden max-w-md">
-        <div className="p-6">
-          <DialogHeader className="mb-5">
-            <DialogTitle className="text-lg font-semibold text-slate-900">
-              {project ? "Edit Project" : "New Project"}
-            </DialogTitle>
-            <DialogDescription className="text-sm text-slate-400">
-              {project
-                ? "Update this project"
-                : "Fill in the details to create your project"}
-            </DialogDescription>
-          </DialogHeader>
+      <DialogContent className="w-[calc(100%-2rem)] sm:w-full max-w-md rounded-2xl border border-border bg-card shadow-xl p-6">
+        <DialogHeader className="text-left">
+          <DialogTitle className="text-lg font-semibold text-foreground">
+            {project ? "Edit project" : "New project"}
+          </DialogTitle>
+          <DialogDescription className="text-small text-muted-foreground">
+            {project
+              ? "Update this project's details."
+              : "Give it a name now, add tasks later."}
+          </DialogDescription>
+        </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
-                Project Name
-              </Label>
-              <Input
-                placeholder="Enter project name"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm"
-              />
-            </div>
+        <div className="space-y-5">
+          <div className="space-y-1.5">
+            <Label className="text-small font-medium text-foreground">
+              Project name
+            </Label>
+            <Input
+              placeholder="e.g. Q3 onboarding revamp"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              maxLength={200}
+              className="h-10 bg-muted border-transparent rounded-xl text-small focus-visible:ring-primary"
+            />
+          </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
-                Description
-              </Label>
-              <Textarea
-                placeholder="What is this project about?"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="min-h-[80px] bg-slate-50 border-slate-200 rounded-xl text-sm resize-none"
-              />
-            </div>
+          <div className="space-y-1.5">
+            <Label className="text-small font-medium text-foreground">
+              Description{" "}
+              <span className="font-normal text-muted-foreground">optional</span>
+            </Label>
+            <Textarea
+              placeholder="What is this project for?"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              maxLength={2000}
+              className="min-h-[84px] bg-muted border-transparent rounded-xl text-small resize-none focus-visible:ring-primary"
+            />
+          </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
-                Status
-              </Label>
-              <div className="grid grid-cols-3 gap-2">
-                {statuses.map((s) => (
+          <div className="space-y-1.5">
+            <Label className="text-small font-medium text-foreground">Status</Label>
+            <div className="space-y-1">
+              {STATUSES.map((s) => {
+                const selected = selectedPlan === s.id;
+                return (
                   <button
                     key={s.id}
                     type="button"
                     onClick={() => setSelectedPlan(s.id)}
                     className={cn(
-                      "py-2 rounded-xl border text-xs font-medium transition-all",
-                      selectedPlan === s.id
-                        ? `${s.active} border-2`
-                        : `${s.color} border hover:opacity-80`,
+                      "w-full flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition-colors",
+                      selected ? "bg-secondary" : "hover:bg-muted",
                     )}
                   >
-                    {s.label}
+                    <span className="flex items-center gap-3">
+                      <span
+                        className={cn(
+                          "flex items-center justify-center w-4 h-4 rounded-full border-2 shrink-0",
+                          selected ? STATUS_RING[s.id] : "border-border",
+                        )}
+                      >
+                        {selected && (
+                          <span className={cn("w-2 h-2 rounded-full", STATUS_DOT[s.id])} />
+                        )}
+                      </span>
+                      <span className="text-small font-medium text-foreground">
+                        {s.label}
+                      </span>
+                    </span>
+                    <span className="text-caption text-muted-foreground shrink-0">
+                      {s.blurb}
+                    </span>
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-2">
-          <Button
-            variant="outline"
+        <DialogFooter className="flex-row items-center justify-end gap-4 pt-1">
+          <button
+            type="button"
             onClick={handleCancel}
-            className="flex-1 h-10 rounded-xl border-slate-200 text-sm font-medium"
+            className="text-small font-medium text-muted-foreground hover:text-foreground transition-all duration-150 hover:-translate-y-0.5"
           >
             Cancel
-          </Button>
+          </button>
           {project ? (
             <Button
               onClick={() => handleEdit(project.id)}
               disabled={loading}
-              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+              className="h-10 px-6 bg-primary hover:opacity-90 text-primary-foreground rounded-full text-small font-medium transition-all duration-150 hover:-translate-y-0.5"
             >
-              {loading ? "Saving..." : "Save Changes"}
+              {loading ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Save changes"
+              )}
             </Button>
           ) : (
             <Button
               onClick={handleCreate}
               disabled={loading}
-              className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium"
+              className="h-10 px-6 bg-primary hover:opacity-90 text-primary-foreground rounded-full text-small font-medium transition-all duration-150 hover:-translate-y-0.5"
             >
-              {loading ? "Creating..." : "Create Project"}
+              {loading ? (
+                <LoadingSpinner size="sm" className="border-primary-foreground" />
+              ) : (
+                "Create project"
+              )}
             </Button>
           )}
         </DialogFooter>

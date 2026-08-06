@@ -1,6 +1,7 @@
 import * as React from "react";
 
-import { Button } from "@/components/ui/button";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { STATUS_META } from "@/lib/taskStatus";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +16,6 @@ export default function StatusDropdown({
   currentStatus,
   statuses,
   onStatusChange,
-  statusStyles,
   updatingStatus,
 }) {
   const [position, setPosition] = React.useState(currentStatus);
@@ -28,26 +28,34 @@ export default function StatusDropdown({
     onStatusChange(newStatus);
   }
 
+  const currentMeta = STATUS_META[currentStatus];
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild disabled={updatingStatus}>
         <span
-          className={`cursor-pointer text-xs font-medium px-2.5 py-1 rounded-lg ${statusStyles[currentStatus]}`}
+          className={`cursor-pointer text-caption font-medium px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 shrink-0 ${currentMeta?.tint || "bg-muted text-muted-foreground"}`}
         >
-          {updatingStatus
-            ? "Updating..."
-            : currentStatus === "Inprogress"
-              ? "In Progress"
-              : currentStatus}
+          {updatingStatus ? (
+            <LoadingSpinner size="sm" className="border-current border-t-transparent" />
+          ) : (
+            <>
+              <span className={`w-1.5 h-1.5 rounded-full ${currentMeta?.dot}`} />
+              {currentMeta?.label || currentStatus}
+            </>
+          )}
         </span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-32">
+      <DropdownMenuContent className="w-36" align="end">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Change Status</DropdownMenuLabel>
           <DropdownMenuRadioGroup value={position} onValueChange={handleChange}>
             {statuses.map((status) => (
               <DropdownMenuRadioItem key={status} value={status}>
-                {status}
+                <span className="flex items-center gap-1.5">
+                  <span className={`w-1.5 h-1.5 rounded-full ${STATUS_META[status]?.dot}`} />
+                  {STATUS_META[status]?.label || status}
+                </span>
               </DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>

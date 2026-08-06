@@ -15,16 +15,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
 html,
 body,
 #root {
@@ -36,80 +26,84 @@ body {
   min-width: 320px;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-
-  a:hover {
-    color: #747bff;
-  }
-
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 228 25% 95.3%;
+    --foreground: 240 11.6% 18.6%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 11.6% 18.6%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --popover-foreground: 240 11.6% 18.6%;
+    --primary: 239 84.5% 72.2%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 228 29.4% 96.7%;
+    --secondary-foreground: 240 11.6% 18.6%;
+    --secondary-tint: 250 64% 94.5%;
+    --muted: 240 22.2% 96.5%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 22.2% 96.5%;
+    --accent-foreground: 240 11.6% 18.6%;
+    --destructive: 0 80.8% 71.4%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 18.8% 93.7%;
+    --input: 240 18.8% 93.7%;
+    --ring: 239 84.5% 72.2%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    --status-todo: 215 20.2% 65.1%;
+    --status-todo-tint: 210 40% 96.1%;
+    --status-progress: 36.1 88.6% 65.5%;
+    --status-progress-tint: 36.4 93.3% 94.1%;
+    --status-done: 145 50% 62.4%;
+    --status-done-tint: 150 53.3% 94.1%;
+    --status-overdue: 0 80.8% 71.4%;
+    --status-overdue-tint: 0 90% 96.1%;
+    --status-due: 29.2 88.1% 67.1%;
+    --status-due-tint: 30 93.3% 94.1%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --background: 240 15% 9%;
+    --foreground: 240 20% 95%;
+    --card: 240 14% 12%;
+    --card-foreground: 240 20% 95%;
+    --popover: 240 14% 12%;
+    --popover-foreground: 240 20% 95%;
+    --primary: 239 84.5% 72.2%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 10% 18%;
+    --secondary-foreground: 240 20% 95%;
+    --secondary-tint: 250 30% 20%;
+    --muted: 240 10% 16%;
+    --muted-foreground: 240 8% 65%;
+    --accent: 240 10% 18%;
+    --accent-foreground: 240 20% 95%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 10% 20%;
+    --input: 240 10% 20%;
+    --ring: 239 84.5% 72.2%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    --status-todo: 215 25% 70%;
+    --status-todo-tint: 215 15% 20%;
+    --status-progress: 36 85% 68%;
+    --status-progress-tint: 36 40% 20%;
+    --status-done: 145 45% 60%;
+    --status-done-tint: 150 30% 18%;
+    --status-overdue: 0 75% 70%;
+    --status-overdue-tint: 0 40% 20%;
+    --status-due: 29 85% 68%;
+    --status-due-tint: 29 40% 20%;
   }
 }
 
@@ -125,15 +119,15 @@ h1 {
 
 @layer components {
   .btn-primary {
-    @apply bg-slate-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:opacity-80 transition-opacity;
+    @apply bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-body font-medium hover:opacity-80 transition-opacity;
   }
   .btn-outline {
-    @apply border border-slate-200 text-slate-800 px-5 py-2.5 rounded-lg text-sm font-medium hover:border-slate-800 transition-colors;
+    @apply border border-border text-foreground px-5 py-2.5 rounded-lg text-body font-medium hover:border-foreground transition-colors;
   }
   .feature-card {
-    @apply bg-white border border-slate-100 rounded-2xl p-7 hover:shadow-md transition-shadow;
+    @apply bg-card border border-border rounded-lg p-7 hover:shadow-card transition-shadow;
   }
   .section-label {
-    @apply text-indigo-600 text-xs font-semibold uppercase tracking-widest;
+    @apply text-primary text-caption font-semibold uppercase tracking-widest;
   }
 }

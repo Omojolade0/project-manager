@@ -55,6 +55,7 @@ export function useAllTasks({ autoFetch = false } = {}) {
     loading,
     error,
     page,
+    limit: LIMIT,
     total,
     hasMore,
     sort,

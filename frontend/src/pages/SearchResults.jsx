@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { FolderKanban, CheckSquare, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import {
+  FolderKanban,
+  CheckSquare,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+} from "lucide-react";
 import Layout from "@/layouts/Layout";
 import { Input } from "@/components/ui/input";
 import searchService from "@/services/searchService";
+import Skeleton from "@/components/common/Skeleton";
+import EmptyState from "@/components/common/EmptyState";
+import ErrorState from "@/components/common/ErrorState";
 
 const LIMIT = 10;
 
@@ -41,7 +50,12 @@ function SearchResults() {
       try {
         setLoading(true);
         setError(null);
-        const response = await searchService.searchFull({ q, type, page, limit: LIMIT });
+        const response = await searchService.searchFull({
+          q,
+          type,
+          page,
+          limit: LIMIT,
+        });
         if (!ignore) setData(response);
       } catch (err) {
         if (!ignore) setError(err);
@@ -84,13 +98,16 @@ function SearchResults() {
       ? (projectsPage?.items?.length ?? 0) === 0
       : type === "tasks"
         ? (tasksPage?.items?.length ?? 0) === 0
-        : (projectsPage?.items?.length ?? 0) === 0 && (tasksPage?.items?.length ?? 0) === 0);
+        : (projectsPage?.items?.length ?? 0) === 0 &&
+          (tasksPage?.items?.length ?? 0) === 0);
 
   return (
     <Layout>
       <div className="bg-white rounded-2xl border border-slate-100 p-6">
         <div className="mb-6">
-          <h2 className="text-base font-semibold text-slate-900 mb-3">Search results</h2>
+          <h2 className="text-base font-semibold text-slate-900 mb-3">
+            Search results
+          </h2>
           <form onSubmit={submitQuery} className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
@@ -123,27 +140,24 @@ function SearchResults() {
         </div>
 
         {error ? (
-          <div className="text-center py-16">
-            <p className="text-sm text-slate-400 mb-4">Something went wrong.</p>
-            <button
-              onClick={() => setSearchParams({ q, type, page: String(page) })}
-              className="text-sm text-indigo-600 hover:text-indigo-700"
-            >
-              Try again
-            </button>
-          </div>
+          <ErrorState
+            variant="page"
+            title="Couldn't load search results"
+            actionLabel="Retry"
+            onAction={() => setSearchParams({ q, type, page: String(page) })}
+          />
         ) : loading ? (
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-slate-50 rounded-xl animate-pulse" />
+              <Skeleton key={i} variant="list-row" />
             ))}
           </div>
         ) : !q.trim() ? null : isEmpty ? (
-          <div className="text-center py-16">
-            <p className="text-sm font-medium text-slate-900">
-              No results for &quot;{q}&quot;
-            </p>
-          </div>
+          <EmptyState
+            icon={Search}
+            title={`No results for "${q}"`}
+            subtext="Try a different search term"
+          />
         ) : (
           <>
             {(type === "all" || type === "projects") && projectsPage && (
@@ -164,7 +178,9 @@ function SearchResults() {
                         className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-slate-50 transition-colors"
                       >
                         <FolderKanban className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span className="text-sm text-slate-900 truncate">{project.name}</span>
+                        <span className="flex-1 min-w-0 text-sm text-slate-900 truncate">
+                          {project.name}
+                        </span>
                         <span className="ml-auto text-[10px] uppercase tracking-wide text-slate-400 shrink-0">
                           Project
                         </span>
@@ -194,7 +210,9 @@ function SearchResults() {
                       >
                         <CheckSquare className="w-4 h-4 text-slate-400 shrink-0" />
                         <div className="min-w-0">
-                          <div className="text-sm text-slate-900 truncate">{task.title}</div>
+                          <div className="text-sm text-slate-900 truncate">
+                            {task.title}
+                          </div>
                           <div className="text-xs text-slate-400 truncate">
                             {task.project_name}
                           </div>
@@ -221,7 +239,11 @@ function SearchResults() {
                 <span className="text-sm text-slate-400">Page {page}</span>
                 <button
                   onClick={() => goToPage(page + 1)}
-                  disabled={!(type === "projects" ? projectsPage?.has_more : tasksPage?.has_more)}
+                  disabled={
+                    !(type === "projects"
+                      ? projectsPage?.has_more
+                      : tasksPage?.has_more)
+                  }
                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   Next <ChevronRight className="w-4 h-4" />

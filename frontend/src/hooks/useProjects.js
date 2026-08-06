@@ -107,6 +107,7 @@ export function useProjects({ autoFetch = false } = {}) {
     loading,
     error,
     page,
+    limit: LIMIT,
     total,
     hasMore,
     status,

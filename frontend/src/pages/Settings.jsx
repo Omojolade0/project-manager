@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -112,9 +113,13 @@ export default function Settings() {
             onClick={() => {
               handleDetailsChange();
             }}
-            className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl"
+            className="bg-primary hover:opacity-90 text-primary-foreground rounded-xl"
           >
-            {loadingProfile ? "Saving..." : "Save Changes"}
+            {loadingProfile ? (
+              <LoadingSpinner size="sm" className="border-primary-foreground" />
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </div>
 
@@ -148,9 +153,13 @@ export default function Settings() {
           <Button
             disabled={loadingPassword}
             onClick={handleChangePassword}
-            className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl"
+            className="bg-primary hover:opacity-90 text-primary-foreground rounded-xl"
           >
-            {loadingPassword ? "Saving..." : "Update Password"}
+            {loadingPassword ? (
+              <LoadingSpinner size="sm" className="border-primary-foreground" />
+            ) : (
+              "Update Password"
+            )}
           </Button>
         </div>
 
