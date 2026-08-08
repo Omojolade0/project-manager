@@ -1,49 +1,342 @@
+import { useState } from "react";
+import { Upload, AlertTriangle } from "lucide-react";
 import Layout from "@/layouts/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import authService from "@/services/authService";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
+import useTheme from "@/hooks/useTheme";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { cn } from "@/lib/utils";
+
+const TABS = [
+  { id: "basics", label: "Basics" },
+  { id: "appearance", label: "Appearance" },
+  { id: "account", label: "Account" },
+];
+
+const cardClass =
+  "bg-card rounded-2xl border border-border shadow-card p-6 hover:shadow-lg transition-shadow duration-200";
 
 export default function Settings() {
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("basics");
 
-  const [email, setEmail] = useState("");
+  return (
+    <Layout>
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-page-title text-foreground">Settings</h1>
+          <p className="text-body text-muted-foreground mt-1">
+            Manage your profile, appearance and account.
+          </p>
+        </div>
+
+        <div className="flex gap-6 border-b border-border overflow-x-auto overflow-y-hidden mb-6">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "pb-3 -mb-px shrink-0 text-small font-medium border-b-2 transition-colors",
+                activeTab === tab.id
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "basics" && <BasicsTab />}
+        {activeTab === "appearance" && <AppearanceTab />}
+        {activeTab === "account" && <AccountTab />}
+      </div>
+    </Layout>
+  );
+}
+
+function BasicsTab() {
+  const { user, updateUser } = useAuth();
+  const [username, setUsername] = useState(user?.username ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
   const [loadingProfile, setLoadingProfile] = useState(false);
-  const [loadingPassword, setLoadingPassword] = useState(false);
-  const [loadingDelete, setLoadingDelete] = useState(false);
 
-  const [username, setUsername] = useState("");
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [toDelete, setToDelete] = useState(false);
+  function handleCancel() {
+    setUsername(user?.username ?? "");
+    setEmail(user?.email ?? "");
+  }
 
-  const { user, logout } = useAuth();
-
-  useEffect(() => {
-    if (!user) return;
-    setEmail(user.email);
-    setUsername(user.username);
-  }, [user]);
+  function handleUploadPhoto() {
+    // Photo upload isn't wired to a backend yet — safe no-op.
+    toast("Photo upload isn't available yet.");
+  }
 
   async function handleDetailsChange() {
     try {
       setLoadingProfile(true);
-      await authService.updateMe({ username, email });
-
+      const updated = await authService.updateMe({ username, email });
+      updateUser(updated);
       toast.success("Details updated!");
     } catch (error) {
       console.error("Error updating details:", error);
-
       toast.error("Failed to update details");
     } finally {
       setLoadingProfile(false);
     }
   }
+
+  return (
+    <div className={cardClass}>
+      <h2 className="text-card-title text-foreground">Profile</h2>
+      <p className="text-small text-muted-foreground mt-1">
+        How you appear across the app.
+      </p>
+
+      <div className="flex items-center gap-4 mt-6">
+        <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-semibold shrink-0">
+          {username?.[0]?.toUpperCase() || "?"}
+        </div>
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleUploadPhoto}
+            className="rounded-full"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Upload photo
+          </Button>
+          <button
+            type="button"
+            disabled
+            className="text-small text-muted-foreground/50 cursor-not-allowed"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+      <p className="text-caption text-muted-foreground mt-2">
+        JPG or PNG, up to 2 MB.
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+        <div className="space-y-1.5">
+          <Label className="text-foreground">Name</Label>
+          <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-foreground">Email</Label>
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-end gap-3 mt-6">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={handleCancel}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          Cancel
+        </Button>
+        <Button type="button" disabled={loadingProfile} onClick={handleDetailsChange}>
+          {loadingProfile ? (
+            <LoadingSpinner size="sm" className="border-primary-foreground" />
+          ) : (
+            "Save changes"
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// Fixed light/dark swatches for the theme previews below — copied from the
+// token values in index.css. These intentionally do NOT use the live CSS
+// variables: a "Dark" preview has to look dark even while the page itself is
+// in light mode (and vice versa), so it can't react to the current theme.
+const PREVIEW_PALETTES = {
+  light: {
+    bg: "hsl(228 25% 95.3%)",
+    card: "hsl(0 0% 100%)",
+    bar: "hsl(240 22.2% 96.5%)",
+    accent: "hsl(239 84.5% 72.2%)",
+  },
+  dark: {
+    bg: "hsl(240 15% 9%)",
+    card: "hsl(240 14% 12%)",
+    bar: "hsl(240 10% 18%)",
+    accent: "hsl(239 84.5% 72.2%)",
+  },
+};
+
+function ThemePreview({ variant }) {
+  if (variant === "system") {
+    return (
+      <span className="flex h-16 w-full overflow-hidden rounded-lg border border-border">
+        {["dark", "light"].map((half) => (
+          <span
+            key={half}
+            className="w-1/2 h-full p-2 flex flex-col gap-1.5"
+            style={{ background: PREVIEW_PALETTES[half].bg }}
+          >
+            <span
+              className="h-1.5 w-3/4 rounded-full"
+              style={{ background: PREVIEW_PALETTES[half].accent }}
+            />
+            <span
+              className="h-1.5 w-1/2 rounded-full"
+              style={{ background: PREVIEW_PALETTES[half].bar }}
+            />
+          </span>
+        ))}
+      </span>
+    );
+  }
+
+  const p = PREVIEW_PALETTES[variant];
+  return (
+    <span
+      className="flex h-16 w-full flex-col gap-1.5 rounded-lg border border-border p-2"
+      style={{ background: p.bg }}
+    >
+      <span className="h-1.5 w-3/4 rounded-full" style={{ background: p.accent }} />
+      <span className="h-1.5 w-1/2 rounded-full" style={{ background: p.bar }} />
+      <span className="h-1.5 w-2/3 rounded-full" style={{ background: p.bar }} />
+    </span>
+  );
+}
+
+const THEME_OPTIONS = [
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+  { value: "system", label: "System" },
+];
+
+function AppearanceTab() {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <div className={cardClass}>
+      <h2 className="text-card-title text-foreground">Theme</h2>
+      <p className="text-small text-muted-foreground mt-1">
+        Applies to this browser only.
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+        {THEME_OPTIONS.map((opt) => {
+          const selected = theme === opt.value;
+          return (
+            <label
+              key={opt.value}
+              className={cn(
+                "flex flex-col gap-3 rounded-xl border p-3 cursor-pointer transition-all",
+                selected
+                  ? "border-primary ring-1 ring-primary bg-secondary-tint/50"
+                  : "border-border hover:border-foreground/20",
+              )}
+            >
+              <input
+                type="radio"
+                name="theme"
+                value={opt.value}
+                checked={selected}
+                onChange={() => setTheme(opt.value)}
+                className="sr-only"
+              />
+              <ThemePreview variant={opt.value} />
+              <span className="flex items-center gap-2 text-small font-medium text-foreground">
+                <span
+                  className={cn(
+                    "h-4 w-4 rounded-full border flex items-center justify-center shrink-0",
+                    selected ? "border-primary" : "border-input",
+                  )}
+                >
+                  {selected && <span className="h-2 w-2 rounded-full bg-primary" />}
+                </span>
+                {opt.label}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function getPasswordStrength(password) {
+  if (!password) return { score: 0, label: "Not set" };
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+  const clamped = Math.min(score, 4);
+  const labels = ["Weak", "Weak", "Fair", "Good", "Strong"];
+  return { score: clamped, label: labels[clamped] };
+}
+
+const STRENGTH_COLORS = [
+  "bg-status-overdue",
+  "bg-status-overdue",
+  "bg-status-due",
+  "bg-status-progress",
+  "bg-status-done",
+];
+
+function PasswordStrengthMeter({ value }) {
+  const { score, label } = getPasswordStrength(value);
+  return (
+    <div className="flex items-center gap-2 mt-2">
+      <div className="flex gap-1 flex-1">
+        {[0, 1, 2, 3].map((i) => (
+          <span
+            key={i}
+            className={cn(
+              "h-1 flex-1 rounded-full",
+              i < score ? STRENGTH_COLORS[score] : "bg-muted",
+            )}
+          />
+        ))}
+      </div>
+      <span className="text-caption text-muted-foreground w-12 text-right shrink-0">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function AccountTab() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [loadingPassword, setLoadingPassword] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
   async function handleChangePassword() {
     if (!oldPassword || !newPassword) {
       toast.error("Please fill in both password fields");
@@ -55,13 +348,13 @@ export default function Settings() {
     }
     try {
       setLoadingPassword(true);
+      // No dedicated "verify current password" endpoint — confirm it the
+      // same way the previous implementation did, via a login attempt.
       await authService.login({ email: user.email, password: oldPassword });
       await authService.updateMe({ password: newPassword });
-
       toast.success("Password updated!");
     } catch (error) {
       console.error("Error updating password:", error);
-
       toast.error("Failed to update password");
     } finally {
       setLoadingPassword(false);
@@ -73,7 +366,7 @@ export default function Settings() {
   async function handleDeleteAccount() {
     try {
       setLoadingDelete(true);
-      await authService.deleteMe(); // ← delete from database
+      await authService.deleteMe();
       toast.success("Account deleted successfully.");
       await logout();
       navigate("/login");
@@ -84,127 +377,100 @@ export default function Settings() {
       setLoadingDelete(false);
     }
   }
-  return (
-    <Layout>
-      <div className="max-w-2xl mx-auto space-y-6">
-        {/* Profile */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-900">Profile</h2>
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium text-slate-700">
-              Username
-            </Label>
-            <Input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium text-slate-700">Email</Label>
-            <Input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm"
-            />
-          </div>
-          <Button
-            disabled={loadingProfile}
-            onClick={() => {
-              handleDetailsChange();
-            }}
-            className="bg-primary hover:opacity-90 text-primary-foreground rounded-xl"
-          >
-            {loadingProfile ? (
-              <LoadingSpinner size="sm" className="border-primary-foreground" />
-            ) : (
-              "Save Changes"
-            )}
-          </Button>
-        </div>
 
-        {/* Password */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-900">
-            Change Password
-          </h2>
+  return (
+    <div className="space-y-6">
+      <div className={cardClass}>
+        <h2 className="text-card-title text-foreground">Password</h2>
+        <p className="text-small text-muted-foreground mt-1">
+          Use at least 8 characters.
+        </p>
+
+        <div className="space-y-4 mt-6 max-w-sm">
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium text-slate-700">
-              Current Password
-            </Label>
+            <Label className="text-foreground">Current password</Label>
             <Input
               type="password"
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
-              className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium text-slate-700">
-              New Password
-            </Label>
+            <Label className="text-foreground">New password</Label>
             <Input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="h-10 bg-slate-50 border-slate-200 rounded-xl text-sm"
             />
+            <PasswordStrengthMeter value={newPassword} />
           </div>
-          <Button
-            disabled={loadingPassword}
-            onClick={handleChangePassword}
-            className="bg-primary hover:opacity-90 text-primary-foreground rounded-xl"
-          >
+        </div>
+
+        <div className="flex justify-end mt-6">
+          <Button type="button" disabled={loadingPassword} onClick={handleChangePassword}>
             {loadingPassword ? (
               <LoadingSpinner size="sm" className="border-primary-foreground" />
             ) : (
-              "Update Password"
+              "Update password"
             )}
           </Button>
         </div>
-
-        {/* Danger Zone */}
-        <div className="bg-white rounded-2xl border border-red-100 p-6 space-y-4">
-          <h2 className="text-base font-semibold text-red-600">Danger Zone</h2>
-          <p className="text-sm text-slate-400">
-            Permanently delete your account and all your data. This cannot be
-            undone.
-          </p>
-          <Button
-            variant="destructive"
-            onClick={() => {
-              setToDelete(true);
-            }}
-            className="rounded-xl"
-          >
-            Delete Account
-          </Button>
-          {toDelete && (
-            <div className="space-y-4">
-              <p className="text-sm text-red-500">
-                Are you sure you want to delete your account? This action cannot
-                be undone.
-              </p>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteAccount}
-                className="rounded-xl"
-              >
-                Confirm Delete
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setToDelete(false);
-                }}
-                className="rounded-xl"
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
-        </div>
       </div>
-    </Layout>
+
+      <div
+        className={cn(
+          cardClass,
+          "border-destructive/30 flex items-start justify-between gap-4 flex-wrap",
+        )}
+      >
+        <div className="flex items-start gap-3">
+          <div className="h-9 w-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
+            <AlertTriangle className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="text-card-title text-foreground">Delete account</h2>
+            <p className="text-small text-muted-foreground mt-1 max-w-md">
+              Permanently delete your account and all your data. This cannot be
+              undone.
+            </p>
+          </div>
+        </div>
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+            >
+              Delete account
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently deletes your account and cascades to all of
+                your projects, tasks, and notes. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteAccount}
+                disabled={loadingDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {loadingDelete ? (
+                  <LoadingSpinner size="sm" className="border-destructive-foreground" />
+                ) : (
+                  "Delete account"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </div>
   );
 }

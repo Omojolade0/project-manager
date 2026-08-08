@@ -59,9 +59,9 @@ function CommandPalette() {
         type="button"
         aria-label="Open command palette"
         onClick={() => setOpen(true)}
-        className="h-9 w-9 rounded-xl flex items-center justify-center hover:bg-white border border-transparent hover:border-slate-200 transition-all bg-transparent"
+        className="h-9 w-9 rounded-xl flex items-center justify-center hover:bg-muted border border-transparent hover:border-border transition-all bg-transparent"
       >
-        <CommandIcon className="h-4 w-4 text-slate-500" />
+        <CommandIcon className="h-4 w-4 text-muted-foreground" />
       </button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
@@ -71,15 +71,15 @@ function CommandPalette() {
 
           <CommandGroup heading="Create">
             <CommandItem onSelect={() => runCommand(() => setShowProjectModal(true))}>
-              <FolderKanban className="h-4 w-4 text-slate-400" />
+              <FolderKanban className="h-4 w-4 text-muted-foreground" />
               Create Project
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => setShowTaskModal(true))}>
-              <CheckSquare className="h-4 w-4 text-slate-400" />
+              <CheckSquare className="h-4 w-4 text-muted-foreground" />
               Create Task
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => setShowNoteModal(true))}>
-              <FileText className="h-4 w-4 text-slate-400" />
+              <FileText className="h-4 w-4 text-muted-foreground" />
               Create Note
             </CommandItem>
           </CommandGroup>
@@ -88,15 +88,15 @@ function CommandPalette() {
 
           <CommandGroup heading="Navigate">
             <CommandItem onSelect={() => runCommand(() => navigate("/dashboard"))}>
-              <LayoutDashboard className="h-4 w-4 text-slate-400" />
+              <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
               Dashboard
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => navigate("/projects"))}>
-              <FolderKanban className="h-4 w-4 text-slate-400" />
+              <FolderKanban className="h-4 w-4 text-muted-foreground" />
               Project List
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => navigate("/tasks"))}>
-              <ListTodo className="h-4 w-4 text-slate-400" />
+              <ListTodo className="h-4 w-4 text-muted-foreground" />
               Upcoming Tasks
             </CommandItem>
           </CommandGroup>
@@ -105,11 +105,11 @@ function CommandPalette() {
 
           <CommandGroup heading="Account">
             <CommandItem onSelect={() => runCommand(() => navigate("/settings"))}>
-              <SettingsIcon className="h-4 w-4 text-slate-400" />
+              <SettingsIcon className="h-4 w-4 text-muted-foreground" />
               Settings
             </CommandItem>
             <CommandItem onSelect={() => runCommand(handleLogout)}>
-              <LogOut className="h-4 w-4 text-slate-400" />
+              <LogOut className="h-4 w-4 text-muted-foreground" />
               Logout
             </CommandItem>
           </CommandGroup>

@@ -50,9 +50,13 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
+  function updateUser(partial) {
+    setUser((prev) => (prev ? { ...prev, ...partial } : prev));
+  }
+
   return (
     <AuthContext.Provider
-      value={{ user, loading, connectionError, login, logout }}
+      value={{ user, loading, connectionError, login, logout, updateUser }}
     >
       {children}
     </AuthContext.Provider>

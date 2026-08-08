@@ -10,8 +10,8 @@ function ItemsNav({ item, collapsed }) {
         [
           "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-150",
           isActive
-            ? "bg-slate-900 text-white font-medium"
-            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
+            ? "bg-primary text-primary-foreground font-medium"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground",
           collapsed ? "justify-center" : "",
         ].join(" ")
       }
