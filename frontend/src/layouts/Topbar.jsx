@@ -153,19 +153,19 @@ function Topbar({ onOpenMobileNav }) {
             type="button"
             aria-label="Open navigation"
             onClick={onOpenMobileNav}
-            className="md:hidden h-9 w-9 shrink-0 rounded-xl flex items-center justify-center hover:bg-white border border-transparent hover:border-slate-200 transition-all"
+            className="md:hidden h-9 w-9 shrink-0 rounded-xl flex items-center justify-center hover:bg-muted border border-transparent hover:border-border transition-all"
           >
-            <Menu className="h-4 w-4 text-slate-500" />
+            <Menu className="h-4 w-4 text-muted-foreground" />
           </button>
-          <h2 className="text-xl font-semibold text-slate-900 tracking-tight truncate">
+          <h2 className="text-xl font-semibold text-foreground tracking-tight truncate">
             {title}
           </h2>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <div className="relative hidden md:block" ref={containerRef}>
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              className="w-56 rounded-xl pl-9 bg-white border-slate-200 text-sm"
+              className="w-56 rounded-xl pl-9 bg-card border-border text-sm"
               placeholder="Search..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -190,10 +190,10 @@ function Topbar({ onOpenMobileNav }) {
               <div
                 id="topbar-search-listbox"
                 role="listbox"
-                className="absolute right-0 mt-2 w-72 bg-white rounded-xl border border-slate-100 shadow-lg py-2 max-h-80 overflow-y-auto"
+                className="absolute right-0 mt-2 w-72 bg-popover rounded-xl border border-border shadow-lg py-2 max-h-80 overflow-y-auto"
               >
                 {!hasResults ? (
-                  <p className="text-xs text-slate-400 text-center py-4">
+                  <p className="text-xs text-muted-foreground text-center py-4">
                     No results
                   </p>
                 ) : (
@@ -208,14 +208,14 @@ function Topbar({ onOpenMobileNav }) {
                         onClick={() => goToProject(project.id)}
                         className={[
                           "w-full flex items-center gap-2 px-3 py-2 text-left transition-colors",
-                          highlightedIndex === i ? "bg-slate-100" : "hover:bg-slate-50",
+                          highlightedIndex === i ? "bg-accent" : "hover:bg-accent/60",
                         ].join(" ")}
                       >
-                        <FolderKanban className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="text-sm text-slate-900 truncate">
+                        <FolderKanban className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <span className="text-sm text-popover-foreground truncate">
                           {project.name}
                         </span>
-                        <span className="ml-auto text-[10px] uppercase tracking-wide text-slate-400 shrink-0">
+                        <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground shrink-0">
                           Project
                         </span>
                       </button>
@@ -232,14 +232,14 @@ function Topbar({ onOpenMobileNav }) {
                           onClick={() => goToProject(task.project_id)}
                           className={[
                             "w-full flex items-center gap-2 px-3 py-2 text-left transition-colors",
-                            highlightedIndex === i ? "bg-slate-100" : "hover:bg-slate-50",
+                            highlightedIndex === i ? "bg-accent" : "hover:bg-accent/60",
                           ].join(" ")}
                         >
-                          <CheckSquare className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="text-sm text-slate-900 truncate">
+                          <CheckSquare className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                          <span className="text-sm text-popover-foreground truncate">
                             {task.title}
                           </span>
-                          <span className="ml-auto text-[10px] uppercase tracking-wide text-slate-400 shrink-0">
+                          <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground shrink-0">
                             Task
                           </span>
                         </button>
@@ -247,7 +247,7 @@ function Topbar({ onOpenMobileNav }) {
                     })}
                     <button
                       onClick={goToFullResults}
-                      className="w-full text-center text-xs font-medium text-indigo-600 hover:text-indigo-700 py-2 mt-1 border-t border-slate-100"
+                      className="w-full text-center text-xs font-medium text-primary hover:text-primary/80 py-2 mt-1 border-t border-border"
                     >
                       See all results
                     </button>
@@ -260,9 +260,9 @@ function Topbar({ onOpenMobileNav }) {
           <button
             type="button"
             aria-label="Notifications"
-            className="h-9 w-9 rounded-xl flex items-center justify-center hover:bg-white border border-transparent hover:border-slate-200 transition-all bg-transparent"
+            className="h-9 w-9 rounded-xl flex items-center justify-center hover:bg-muted border border-transparent hover:border-border transition-all bg-transparent"
           >
-            <Bell className="h-4 w-4 text-slate-500" />
+            <Bell className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
       </div>
