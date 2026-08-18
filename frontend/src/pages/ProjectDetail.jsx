@@ -198,7 +198,7 @@ function ProjectDetail() {
   const {
     tasks,
     error: tasksError,
-    loading: tasksLoading,
+    isInitialLoading: tasksInitialLoading,
     page: tasksPage,
     total: tasksTotal,
     hasMore: tasksHasMore,
@@ -215,6 +215,7 @@ function ProjectDetail() {
   // of which should shift when the list view's filter changes.
   const [statsTasks, setStatsTasks] = useState([]);
   const [statsLoading, setStatsLoading] = useState(true);
+  const statsInitialLoading = statsLoading && statsTasks.length === 0;
 
   const refreshStats = useCallback(async () => {
     try {
@@ -301,7 +302,7 @@ function ProjectDetail() {
   const {
     notes,
     error: notesError,
-    loading: notesLoading,
+    isInitialLoading: notesInitialLoading,
     page: notesPage,
     total: notesTotal,
     hasMore: notesHasMore,
@@ -563,7 +564,7 @@ function ProjectDetail() {
               </div>
             )}
 
-            {tasksLoading ? (
+            {tasksInitialLoading ? (
               <div className="space-y-3">
                 {[1, 2].map((i) => (
                   <Skeleton key={i} variant="list-row" />
@@ -663,7 +664,7 @@ function ProjectDetail() {
                 </div>
                 <NoteModal projectId={id} onSuccess={() => fetchNotes(id, 1)} />
               </div>
-              {notesLoading ? (
+              {notesInitialLoading ? (
                 <div className="space-y-3">
                   {[1, 2].map((i) => (
                     <Skeleton key={i} variant="list-row" />
@@ -702,7 +703,7 @@ function ProjectDetail() {
             </div>
           )}
 
-          <ProjectInsights tasks={statsTasks} loading={statsLoading} />
+          <ProjectInsights tasks={statsTasks} loading={statsInitialLoading} />
         </div>
       </div>
     </Layout>

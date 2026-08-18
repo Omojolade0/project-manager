@@ -40,6 +40,7 @@ function UpcomingSection() {
   const [filter, setFilter] = useState("all");
   const [updatingId, setUpdatingId] = useState(null);
   const navigate = useNavigate();
+  const isInitialLoading = loading && tasks.length === 0;
 
   const fetchUpcoming = useCallback(async () => {
     try {
@@ -116,7 +117,7 @@ function UpcomingSection() {
 
       {error ? (
         <ErrorState title="Couldn't load upcoming tasks" onAction={fetchUpcoming} />
-      ) : loading ? (
+      ) : isInitialLoading ? (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} variant="list-row" />

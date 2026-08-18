@@ -34,6 +34,7 @@ function SearchResults() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [queryInput, setQueryInput] = useState(q);
+  const isInitialLoading = loading && !data;
 
   useEffect(() => {
     setQueryInput(q);
@@ -146,7 +147,7 @@ function SearchResults() {
             actionLabel="Retry"
             onAction={() => setSearchParams({ q, type, page: String(page) })}
           />
-        ) : loading ? (
+        ) : isInitialLoading ? (
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
               <Skeleton key={i} variant="list-row" />

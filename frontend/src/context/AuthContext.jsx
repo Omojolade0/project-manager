@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import authService from "@/services/authService";
+import api from "@/api/api";
 
 const AuthContext = createContext(null);
 
@@ -46,8 +47,14 @@ export function AuthProvider({ children }) {
   }
 
   async function logout() {
-    localStorage.removeItem("token");
-    setUser(null);
+    try {
+      await api.post("/auth/logout");
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      localStorage.removeItem("token");
+      setUser(null);
+    }
   }
 
   function updateUser(partial) {

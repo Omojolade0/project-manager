@@ -22,7 +22,7 @@ const SORTS = [
 function UpcomingTasks() {
   const {
     tasks,
-    loading,
+    isInitialLoading,
     error,
     page,
     limit,
@@ -113,7 +113,7 @@ function UpcomingTasks() {
           ))}
         </div>
 
-        {loading ? (
+        {isInitialLoading ? (
           <div className="space-y-2">
             {[1, 2, 3, 4, 5].map((i) => (
               <Skeleton key={i} variant="list-row" />

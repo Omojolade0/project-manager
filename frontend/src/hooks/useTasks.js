@@ -13,6 +13,7 @@ export function useTasks(projectId, { autoFetch = false } = {}) {
   const [hasMore, setHasMore] = useState(false);
   const [status, setStatus] = useState(null);
   const [sort, setSort] = useState(null);
+  const isInitialLoading = loading && tasks.length === 0;
 
   async function fetchTasks(
     pid,
@@ -98,6 +99,7 @@ export function useTasks(projectId, { autoFetch = false } = {}) {
   return {
     tasks,
     loading,
+    isInitialLoading,
     error,
     page,
     total,

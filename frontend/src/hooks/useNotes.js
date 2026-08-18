@@ -11,6 +11,7 @@ export function useNotes(projectId, { autoFetch = false } = {}) {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const isInitialLoading = loading && notes.length === 0;
 
   async function fetchNotes(pid, pageNum = page) {
     try {
@@ -85,6 +86,7 @@ export function useNotes(projectId, { autoFetch = false } = {}) {
   return {
     notes,
     loading,
+    isInitialLoading,
     error,
     page,
     total,

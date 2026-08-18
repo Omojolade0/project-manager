@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 from jose import jwt 
 from datetime import datetime, timedelta, timezone
-from app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_HOURS
+from app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_HOURS, REFRESH_TOKEN_EXPIRE_DAYS
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto" )
 
@@ -20,5 +20,16 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None ) -> 
   else:
     expire = datetime.now(timezone.utc) + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
   to_encode.update({"exp": expire, "type": "access"})
+  jwt_encode = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+  return jwt_encode
+
+
+def create_refresh_token(data: dict, expires_delta: timedelta | None = None ) -> str :
+  to_encode = data.copy()
+  if expires_delta:
+    expire = datetime.now(timezone.utc) + expires_delta
+  else:
+    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+  to_encode.update({"exp": expire, "type": "refresh"})
   jwt_encode = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
   return jwt_encode
