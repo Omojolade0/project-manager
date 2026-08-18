@@ -12,6 +12,7 @@ export function useAllTasks({ autoFetch = false } = {}) {
   const [sort, setSort] = useState(null);
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const isInitialLoading = loading && tasks.length === 0;
 
   async function fetchTasks({ pageNum = page, sortValue = sort } = {}) {
     try {
@@ -53,6 +54,7 @@ export function useAllTasks({ autoFetch = false } = {}) {
   return {
     tasks,
     loading,
+    isInitialLoading,
     error,
     page,
     limit: LIMIT,

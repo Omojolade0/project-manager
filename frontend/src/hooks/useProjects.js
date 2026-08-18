@@ -14,6 +14,7 @@ export function useProjects({ autoFetch = false } = {}) {
   const [hasMore, setHasMore] = useState(false);
   const [status, setStatus] = useState(null);
   const [sort, setSort] = useState(null);
+  const isInitialLoading = loading && projects.length === 0;
 
   async function fetchProjects(
     pageNum = page,
@@ -105,6 +106,7 @@ export function useProjects({ autoFetch = false } = {}) {
   return {
     projects,
     loading,
+    isInitialLoading,
     error,
     page,
     limit: LIMIT,
