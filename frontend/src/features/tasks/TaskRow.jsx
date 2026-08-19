@@ -34,18 +34,14 @@ function DateBadge({ dueDate, overdue }) {
       )}
     >
       <span className="text-body font-semibold leading-none">{day}</span>
-      <span className="text-[10px] font-medium tracking-wide mt-0.5">{month}</span>
+      <span className="text-caption font-medium tracking-wide mt-0.5">{month}</span>
     </div>
   );
 }
 
 function DueLabel({ dueDate }) {
   if (!dueDate) {
-    return (
-      <span className="text-small font-medium px-2.5 py-1 rounded-full bg-muted text-muted-foreground shrink-0">
-        No date
-      </span>
-    );
+    return null;
   }
   const late = daysLate(dueDate);
   if (late > 0) {

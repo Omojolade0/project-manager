@@ -163,7 +163,7 @@ def get_all_user_tasks(user_id: uuid.UUID, sort: Optional[str], page: int, limit
     select(func.count())
     .select_from(Task)
     .join(Project, Task.project_id == Project.id)
-    .where(Project.user_id == user_id)
+    .where(Project.user_id == user_id, Task.status != TaskStatus.Done)
   ).one()
 
   order_by = [_pin_priority(), *_sort_columns(sort), Task.id]
@@ -171,7 +171,7 @@ def get_all_user_tasks(user_id: uuid.UUID, sort: Optional[str], page: int, limit
   rows = session.exec(
     select(Task, Project)
     .join(Project, Task.project_id == Project.id)
-    .where(Project.user_id == user_id)
+    .where(Project.user_id == user_id, Task.status != TaskStatus.Done)
     .order_by(*order_by)
     .offset((page - 1) * limit)
     .limit(limit)

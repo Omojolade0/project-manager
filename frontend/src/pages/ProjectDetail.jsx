@@ -27,6 +27,8 @@ import { useProjects } from "@/hooks/useProjects";
 import taskService from "@/services/taskService";
 import { getUrgency } from "@/lib/taskUrgency";
 import { STATUS_META, STATUS_ORDER } from "@/lib/taskStatus";
+import { getPageNumbers, ELLIPSIS } from "@/lib/pagination";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -193,13 +195,14 @@ function ProjectDetail() {
   const [tasksView, setTasksView] = useState("list");
   const [taskStatusFilter, setTaskStatusFilter] = useState("");
   const [taskSort, setTaskSort] = useState("");
-  const [groupBy, setGroupBy] = useState("none");
+  const [groupBy, setGroupBy] = useState("status");
 
   const {
     tasks,
     error: tasksError,
     isInitialLoading: tasksInitialLoading,
     page: tasksPage,
+    limit: tasksLimit,
     total: tasksTotal,
     hasMore: tasksHasMore,
     fetchTasks,
@@ -304,12 +307,16 @@ function ProjectDetail() {
     error: notesError,
     isInitialLoading: notesInitialLoading,
     page: notesPage,
+    limit: notesLimit,
     total: notesTotal,
     hasMore: notesHasMore,
     fetchNotes,
     goToNextPage: notesNextPage,
     goToPrevPage: notesPrevPage,
   } = useNotes(id, { autoFetch: true });
+
+  const tasksTotalPages = Math.max(1, Math.ceil(tasksTotal / tasksLimit));
+  const notesTotalPages = Math.max(1, Math.ceil(notesTotal / notesLimit));
 
   const { fetchProjectById } = useProjects();
 
@@ -617,8 +624,8 @@ function ProjectDetail() {
                     />
                   ))}
                 </div>
-                {tasksTotal > 0 && (
-                  <div className="flex items-center justify-center gap-3 mt-4 pt-4 border-t border-border">
+                {tasksTotalPages > 1 && (
+                  <div className="flex items-center justify-center gap-1.5 mt-4 pt-4 border-t border-border">
                     <button
                       onClick={tasksPrevPage}
                       disabled={tasksPage === 1}
@@ -626,7 +633,29 @@ function ProjectDetail() {
                     >
                       <ChevronLeft className="w-3.5 h-3.5" /> Prev
                     </button>
-                    <span className="text-caption text-muted-foreground">Page {tasksPage}</span>
+                    {getPageNumbers(tasksPage, tasksTotalPages).map((pageNum, i) =>
+                      pageNum === ELLIPSIS ? (
+                        <span
+                          key={`ellipsis-${i}`}
+                          className="w-7 h-7 flex items-center justify-center text-caption text-muted-foreground"
+                        >
+                          …
+                        </span>
+                      ) : (
+                        <button
+                          key={pageNum}
+                          onClick={() => fetchTasks(id, pageNum)}
+                          className={cn(
+                            "w-7 h-7 rounded-full text-caption font-semibold transition-colors",
+                            pageNum === tasksPage
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                          )}
+                        >
+                          {pageNum}
+                        </button>
+                      ),
+                    )}
                     <button
                       onClick={tasksNextPage}
                       disabled={!tasksHasMore}
@@ -679,8 +708,8 @@ function ProjectDetail() {
                       <NoteCard key={note.id} note={note} projectId={id} />
                     ))}
                   </div>
-                  {notesTotal > 0 && (
-                    <div className="flex items-center justify-center gap-3 mt-4 pt-4 border-t border-border">
+                  {notesTotalPages > 1 && (
+                    <div className="flex items-center justify-center gap-1.5 mt-4 pt-4 border-t border-border">
                       <button
                         onClick={notesPrevPage}
                         disabled={notesPage === 1}
@@ -688,7 +717,29 @@ function ProjectDetail() {
                       >
                         <ChevronLeft className="w-3.5 h-3.5" /> Prev
                       </button>
-                      <span className="text-caption text-muted-foreground">Page {notesPage}</span>
+                      {getPageNumbers(notesPage, notesTotalPages).map((pageNum, i) =>
+                        pageNum === ELLIPSIS ? (
+                          <span
+                            key={`ellipsis-${i}`}
+                            className="w-7 h-7 flex items-center justify-center text-caption text-muted-foreground"
+                          >
+                            …
+                          </span>
+                        ) : (
+                          <button
+                            key={pageNum}
+                            onClick={() => fetchNotes(id, pageNum)}
+                            className={cn(
+                              "w-7 h-7 rounded-full text-caption font-semibold transition-colors",
+                              pageNum === notesPage
+                                ? "bg-primary text-primary-foreground"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                            )}
+                          >
+                            {pageNum}
+                          </button>
+                        ),
+                      )}
                       <button
                         onClick={notesNextPage}
                         disabled={!notesHasMore}

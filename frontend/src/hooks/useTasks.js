@@ -102,6 +102,7 @@ export function useTasks(projectId, { autoFetch = false } = {}) {
     isInitialLoading,
     error,
     page,
+    limit: LIMIT,
     total,
     hasMore,
     status,

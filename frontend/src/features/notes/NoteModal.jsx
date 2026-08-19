@@ -133,13 +133,13 @@ function NoteModal({
       {!hideTrigger &&
         (note ? (
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-body h-9 px-4 rounded-xl flex items-center gap-2">
               <Edit className="w-4 h-4" />
             </Button>
           </DialogTrigger>
         ) : (
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-body h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" /> Add Note
             </Button>
           </DialogTrigger>
@@ -149,7 +149,7 @@ function NoteModal({
         <div className="p-6">
           {note ? (
             <DialogHeader className="mb-5 text-left">
-              <DialogTitle className="text-lg font-semibold text-foreground">
+              <DialogTitle className="text-section font-semibold text-foreground">
                 Edit Note
               </DialogTitle>
               <DialogDescription className="text-small text-muted-foreground">
@@ -158,7 +158,7 @@ function NoteModal({
             </DialogHeader>
           ) : (
             <DialogHeader className="mb-5 text-left">
-              <DialogTitle className="text-lg font-semibold text-foreground">
+              <DialogTitle className="text-section font-semibold text-foreground">
                 New Note
               </DialogTitle>
               <DialogDescription className="text-small text-muted-foreground">

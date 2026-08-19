@@ -105,6 +105,50 @@ body {
     --status-due: 29 85% 68%;
     --status-due-tint: 29 40% 20%;
   }
+
+  /* Pins a subtree to the light palette regardless of the app-wide theme —
+     used by the pre-auth pages (landing, login, register), which are
+     intentionally not dark-mode aware even when a signed-in user has dark
+     mode enabled elsewhere in the app. */
+  .theme-light-pinned {
+    /* Set color directly, not just the --foreground variable: plain `color`
+       inherits down the DOM as an already-resolved value, so descendants
+       with no explicit text-color class (e.g. typed <input> text) would
+       otherwise keep inheriting <body>'s dark-resolved color even though
+       --foreground is correctly overridden here for anything using var(). */
+    color: hsl(240 11.6% 18.6%);
+    --background: 228 25% 95.3%;
+    --foreground: 240 11.6% 18.6%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 11.6% 18.6%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 11.6% 18.6%;
+    --primary: 239 84.5% 72.2%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 228 29.4% 96.7%;
+    --secondary-foreground: 240 11.6% 18.6%;
+    --secondary-tint: 250 64% 94.5%;
+    --muted: 240 22.2% 96.5%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 22.2% 96.5%;
+    --accent-foreground: 240 11.6% 18.6%;
+    --destructive: 0 80.8% 71.4%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 18.8% 93.7%;
+    --input: 240 18.8% 93.7%;
+    --ring: 239 84.5% 72.2%;
+
+    --status-todo: 215 20.2% 65.1%;
+    --status-todo-tint: 210 40% 96.1%;
+    --status-progress: 36.1 88.6% 65.5%;
+    --status-progress-tint: 36.4 93.3% 94.1%;
+    --status-done: 145 50% 62.4%;
+    --status-done-tint: 150 53.3% 94.1%;
+    --status-overdue: 0 80.8% 71.4%;
+    --status-overdue-tint: 0 90% 96.1%;
+    --status-due: 29.2 88.1% 67.1%;
+    --status-due-tint: 30 93.3% 94.1%;
+  }
 }
 
 @layer base {

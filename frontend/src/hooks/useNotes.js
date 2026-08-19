@@ -89,6 +89,7 @@ export function useNotes(projectId, { autoFetch = false } = {}) {
     isInitialLoading,
     error,
     page,
+    limit: LIMIT,
     total,
     hasMore,
     fetchNotes,

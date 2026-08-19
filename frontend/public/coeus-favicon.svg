@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512" role="img" aria-label="Coeus">
+  <defs>
+    <linearGradient id="coeus-block" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3A3B52"></stop>
+      <stop offset="0.5" stop-color="#1E1E2A"></stop>
+      <stop offset="1" stop-color="#0E0E14"></stop>
+    </linearGradient>
+    <linearGradient id="coeus-disc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#C0C2FF"></stop>
+      <stop offset="0.55" stop-color="#7C7FF0"></stop>
+      <stop offset="1" stop-color="#4A4DC8"></stop>
+    </linearGradient>
+    <filter id="coeus-lift" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" flood-color="#2B2D5A" flood-opacity="0.35"></feDropShadow>
+    </filter>
+  </defs>
+  <g filter="url(#coeus-lift)">
+    <rect x="10" y="26" width="48" height="48" rx="13" fill="url(#coeus-block)"></rect>
+    <path d="M23 26.8 H45 A12.2 12.2 0 0 1 57.2 39" fill="none" stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="1.6" stroke-linecap="round"></path>
+  </g>
+  <g filter="url(#coeus-lift)">
+    <circle cx="66" cy="50" r="24" fill="url(#coeus-disc)"></circle>
+    <path d="M49 39 A24 24 0 0 1 77 27.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="2.2" stroke-linecap="round"></path>
+    <path d="M83 61 A24 24 0 0 1 55 72.5" fill="none" stroke="#2B2D6A" stroke-opacity="0.35" stroke-width="2.2" stroke-linecap="round"></path>
+  </g>
+</svg>

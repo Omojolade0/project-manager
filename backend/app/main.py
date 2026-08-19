@@ -17,6 +17,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         FRONTEND_URL,
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
         "https://project-manager-psi-eight.vercel.app",
         "https://ceous.jolaogunleye.dev",
     ],

@@ -157,15 +157,17 @@ function Topbar({ onOpenMobileNav }) {
           >
             <Menu className="h-4 w-4 text-muted-foreground" />
           </button>
-          <h2 className="text-xl font-semibold text-foreground tracking-tight truncate">
-            {title}
-          </h2>
+          {pathname === "/dashboard" && (
+            <h2 className="text-page-title font-semibold text-foreground tracking-tight truncate">
+              {title}
+            </h2>
+          )}
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <div className="relative hidden md:block" ref={containerRef}>
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              className="w-56 rounded-xl pl-9 bg-card border-border text-sm"
+              className="w-56 rounded-xl pl-9 bg-card border-border text-body"
               placeholder="Search..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -193,7 +195,7 @@ function Topbar({ onOpenMobileNav }) {
                 className="absolute right-0 mt-2 w-72 bg-popover rounded-xl border border-border shadow-lg py-2 max-h-80 overflow-y-auto"
               >
                 {!hasResults ? (
-                  <p className="text-xs text-muted-foreground text-center py-4">
+                  <p className="text-small text-muted-foreground text-center py-4">
                     No results
                   </p>
                 ) : (
@@ -212,10 +214,10 @@ function Topbar({ onOpenMobileNav }) {
                         ].join(" ")}
                       >
                         <FolderKanban className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                        <span className="text-sm text-popover-foreground truncate">
+                        <span className="text-body text-popover-foreground truncate">
                           {project.name}
                         </span>
-                        <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground shrink-0">
+                        <span className="ml-auto text-caption font-normal uppercase tracking-wide text-muted-foreground shrink-0">
                           Project
                         </span>
                       </button>
@@ -236,10 +238,10 @@ function Topbar({ onOpenMobileNav }) {
                           ].join(" ")}
                         >
                           <CheckSquare className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                          <span className="text-sm text-popover-foreground truncate">
+                          <span className="text-body text-popover-foreground truncate">
                             {task.title}
                           </span>
-                          <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground shrink-0">
+                          <span className="ml-auto text-caption font-normal uppercase tracking-wide text-muted-foreground shrink-0">
                             Task
                           </span>
                         </button>
@@ -247,7 +249,7 @@ function Topbar({ onOpenMobileNav }) {
                     })}
                     <button
                       onClick={goToFullResults}
-                      className="w-full text-center text-xs font-medium text-primary hover:text-primary/80 py-2 mt-1 border-t border-border"
+                      className="w-full text-center text-caption font-medium text-primary hover:text-primary/80 py-2 mt-1 border-t border-border"
                     >
                       See all results
                     </button>

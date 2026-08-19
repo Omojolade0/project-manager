@@ -8,8 +8,16 @@ import TaskModal from "@/features/tasks/TaskModal";
 import Skeleton from "@/components/common/Skeleton";
 import EmptyState from "@/components/common/EmptyState";
 import ErrorState from "@/components/common/ErrorState";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAllTasks } from "@/hooks/useAllTasks";
 import taskService from "@/services/taskService";
+import { getPageNumbers, ELLIPSIS } from "@/lib/pagination";
 import { ListTodo, ChevronLeft, ChevronRight } from "lucide-react";
 
 const SORTS = [
@@ -84,33 +92,31 @@ function UpcomingTasks() {
   return (
     <Layout>
       <div className="bg-card rounded-2xl p-6 shadow-card">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <div className="flex items-center gap-2">
             <h1 className="text-section text-foreground">Upcoming Tasks</h1>
             <span className="text-caption font-medium text-muted-foreground bg-muted rounded-full px-2 py-0.5">
               {total}
             </span>
           </div>
-          <TaskModal onSuccess={refetch} />
-        </div>
-
-        {/* Sort controls */}
-        <div className="inline-flex flex-wrap items-center gap-1 bg-muted rounded-full p-1 mb-6">
-          {SORTS.map((s) => (
-            <button
-              key={s.value}
-              type="button"
-              onClick={() => changeSort(s.value)}
-              className={cn(
-                "px-3 py-1.5 rounded-full text-small font-medium transition-colors",
-                activeSort === s.value
-                  ? "bg-card text-foreground shadow-card"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {s.label}
-            </button>
-          ))}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-small font-medium text-muted-foreground">Sort by</span>
+              <Select value={activeSort} onValueChange={changeSort}>
+                <SelectTrigger className="w-40 h-9 rounded-full bg-muted border-transparent text-small">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SORTS.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <TaskModal onSuccess={refetch} />
+          </div>
         </div>
 
         {isInitialLoading ? (
@@ -139,7 +145,7 @@ function UpcomingTasks() {
           </div>
         )}
 
-        {total > 0 && (
+        {totalPages > 1 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-5 border-t border-border">
             <p className="text-small text-muted-foreground">
               Showing {rangeStart}–{rangeEnd} of {total}
@@ -152,9 +158,15 @@ function UpcomingTasks() {
               >
                 <ChevronLeft className="w-4 h-4" /> Previous
               </button>
-              {Array.from({ length: totalPages }).map((_, i) => {
-                const pageNum = i + 1;
-                return (
+              {getPageNumbers(page, totalPages).map((pageNum, i) =>
+                pageNum === ELLIPSIS ? (
+                  <span
+                    key={`ellipsis-${i}`}
+                    className="w-9 h-9 flex items-center justify-center text-small text-muted-foreground"
+                  >
+                    …
+                  </span>
+                ) : (
                   <button
                     key={pageNum}
                     onClick={() => fetchTasks({ pageNum })}
@@ -167,8 +179,8 @@ function UpcomingTasks() {
                   >
                     {pageNum}
                   </button>
-                );
-              })}
+                ),
+              )}
               <button
                 onClick={() => fetchTasks({ pageNum: page + 1 })}
                 disabled={!hasMore}

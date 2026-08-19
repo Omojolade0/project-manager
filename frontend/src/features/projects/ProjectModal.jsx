@@ -117,11 +117,11 @@ function ProjectModal({
       {!hideTrigger && (
         <DialogTrigger asChild>
           {project ? (
-            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-body h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" />
             </Button>
           ) : (
-            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-body h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" /> New Project
             </Button>
           )}
@@ -130,7 +130,7 @@ function ProjectModal({
 
       <DialogContent className="w-[calc(100%-2rem)] sm:w-full max-w-md rounded-2xl border border-border bg-card shadow-xl p-6">
         <DialogHeader className="text-left">
-          <DialogTitle className="text-lg font-semibold text-foreground">
+          <DialogTitle className="text-section font-semibold text-foreground">
             {project ? "Edit project" : "New project"}
           </DialogTitle>
           <DialogDescription className="text-small text-muted-foreground">

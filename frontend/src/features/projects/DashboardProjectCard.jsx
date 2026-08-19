@@ -1,9 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Pin, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Pin, Trash2 } from "lucide-react";
 import ProjectModal from "./ProjectModal";
 import toast from "react-hot-toast";
 import { useProjects } from "@/hooks/useProjects";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +20,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 const STATUS_BADGE = {
@@ -73,6 +79,8 @@ function DashboardProjectCard({
 }) {
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const { removeProject } = useProjects();
 
   const taskCount = project.task_count ?? 0;
@@ -106,19 +114,38 @@ function DashboardProjectCard({
     >
       {manageable && (
         <div
-          className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
           onClick={(e) => e.stopPropagation()}
         >
-          <ProjectModal project={project} onSuccess={onChange} />
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <button
-                disabled={deleting}
-                className="p-2 rounded-xl bg-card hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-2 rounded-xl bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                <MoreHorizontal className="w-3.5 h-3.5" />
               </button>
-            </AlertDialogTrigger>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-36">
+              <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+                <Pencil className="w-3.5 h-3.5" /> Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={() => setDeleteOpen(true)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <ProjectModal
+            project={project}
+            onSuccess={onChange}
+            hideTrigger
+            open={editOpen}
+            onOpenChange={setEditOpen}
+          />
+
+          <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -131,6 +158,7 @@ function DashboardProjectCard({
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDelete}
+                  disabled={deleting}
                   className="bg-destructive text-destructive-foreground hover:opacity-90"
                 >
                   Delete
