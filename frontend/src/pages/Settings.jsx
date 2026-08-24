@@ -189,13 +189,25 @@ const THEME_OPTIONS = [
 ];
 
 function AppearanceTab() {
+  const { updateUser } = useAuth();
   const { theme, setTheme } = useTheme();
+
+  async function handleThemeChange(value) {
+    setTheme(value);
+    try {
+      const updated = await authService.updateMe({ theme_preference: value });
+      updateUser(updated);
+    } catch (error) {
+      console.error("Error saving theme preference:", error);
+      toast.error("Failed to save theme preference");
+    }
+  }
 
   return (
     <div className={cardClass}>
       <h2 className="text-card-title text-foreground">Theme</h2>
       <p className="text-small text-muted-foreground mt-1">
-        Applies to this browser only.
+        Applies across your devices.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
@@ -216,7 +228,7 @@ function AppearanceTab() {
                 name="theme"
                 value={opt.value}
                 checked={selected}
-                onChange={() => setTheme(opt.value)}
+                onChange={() => handleThemeChange(opt.value)}
                 className="sr-only"
               />
               <ThemePreview variant={opt.value} />

@@ -1,10 +1,12 @@
 from app.core.dependencies import get_current_user, get_session
 from app.core import security as util
 from app.core.config import REFRESH_TOKEN_EXPIRE_DAYS, SECRET_KEY, ALGORITHM
+from app.core.limiter import limiter
 from app.schemas.token import LoginResponse
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from app.schemas.user import UserLogin, UserCreate, UserPublic, UserUpdate
 from app.services import user as service
+from app.services import demo as demo_service
 from sqlmodel import Session
 from jose import jwt, JWTError
 import uuid
@@ -19,16 +21,10 @@ auth_router = APIRouter(
 REFRESH_COOKIE_NAME = "refresh_token"
 REFRESH_TOKEN_MAX_AGE = REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
 
-@auth_router.post('/register', response_model= UserPublic)
-def create_user_account(data: UserCreate, session: Session = Depends(get_session)):
-  return service.create_user(data, session)
-
-@auth_router.post('/login', response_model=LoginResponse)
-def user_login(data: UserLogin, response: Response, session: Session = Depends(get_session)):
-  login_data = service.login_user(data.email, data.password, session)
+def _set_refresh_cookie(response: Response, user_id: uuid.UUID, email: str) -> None:
   refresh_token = util.create_refresh_token({
-      "user_id": str(login_data.user.id),
-      "email": login_data.user.email
+      "user_id": str(user_id),
+      "email": email
   })
   response.set_cookie(
       key=REFRESH_COOKIE_NAME,
@@ -38,6 +34,25 @@ def user_login(data: UserLogin, response: Response, session: Session = Depends(g
       samesite="none",
       max_age=REFRESH_TOKEN_MAX_AGE,
   )
+
+@auth_router.post('/register', response_model= UserPublic)
+@limiter.limit("5/hour")
+def create_user_account(request: Request, data: UserCreate, session: Session = Depends(get_session)):
+  return service.create_user(data, session)
+
+@auth_router.post('/login', response_model=LoginResponse)
+@limiter.limit("5/minute")
+def user_login(request: Request, data: UserLogin, response: Response, session: Session = Depends(get_session)):
+  login_data = service.login_user(data.email, data.password, session)
+  _set_refresh_cookie(response, login_data.user.id, login_data.user.email)
+  return login_data
+
+@auth_router.post('/demo', response_model=LoginResponse)
+@limiter.limit("5/hour")
+def create_demo_account(request: Request, response: Response, session: Session = Depends(get_session)):
+  guest = demo_service.create_guest_user(session)
+  login_data = service.build_login_response(guest)
+  _set_refresh_cookie(response, guest.id, guest.email)
   return login_data
 
 @auth_router.post('/refresh', response_model=LoginResponse)

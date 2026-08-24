@@ -1,5 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import authService from "@/services/authService";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -18,7 +19,6 @@ import { useProjects } from "@/hooks/useProjects";
 import { useTasks } from "@/hooks/useTasks";
 import useTheme from "@/hooks/useTheme";
 import useAuth from "@/hooks/useAuth";
-import { markOnboardingSeen } from "@/lib/onboarding";
 import { cn } from "@/lib/utils";
 
 const TOTAL_STEPS = 4;
@@ -45,7 +45,7 @@ function ProgressBar({ step }) {
 }
 
 function OnboardingWizard({ onComplete }) {
-  const { user } = useAuth();
+  const { updateUser } = useAuth();
   const { createProject, editProject } = useProjects();
   const [step, setStep] = useState(1);
 
@@ -63,9 +63,24 @@ function OnboardingWizard({ onComplete }) {
   const { createTask, editTask } = useTasks(createdProject?.id);
   const { resolvedTheme, setTheme } = useTheme();
 
-  function finishOnboarding() {
-    markOnboardingSeen(user?.id);
+  async function finishOnboarding() {
+    try {
+      const updated = await authService.updateMe({ has_completed_onboarding: true });
+      updateUser(updated);
+    } catch (error) {
+      console.error("Error marking onboarding complete:", error);
+    }
     onComplete?.();
+  }
+
+  async function handleThemeSelect(value) {
+    setTheme(value);
+    try {
+      const updated = await authService.updateMe({ theme_preference: value });
+      updateUser(updated);
+    } catch (error) {
+      console.error("Error saving theme preference:", error);
+    }
   }
 
   async function handleCreateOrUpdateProject() {
@@ -330,7 +345,7 @@ function OnboardingWizard({ onComplete }) {
                       name="onboarding-theme"
                       value={opt.value}
                       checked={selected}
-                      onChange={() => setTheme(opt.value)}
+                      onChange={() => handleThemeSelect(opt.value)}
                       className="sr-only"
                     />
                     <ThemePreview variant={opt.value} />

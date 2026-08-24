@@ -3,11 +3,12 @@ import TaskListRow from "@/features/tasks/TaskListRow";
 import TaskBoard from "@/features/tasks/TaskBoard";
 import NoteCard from "@/features/notes/NoteCard";
 import TaskModal from "@/features/tasks/TaskModal";
+import GenerateTasksDialog from "@/features/tasks/GenerateTasksDialog";
 import NoteModal from "@/features/notes/NoteModal";
 import ProjectModal from "@/features/projects/ProjectModal";
 import ProjectInsights from "@/features/projects/ProjectInsights";
 import Layout from "@/layouts/Layout";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   CheckSquare,
@@ -187,6 +188,7 @@ function ProjectHeaderMenu({ project, onEdited }) {
 
 function ProjectDetail() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
 
   const [project, setProject] = useState(null);
@@ -196,6 +198,19 @@ function ProjectDetail() {
   const [taskStatusFilter, setTaskStatusFilter] = useState("");
   const [taskSort, setTaskSort] = useState("");
   const [groupBy, setGroupBy] = useState("status");
+
+  // Arriving here right after creating a project with "Generate starter
+  // tasks with AI" checked — open the dialog once, then drop the nav state
+  // so a refresh or back/forward navigation doesn't reopen it.
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(
+    Boolean(location.state?.autoGenerateTasks),
+  );
+  useEffect(() => {
+    if (location.state?.autoGenerateTasks) {
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
     tasks,
@@ -526,6 +541,16 @@ function ProjectDetail() {
                     <LayoutGrid className="w-3.5 h-3.5" /> Board
                   </button>
                 </div>
+                {totalCount < 3 && (
+                  <GenerateTasksDialog
+                    projectId={id}
+                    projectName={project.name}
+                    projectDescription={project.description}
+                    onSuccess={handleTasksChanged}
+                    open={generateDialogOpen}
+                    onOpenChange={setGenerateDialogOpen}
+                  />
+                )}
                 <TaskModal projectId={id} onSuccess={handleTasksChanged} />
               </div>
             </div>

@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import { useProjects } from "@/hooks/useProjects";
 import { useProjectStats } from "@/hooks/useProjectStats";
 import useAuth from "@/hooks/useAuth";
-import { hasSeenOnboarding } from "@/lib/onboarding";
 import {
   FolderKanban,
   FolderCheck,
@@ -113,7 +112,7 @@ function Dashboard() {
     );
   }
 
-  if (!isInitialLoading && total === 0 && !hasSeenOnboarding(user?.id)) {
+  if (user?.has_completed_onboarding === false) {
     return <OnboardingWizard onComplete={completeOnboarding} />;
   }
 
