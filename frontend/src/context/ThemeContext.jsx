@@ -1,4 +1,5 @@
-import { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import AuthContext from "./AuthContext";
 
 const ThemeContext = createContext(null);
 const STORAGE_KEY = "theme";
@@ -44,6 +45,21 @@ export function ThemeProvider({ children }) {
     localStorage.setItem(STORAGE_KEY, next);
     setThemeState(next);
   }, []);
+
+  // Once the logged-in user loads, their persisted preference takes over
+  // from whatever localStorage held (guest default or a previous account).
+  // Adjusted during render (React's recommended pattern for syncing state to
+  // an external value) rather than in an effect, to avoid an extra render.
+  const auth = useContext(AuthContext);
+  const userThemePreference = auth?.user?.theme_preference;
+  const [syncedUserThemePreference, setSyncedUserThemePreference] = useState(userThemePreference);
+  if (userThemePreference !== syncedUserThemePreference) {
+    setSyncedUserThemePreference(userThemePreference);
+    if (THEMES.includes(userThemePreference)) {
+      localStorage.setItem(STORAGE_KEY, userThemePreference);
+      setThemeState(userThemePreference);
+    }
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>

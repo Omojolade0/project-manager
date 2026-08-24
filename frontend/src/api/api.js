@@ -55,8 +55,10 @@ api.interceptors.response.use(
       } catch (refreshError) {
         if (refreshError.response?.status === 401) {
           // refresh token itself was actually rejected — real logout
+          const wasGuest = localStorage.getItem("isGuest") === "1";
           localStorage.removeItem("token");
-          window.location.href = "/login";
+          localStorage.removeItem("isGuest");
+          window.location.href = wasGuest ? "/?demo_expired=1" : "/login";
         }
         // else: network error / 500 / timeout — don't destroy the session,
         // just let this request fail and reject normally

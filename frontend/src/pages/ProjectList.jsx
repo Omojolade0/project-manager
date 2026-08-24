@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { FolderKanban, ChevronLeft, ChevronRight } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useProjectStatusCounts } from "@/hooks/useProjectStatusCounts";
+import { getPageNumbers, ELLIPSIS } from "@/lib/pagination";
 import {
   Select,
   SelectContent,
@@ -180,7 +181,7 @@ function ProjectList() {
       )}
 
       {/* Pagination */}
-      {total > 0 && (
+      {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-5 border-t border-border">
           <p className="text-small text-muted-foreground">
             Showing {rangeStart}–{rangeEnd} of {total}
@@ -193,9 +194,15 @@ function ProjectList() {
             >
               <ChevronLeft className="w-4 h-4" /> Previous
             </button>
-            {Array.from({ length: totalPages }).map((_, i) => {
-              const pageNum = i + 1;
-              return (
+            {getPageNumbers(page, totalPages).map((pageNum, i) =>
+              pageNum === ELLIPSIS ? (
+                <span
+                  key={`ellipsis-${i}`}
+                  className="w-9 h-9 flex items-center justify-center text-small text-muted-foreground"
+                >
+                  …
+                </span>
+              ) : (
                 <button
                   key={pageNum}
                   onClick={() => fetchProjects(pageNum)}
@@ -208,8 +215,8 @@ function ProjectList() {
                 >
                   {pageNum}
                 </button>
-              );
-            })}
+              ),
+            )}
             <button
               onClick={() => fetchProjects(page + 1)}
               disabled={!hasMore}

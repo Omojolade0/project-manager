@@ -31,41 +31,45 @@ def create_user(user_data: UserCreate, session: Session) -> User:
   session.refresh(user)
   return user
 
-def login_user(email: str, password: str, session: Session) -> LoginResponse:
-  user = get_user_by_email(email, session)
-  if not user:
-    raise HTTPException(status_code=401, detail="Invalid credentials")
-  if not util.verify_password(password, user.hashed_password):
-    raise HTTPException(status_code=401, detail="Invalid credentials")
+def build_login_response(user: User) -> LoginResponse:
   access_token = util.create_access_token({
         "user_id": str(user.id),
         "email": user.email
     })
-    
+
   return LoginResponse(
         access_token=access_token,
         token_type="bearer",
         user=UserPublic.model_validate(user)
     )
 
+def login_user(email: str, password: str, session: Session) -> LoginResponse:
+  user = get_user_by_email(email, session)
+  if not user:
+    raise HTTPException(status_code=401, detail="Invalid credentials")
+  if not util.verify_password(password, user.hashed_password):
+    raise HTTPException(status_code=401, detail="Invalid credentials")
+  return build_login_response(user)
+
 
 def update_user(user_id: uuid.UUID, user_data: UserUpdate, session: Session) -> User:
   user = get_user_by_id(user_id, session)
   if not user:
     raise HTTPException(status_code=404, detail="User not found")
-  
-  if user_data.username is not None:
-    user.username = user_data.username
-  if user_data.email is not None:
-    if user.email != user_data.email and get_user_by_email(user_data.email, session):
-      raise HTTPException(status_code=400, detail="Email already registered")
-    user.email = user_data.email
-  if user_data.avatar_url is not None:
-    user.avatar_url = user_data.avatar_url  
 
-  if user_data.password is not None:
-    validate_password(user_data.password)
-    user.hashed_password = util.hash_password(user_data.password)
+  update_fields = user_data.model_dump(exclude_unset=True)
+
+  if "email" in update_fields:
+    new_email = update_fields["email"]
+    if user.email != new_email and get_user_by_email(new_email, session):
+      raise HTTPException(status_code=400, detail="Email already registered")
+
+  if "password" in update_fields:
+    validate_password(update_fields["password"])
+    update_fields["hashed_password"] = util.hash_password(update_fields.pop("password"))
+
+  for field, value in update_fields.items():
+    setattr(user, field, value)
 
   user.updated_at = datetime.now(timezone.utc)
   session.add(user)

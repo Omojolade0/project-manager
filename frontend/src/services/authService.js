@@ -14,6 +14,15 @@ const authService = {
       throw error;
     }
   },
+  demoLogin: async () => {
+    try {
+      const response = await api.post("/auth/demo");
+      return response.data;
+    } catch (error) {
+      console.error("Demo login error:", error);
+      throw error;
+    }
+  },
   register: async (data) => {
     try {
       const response = await api.post("/auth/register", data);

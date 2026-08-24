@@ -253,13 +253,13 @@ function TaskModal({
       {!hideTrigger &&
         (task ? (
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-body h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
         ) : (
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-body h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" /> New Task
             </Button>
           </DialogTrigger>
@@ -271,7 +271,7 @@ function TaskModal({
             <ListChecks className="w-5 h-5" />
           </span>
           <div className="min-w-0">
-            <DialogTitle className="text-lg font-semibold text-foreground">
+            <DialogTitle className="text-section font-semibold text-foreground">
               {task ? "Edit task" : "New task"}
             </DialogTitle>
             <DialogDescription className="text-small text-muted-foreground">
@@ -303,7 +303,7 @@ function TaskModal({
           {needsProjectPicker && (
             <div className="space-y-1.5">
               <Label className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
-                Project
+                Project <span className="text-destructive">*</span>
               </Label>
               <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
                 <SelectTrigger className="h-11 rounded-full bg-card border-border text-small">

@@ -43,19 +43,19 @@ function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center p-6">
-      <div className="w-full max-w-4xl bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100 grid grid-cols-1 lg:grid-cols-2 overflow-hidden">
+    <div className="theme-light-pinned min-h-screen bg-[#FAFAF8] flex items-center justify-center p-6">
+      <div className="w-full max-w-4xl min-h-[620px] bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100 grid grid-cols-1 lg:grid-cols-2 overflow-hidden animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
         {/* LEFT — DESIGN PANEL */}
         <div className="hidden lg:flex flex-col justify-between bg-slate-900 p-12">
           <div>
-            <div className="inline-block bg-white/10 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-8">
+            <div className="inline-block bg-white/10 text-white text-caption font-medium px-3 py-1.5 rounded-full mb-8">
               Free to get started
             </div>
-            <h3 className="text-3xl font-semibold text-white leading-tight tracking-tight mb-4">
+            <h3 className="text-section font-semibold text-white leading-tight tracking-tight mb-4">
               Your projects, tasks and notes in one place
             </h3>
-            <p className="text-slate-400 text-sm font-light leading-relaxed">
-              Join Ceous and take control of how you manage your work from day
+            <p className="text-slate-400 text-small font-light leading-relaxed">
+              Join Coeus and take control of how you manage your work from day
               one.
             </p>
           </div>
@@ -80,7 +80,7 @@ function Register() {
                     />
                   </svg>
                 </div>
-                <span className="text-sm text-slate-300">{f}</span>
+                <span className="text-small text-slate-300">{f}</span>
               </div>
             ))}
           </div>
@@ -90,23 +90,26 @@ function Register() {
         <div className="p-12 flex flex-col justify-center">
           <Link
             to="/"
-            className="text-xl font-semibold text-slate-900 mb-12 block"
+            className="flex items-center gap-2 mb-12"
           >
-            Ceous
+            <img src="/coeus-favicon.svg" alt="" className="w-6 h-6" />
+            <span className="text-section font-semibold text-foreground">
+              Coeus
+            </span>
           </Link>
 
           <div className="mb-8">
-            <h2 className="text-3xl font-semibold text-slate-900 tracking-tight mb-2">
+            <h2 className="text-section font-semibold text-foreground tracking-tight mb-2">
               Create your account
             </h2>
-            <p className="text-sm text-slate-400 font-light">
+            <p className="text-small text-muted-foreground font-light">
               It's free and takes less than a minute
             </p>
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
+              <Label className="text-small font-medium text-foreground">
                 Username
               </Label>
               <Input
@@ -121,7 +124,7 @@ function Register() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
+              <Label className="text-small font-medium text-foreground">
                 Email
               </Label>
               <Input
@@ -136,7 +139,7 @@ function Register() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
+              <Label className="text-small font-medium text-foreground">
                 Password
               </Label>
               <Input
@@ -151,7 +154,7 @@ function Register() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-500 bg-red-50 px-4 py-2.5 rounded-lg">
+              <p className="text-small text-red-500 bg-red-50 px-4 py-2.5 rounded-lg">
                 {error}
               </p>
             )}
@@ -169,11 +172,11 @@ function Register() {
             </Button>
           </form>
 
-          <p className="text-sm text-slate-400 mt-8 text-center">
+          <p className="text-small text-muted-foreground mt-8 text-center">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="text-indigo-600 font-medium hover:text-indigo-700"
+              className="text-primary font-medium hover:text-primary/80"
             >
               Sign in
             </Link>

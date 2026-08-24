@@ -14,9 +14,8 @@ def _project_sort_columns(sort: Optional[str]):
         return [Project.created_at.desc()]
     if sort == "alphabetical":
         return [func.lower(Project.name).asc()]
-    if sort == "updated":
-        return [Project.updated_at.desc().nulls_last()]
-    return []
+    # "updated" and default: most recently updated first
+    return [Project.updated_at.desc().nulls_last()]
 
 
 def _project_card_extras(project_ids: list[uuid.UUID], session: Session) -> dict:

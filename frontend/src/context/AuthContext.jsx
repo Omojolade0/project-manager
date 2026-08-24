@@ -39,11 +39,21 @@ export function AuthProvider({ children }) {
     loadUser();
   }, []);
 
-  async function login(data) {
-    const response = await authService.login(data);
+  function applyLoginResponse(response) {
     localStorage.setItem("token", response.access_token);
+    localStorage.setItem("isGuest", response.user.is_guest ? "1" : "0");
     setUser(response.user);
     return response;
+  }
+
+  async function login(data) {
+    const response = await authService.login(data);
+    return applyLoginResponse(response);
+  }
+
+  async function loginAsGuest() {
+    const response = await authService.demoLogin();
+    return applyLoginResponse(response);
   }
 
   async function logout() {
@@ -53,6 +63,7 @@ export function AuthProvider({ children }) {
       console.error("Logout error:", error);
     } finally {
       localStorage.removeItem("token");
+      localStorage.removeItem("isGuest");
       setUser(null);
     }
   }
@@ -63,7 +74,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, connectionError, login, logout, updateUser }}
+      value={{ user, loading, connectionError, login, loginAsGuest, logout, updateUser }}
     >
       {children}
     </AuthContext.Provider>

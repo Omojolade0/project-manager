@@ -45,29 +45,32 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center p-6">
-      <div className="w-full max-w-4xl bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100 grid grid-cols-1 lg:grid-cols-2 overflow-hidden">
+    <div className="theme-light-pinned min-h-screen bg-[#FAFAF8] flex items-center justify-center p-6">
+      <div className="w-full max-w-4xl min-h-[620px] bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100 grid grid-cols-1 lg:grid-cols-2 overflow-hidden animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
         {/* LEFT — FORM */}
         <div className="p-12 flex flex-col justify-center">
           <Link
             to="/"
-            className="text-xl font-semibold text-slate-900 mb-12 block"
+            className="flex items-center gap-2 mb-12"
           >
-            Ceous
+            <img src="/coeus-favicon.svg" alt="" className="w-6 h-6" />
+            <span className="text-section font-semibold text-foreground">
+              Coeus
+            </span>
           </Link>
 
           <div className="mb-8">
-            <h2 className="text-3xl font-semibold text-slate-900 tracking-tight mb-2">
+            <h2 className="text-section font-semibold text-foreground tracking-tight mb-2">
               Welcome back
             </h2>
-            <p className="text-sm text-slate-400 font-light">
+            <p className="text-small text-muted-foreground font-light">
               Enter your details to sign in to your account
             </p>
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
+              <Label className="text-small font-medium text-foreground">
                 Email
               </Label>
               <Input
@@ -82,7 +85,7 @@ function Login() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">
+              <Label className="text-small font-medium text-foreground">
                 Password
               </Label>
               <Input
@@ -97,7 +100,7 @@ function Login() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-500 bg-red-50 px-4 py-2.5 rounded-lg">
+              <p className="text-small text-red-500 bg-red-50 px-4 py-2.5 rounded-lg">
                 {error}
               </p>
             )}
@@ -105,22 +108,24 @@ function Login() {
             <Button
               type="submit"
               disabled={loadingLogin}
-              onClick={handleSubmit}
               className="w-full h-11 bg-primary hover:opacity-90 text-primary-foreground font-medium mt-2"
             >
               {loadingLogin ? (
-                <LoadingSpinner size="sm" className="border-primary-foreground" />
+                <LoadingSpinner
+                  size="sm"
+                  className="border-primary-foreground"
+                />
               ) : (
                 "Sign in"
               )}
             </Button>
           </form>
 
-          <p className="text-sm text-slate-400 mt-8 text-center">
+          <p className="text-small text-muted-foreground mt-8 text-center">
             Don't have an account?{" "}
             <Link
               to="/register"
-              className="text-indigo-600 font-medium hover:text-indigo-700"
+              className="text-primary font-medium hover:text-primary/80"
             >
               Sign up
             </Link>
@@ -130,13 +135,13 @@ function Login() {
         {/* RIGHT — DESIGN PANEL */}
         <div className="hidden lg:flex flex-col justify-between bg-slate-900 p-12">
           <div>
-            <div className="inline-block bg-white/10 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-8">
+            <div className="inline-block bg-white/10 text-white text-caption font-medium px-3 py-1.5 rounded-full mb-8">
               Project management, simplified
             </div>
-            <h3 className="text-3xl font-semibold text-white leading-tight tracking-tight mb-4">
+            <h3 className="text-section font-semibold text-white leading-tight tracking-tight mb-4">
               Everything you need to ship projects faster
             </h3>
-            <p className="text-slate-400 text-sm font-light leading-relaxed">
+            <p className="text-slate-400 text-small font-light leading-relaxed">
               Track projects, manage tasks, and keep notes — all in one clean
               workspace.
             </p>
@@ -170,11 +175,11 @@ function Login() {
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full ${p.color}`} />
-                  <span className="text-sm text-white font-medium">
+                  <span className="text-card-title text-white">
                     {p.name}
                   </span>
                 </div>
-                <span className="text-xs text-slate-400">{p.tasks} tasks</span>
+                <span className="text-caption font-normal text-slate-400">{p.tasks} tasks</span>
               </div>
             ))}
           </div>

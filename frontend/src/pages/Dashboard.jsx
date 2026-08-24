@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout";
 import DashboardProjectCard from "@/features/projects/DashboardProjectCard";
 import ProjectModal from "@/features/projects/ProjectModal";
 import UpcomingSection from "@/features/tasks/UpcomingSection";
+import OnboardingWizard from "@/features/onboarding/OnboardingWizard";
 import Skeleton from "@/components/common/Skeleton";
 import ErrorState from "@/components/common/ErrorState";
 import { useNavigate } from "react-router-dom";
@@ -51,6 +52,11 @@ function Dashboard() {
   function refetchDashboard() {
     fetchProjects();
     fetchStats();
+  }
+
+  function completeOnboarding() {
+    refetchDashboard();
+    navigate("/dashboard");
   }
 
   const stats = [
@@ -106,6 +112,10 @@ function Dashboard() {
     );
   }
 
+  if (user?.has_completed_onboarding === false) {
+    return <OnboardingWizard onComplete={completeOnboarding} />;
+  }
+
   const now = new Date();
 
   return (
@@ -140,7 +150,7 @@ function Dashboard() {
                   >
                     <s.icon className="w-5 h-5" />
                   </div>
-                  <p className="text-2xl font-semibold text-foreground">{s.value}</p>
+                  <p className="text-page-title text-foreground">{s.value}</p>
                   <p className="text-small text-muted-foreground mt-0.5">{s.label}</p>
                   <div className={`h-1 w-10 rounded-full mt-4 ${s.barBg}`} />
                 </div>
@@ -176,7 +186,13 @@ function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {projects.slice(0, PROJECTS_DISPLAY_LIMIT).map((project) => (
-              <DashboardProjectCard key={project.id} project={project} />
+              <DashboardProjectCard
+                key={project.id}
+                project={project}
+                manageable
+                onDelete={refetchDashboard}
+                onChange={refetchDashboard}
+              />
             ))}
 
             <button

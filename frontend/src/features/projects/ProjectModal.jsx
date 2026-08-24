@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -13,7 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Sparkles } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProjects } from "@/hooks/useProjects";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
@@ -50,7 +52,9 @@ function ProjectModal({
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const [generateWithAI, setGenerateWithAI] = useState(false);
   const { createProject, editProject } = useProjects();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (project) {
@@ -67,17 +71,22 @@ function ProjectModal({
     }
     try {
       setLoading(true);
-      await createProject({
+      const created = await createProject({
         name: projectName,
         description,
         status: selectedPlan,
       });
+      const shouldGenerate = generateWithAI;
       setProjectName("");
       setDescription("");
       setSelectedPlan("Active");
+      setGenerateWithAI(false);
       setOpen(false);
       toast.success("Project created!");
       onSuccess?.();
+      navigate(`/projects/${created.id}`, {
+        state: shouldGenerate ? { autoGenerateTasks: true } : undefined,
+      });
     } catch (error) {
       console.error("Error creating project:", error);
       toast.error("Failed to create project");
@@ -90,6 +99,7 @@ function ProjectModal({
     setProjectName("");
     setDescription("");
     setSelectedPlan("Active");
+    setGenerateWithAI(false);
     setOpen(false);
   }
 
@@ -117,11 +127,11 @@ function ProjectModal({
       {!hideTrigger && (
         <DialogTrigger asChild>
           {project ? (
-            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-body h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" />
             </Button>
           ) : (
-            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-sm h-9 px-4 rounded-xl flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground text-body h-9 px-4 rounded-xl flex items-center gap-2">
               <Plus className="w-4 h-4" /> New Project
             </Button>
           )}
@@ -130,7 +140,7 @@ function ProjectModal({
 
       <DialogContent className="w-[calc(100%-2rem)] sm:w-full max-w-md rounded-2xl border border-border bg-card shadow-xl p-6">
         <DialogHeader className="text-left">
-          <DialogTitle className="text-lg font-semibold text-foreground">
+          <DialogTitle className="text-section font-semibold text-foreground">
             {project ? "Edit project" : "New project"}
           </DialogTitle>
           <DialogDescription className="text-small text-muted-foreground">
@@ -206,6 +216,25 @@ function ProjectModal({
               })}
             </div>
           </div>
+
+          {!project && (
+            <label className="flex items-start gap-3 rounded-2xl bg-muted p-3.5 cursor-pointer">
+              <Checkbox
+                checked={generateWithAI}
+                onCheckedChange={(checked) => setGenerateWithAI(!!checked)}
+                className="mt-0.5"
+              />
+              <span className="min-w-0">
+                <span className="flex items-center gap-1.5 text-small font-medium text-foreground">
+                  <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+                  Generate starter tasks with AI
+                </span>
+                <span className="block text-caption text-muted-foreground mt-0.5">
+                  Optional — based on the name and description above. You'll get to review before anything's added.
+                </span>
+              </span>
+            </label>
+          )}
         </div>
 
         <DialogFooter className="flex-row items-center justify-end gap-4 pt-1">
