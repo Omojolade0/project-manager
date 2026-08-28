@@ -1,6 +1,6 @@
 import uuid
 from typing import Literal, Optional
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from app.schemas.project import ProjectUpdate, ProjectCreate, ProjectPublic, ProjectPage, ProjectStats
 from app.models.user import User
 from sqlmodel import Session
@@ -16,8 +16,8 @@ def list_projects(
     current_user: User= Depends(get_current_user),
     status: Optional[Literal["Active", "Completed", "Inactive"]] = None,
     sort: Optional[Literal["updated", "created", "alphabetical"]] = None,
-    page: int = 1,
-    limit: int = 10,
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=10, ge=1, le=100),
     session: Session = Depends(get_session)):
 
     """Retrieve a list of all project."""

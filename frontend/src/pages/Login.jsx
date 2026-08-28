@@ -70,11 +70,14 @@ function Login() {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
-              <Label className="text-small font-medium text-foreground">
+              <Label
+                htmlFor="login-email"
+                className="text-small font-medium text-foreground"
+              >
                 Email
               </Label>
               <Input
-                id="email"
+                id="login-email"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
@@ -85,11 +88,14 @@ function Login() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-small font-medium text-foreground">
+              <Label
+                htmlFor="login-password"
+                className="text-small font-medium text-foreground"
+              >
                 Password
               </Label>
               <Input
-                id="password"
+                id="login-password"
                 type="password"
                 placeholder="••••••••"
                 value={password}

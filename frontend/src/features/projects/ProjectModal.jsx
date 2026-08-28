@@ -152,10 +152,11 @@ function ProjectModal({
 
         <div className="space-y-5">
           <div className="space-y-1.5">
-            <Label className="text-small font-medium text-foreground">
+            <Label htmlFor="project-name" className="text-small font-medium text-foreground">
               Project name
             </Label>
             <Input
+              id="project-name"
               placeholder="e.g. Q3 onboarding revamp"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
@@ -165,11 +166,12 @@ function ProjectModal({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-small font-medium text-foreground">
+            <Label htmlFor="project-description" className="text-small font-medium text-foreground">
               Description{" "}
               <span className="font-normal text-muted-foreground">optional</span>
             </Label>
             <Textarea
+              id="project-description"
               placeholder="What is this project for?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}

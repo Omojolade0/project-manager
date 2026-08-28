@@ -4,6 +4,7 @@ import TaskBoard from "@/features/tasks/TaskBoard";
 import NoteCard from "@/features/notes/NoteCard";
 import TaskModal from "@/features/tasks/TaskModal";
 import GenerateTasksDialog from "@/features/tasks/GenerateTasksDialog";
+import { ShowMoreDoneButton } from "@/features/tasks/ShowMoreDoneButton";
 import NoteModal from "@/features/notes/NoteModal";
 import ProjectModal from "@/features/projects/ProjectModal";
 import ProjectInsights from "@/features/projects/ProjectInsights";
@@ -27,7 +28,7 @@ import { useNotes } from "@/hooks/useNotes";
 import { useProjects } from "@/hooks/useProjects";
 import taskService from "@/services/taskService";
 import { getUrgency } from "@/lib/taskUrgency";
-import { STATUS_META, STATUS_ORDER } from "@/lib/taskStatus";
+import { STATUS_META, STATUS_ORDER, DONE_TASKS_CAP } from "@/lib/taskStatus";
 import { getPageNumbers, ELLIPSIS } from "@/lib/pagination";
 import { cn } from "@/lib/utils";
 import {
@@ -135,7 +136,7 @@ function ProjectHeaderMenu({ project, onEdited }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0">
+          <button className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
             <MoreHorizontal className="w-4 h-4" />
           </button>
         </DropdownMenuTrigger>
@@ -198,6 +199,9 @@ function ProjectDetail() {
   const [taskStatusFilter, setTaskStatusFilter] = useState("");
   const [taskSort, setTaskSort] = useState("");
   const [groupBy, setGroupBy] = useState("status");
+  // Done tasks beyond DONE_TASKS_CAP start collapsed; this resets whenever the
+  // visible task set changes so a fresh page/filter/grouping starts collapsed too.
+  const [doneExpanded, setDoneExpanded] = useState(false);
 
   // Arriving here right after creating a project with "Generate starter
   // tasks with AI" checked — open the dialog once, then drop the nav state
@@ -226,6 +230,10 @@ function ProjectDetail() {
     createTask,
     reorderTasks,
   } = useTasks(id, { autoFetch: true });
+
+  useEffect(() => {
+    setDoneExpanded(false);
+  }, [tasksPage, taskStatusFilter, taskSort, groupBy, tasksView]);
 
   // Frontend-only stats source: the full, unfiltered task set, fetched
   // independently of the list view's filter/sort/pagination. Powers the
@@ -420,6 +428,13 @@ function ProjectDetail() {
     }
     return null;
   }, [tasks, groupBy]);
+
+  // Used by the ungrouped ("No grouping") list view — the done cap for the
+  // grouped views (status/due) is applied inline where their groups render.
+  const notDoneTasks = useMemo(() => tasks.filter((t) => t.status !== "Done"), [tasks]);
+  const doneTasks = useMemo(() => tasks.filter((t) => t.status === "Done"), [tasks]);
+  const visibleDoneTasks = doneExpanded ? doneTasks : doneTasks.slice(0, DONE_TASKS_CAP);
+  const hiddenDoneCount = doneTasks.length - visibleDoneTasks.length;
 
   if (projectLoading) {
     return (
@@ -617,29 +632,50 @@ function ProjectDetail() {
               />
             ) : groupedTasks ? (
               <div className="space-y-5">
-                {groupedTasks.map((group) => (
-                  <div key={group.key}>
-                    <p className="text-caption font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                      {group.label} · {group.items.length}
-                    </p>
-                    <div className="space-y-2.5">
-                      {group.items.map((task) => (
-                        <TaskListRow
-                          key={task.id}
-                          task={task}
-                          projectId={id}
-                          onChange={handleTasksChanged}
-                          onDuplicate={handleDuplicateTask}
-                        />
-                      ))}
+                {groupedTasks.map((group) => {
+                  const isDoneGroup = group.key === "Done" || group.key === "done";
+                  const visibleItems =
+                    isDoneGroup && !doneExpanded
+                      ? group.items.slice(0, DONE_TASKS_CAP)
+                      : group.items;
+                  const hiddenCount = group.items.length - visibleItems.length;
+                  return (
+                    <div key={group.key}>
+                      <p className="text-caption font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                        {group.label} · {group.items.length}
+                      </p>
+                      <div className="space-y-2.5">
+                        {visibleItems.map((task) => (
+                          <TaskListRow
+                            key={task.id}
+                            task={task}
+                            projectId={id}
+                            onChange={handleTasksChanged}
+                            onDuplicate={handleDuplicateTask}
+                          />
+                        ))}
+                      </div>
+                      <ShowMoreDoneButton
+                        hiddenCount={hiddenCount}
+                        onClick={() => setDoneExpanded(true)}
+                      />
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <>
                 <div className="space-y-2.5">
-                  {tasks.map((task) => (
+                  {notDoneTasks.map((task) => (
+                    <TaskListRow
+                      key={task.id}
+                      task={task}
+                      projectId={id}
+                      onChange={handleTasksChanged}
+                      onDuplicate={handleDuplicateTask}
+                    />
+                  ))}
+                  {visibleDoneTasks.map((task) => (
                     <TaskListRow
                       key={task.id}
                       task={task}
@@ -649,6 +685,10 @@ function ProjectDetail() {
                     />
                   ))}
                 </div>
+                <ShowMoreDoneButton
+                  hiddenCount={hiddenDoneCount}
+                  onClick={() => setDoneExpanded(true)}
+                />
                 {tasksTotalPages > 1 && (
                   <div className="flex items-center justify-center gap-1.5 mt-4 pt-4 border-t border-border">
                     <button

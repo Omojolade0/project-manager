@@ -20,12 +20,12 @@ class Task(SQLModel, table=True):
     project_id: uuid.UUID = Field(foreign_key="project.id", ondelete="CASCADE", index=True)
     title: str
     description: Optional[str] = None
-    status: TaskStatus = Field(default=TaskStatus.Todo)  # ← Added default
+    status: TaskStatus = Field(default=TaskStatus.Todo, index=True)  # ← Added default
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
     priority: Optional[Priority] = None
-    due_date: Optional[datetime] = None
-    is_pinned: bool = Field(default=False)
+    due_date: Optional[datetime] = Field(default=None, index=True)
+    is_pinned: bool = Field(default=False, index=True)
     assigned_to: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id", ondelete="SET NULL")
     position: int = Field(default=0)
     deleted_at: Optional[datetime] = None

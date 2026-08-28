@@ -153,7 +153,7 @@ function Topbar({ onOpenMobileNav }) {
             type="button"
             aria-label="Open navigation"
             onClick={onOpenMobileNav}
-            className="md:hidden h-9 w-9 shrink-0 rounded-xl flex items-center justify-center hover:bg-muted border border-transparent hover:border-border transition-all"
+            className="md:hidden h-9 w-9 shrink-0 rounded-xl flex items-center justify-center hover:bg-muted border border-transparent hover:border-border transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <Menu className="h-4 w-4 text-muted-foreground" />
           </button>
@@ -262,7 +262,7 @@ function Topbar({ onOpenMobileNav }) {
           <button
             type="button"
             aria-label="Notifications"
-            className="h-9 w-9 rounded-xl flex items-center justify-center hover:bg-muted border border-transparent hover:border-border transition-all bg-transparent"
+            className="h-9 w-9 rounded-xl flex items-center justify-center hover:bg-muted border border-transparent hover:border-border transition-all bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <Bell className="h-4 w-4 text-muted-foreground" />
           </button>

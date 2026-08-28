@@ -17,4 +17,5 @@ class User(SQLModel, table=True):
     has_completed_onboarding: bool = Field(default=False)
     theme_preference: ThemePreferences = Field(default=ThemePreferences.system)
     is_guest: bool = Field(default=False)
+    token_version: int = Field(default=0)
 
