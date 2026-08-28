@@ -136,7 +136,7 @@ export default function LandingPage() {
         .coeus-drift { animation: coeus-drift 4.5s ease-in-out infinite; }
       `}</style>
 
-      <div id="top" className="theme-light-pinned min-h-screen bg-background text-foreground overflow-x-hidden">
+      <div id="top" className="theme-light-pinned min-h-screen bg-background text-foreground">
         {/* Nav */}
         <header className="sticky top-3 sm:top-5 z-20 px-3 sm:px-6">
           <nav className="mx-auto max-w-6xl flex items-center justify-between gap-3 rounded-full bg-card/90 backdrop-blur border border-border shadow-card px-3 py-2.5 sm:px-4">
@@ -191,6 +191,14 @@ export default function LandingPage() {
             </div>
           </nav>
         </header>
+
+        {/*
+          overflow-x-hidden lives on this wrapper instead of the #top div —
+          any non-visible overflow on a sticky element's ancestor makes that
+          ancestor the sticky positioning container, which silently breaks
+          `position: sticky` on the header above if it were applied there.
+        */}
+        <div className="overflow-x-hidden">
 
         {/* Hero */}
         <section className="relative max-w-6xl mx-auto px-4 sm:px-6 md:px-10 pt-12 sm:pt-16 md:pt-20 pb-16 sm:pb-24">
@@ -762,6 +770,7 @@ export default function LandingPage() {
           </div>
           <p className="text-sm text-muted-foreground">Built with FastAPI & React</p>
         </footer>
+        </div>
       </div>
     </>
   );

@@ -4,7 +4,7 @@ from app.models.task import Task, TaskStatus, Priority
 from app.models.project import Project, ProjectStatus
 from app.schemas.task import TaskCreate, TaskUpdate, ReorderColumn
 from sqlmodel import Session, select
-from sqlalchemy import func, case
+from sqlalchemy import func, case, update
 from fastapi import HTTPException
 from app.core.permissions import verify_project_ownership
 from datetime import datetime, timezone
@@ -12,6 +12,10 @@ from datetime import datetime, timezone
 
 def _unconditional_pin_priority():
   return case((Task.is_pinned == True, 0), else_=1)
+
+
+def _not_done_first():
+  return case((Task.status == TaskStatus.Done, 1), else_=0)
 
 
 def _project_task_sort_columns(sort: Optional[str]):
@@ -43,7 +47,7 @@ def get_all_project_tasks(project_id: uuid.UUID, page: int, limit: int, user_id:
     select(func.count()).select_from(Task).where(*filters)
   ).one()
 
-  order_by = [_unconditional_pin_priority(), *_project_task_sort_columns(sort), Task.id]
+  order_by = [_not_done_first(), _unconditional_pin_priority(), *_project_task_sort_columns(sort), Task.id]
 
   results = session.exec(
     select(Task)
@@ -115,16 +119,32 @@ def delete_task(project_id: uuid.UUID, task_id: uuid.UUID, user_id: uuid.UUID, s
 
 def reorder_tasks(project_id: uuid.UUID, columns: list[ReorderColumn], user_id: uuid.UUID, session: Session) -> dict:
   verify_project_ownership(project_id, user_id, session)
+
+  position_by_id: dict[uuid.UUID, int] = {}
+  status_by_id: dict[uuid.UUID, TaskStatus] = {}
   for column in columns:
     for index, task_id in enumerate(column.task_ids):
-      task = session.exec(
-        select(Task).where((Task.id == task_id) & (Task.project_id == project_id))
-      ).first()
-      if not task:
-        continue
-      task.position = index
-      task.status = column.status
-      session.add(task)
+      position_by_id[task_id] = index
+      status_by_id[task_id] = column.status
+
+  if not position_by_id:
+    return {"success": True}
+
+  task_ids = list(position_by_id.keys())
+  position_case = case(
+    *[(Task.id == task_id, position) for task_id, position in position_by_id.items()],
+    else_=Task.position,
+  )
+  status_case = case(
+    *[(Task.id == task_id, status) for task_id, status in status_by_id.items()],
+    else_=Task.status,
+  )
+
+  session.exec(
+    update(Task)
+    .where(Task.id.in_(task_ids), Task.project_id == project_id)
+    .values(position=position_case, status=status_case)
+  )
   session.commit()
   return {"success": True}
 

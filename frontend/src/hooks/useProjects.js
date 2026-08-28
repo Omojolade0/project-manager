@@ -4,7 +4,7 @@ import { useProjectStore } from "@/store/useProjectStore";
 
 const LIMIT = 10;
 
-export function useProjects({ autoFetch = false } = {}) {
+export function useProjects({ autoFetch = false, status: initialStatus = null, sort: initialSort = null } = {}) {
   const { projects, setProjects, addProject, updateProject, deleteProject } =
     useProjectStore();
   const [loading, setLoading] = useState(false);
@@ -12,8 +12,8 @@ export function useProjects({ autoFetch = false } = {}) {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
-  const [status, setStatus] = useState(null);
-  const [sort, setSort] = useState(null);
+  const [status, setStatus] = useState(initialStatus);
+  const [sort, setSort] = useState(initialSort);
   const isInitialLoading = loading && projects.length === 0;
 
   async function fetchProjects(

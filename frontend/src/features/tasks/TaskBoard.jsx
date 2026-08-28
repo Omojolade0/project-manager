@@ -3,7 +3,8 @@ import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import TaskCard from "@/features/tasks/TaskCard";
 import TaskModal from "@/features/tasks/TaskModal";
-import { STATUS_META, STATUS_ORDER } from "@/lib/taskStatus";
+import { ShowMoreDoneButton } from "@/features/tasks/ShowMoreDoneButton";
+import { STATUS_META, STATUS_ORDER, DONE_TASKS_CAP } from "@/lib/taskStatus";
 import { useTasks } from "@/hooks/useTasks";
 import {
   DndContext,
@@ -80,9 +81,21 @@ function SortableTaskCard({ task, projectId, onChange, onDuplicate }) {
   );
 }
 
-function Column({ column, tasks, projectId, onChange, onDuplicate }) {
+function Column({
+  column,
+  tasks,
+  projectId,
+  onChange,
+  onDuplicate,
+  doneExpanded,
+  onExpandDone,
+}) {
   const { setNodeRef } = useDroppable({ id: column.status });
-  const taskIds = tasks.map((t) => t.id);
+  const isDoneColumn = column.status === "Done";
+  const visibleTasks =
+    isDoneColumn && !doneExpanded ? tasks.slice(0, DONE_TASKS_CAP) : tasks;
+  const hiddenCount = tasks.length - visibleTasks.length;
+  const taskIds = visibleTasks.map((t) => t.id);
   const [addOpen, setAddOpen] = useState(false);
   const meta = STATUS_META[column.status];
 
@@ -102,7 +115,7 @@ function Column({ column, tasks, projectId, onChange, onDuplicate }) {
           {tasks.length === 0 ? (
             <EmptyState compact title="No tasks" />
           ) : (
-            tasks.map((task) => (
+            visibleTasks.map((task) => (
               <SortableTaskCard
                 key={task.id}
                 task={task}
@@ -114,6 +127,7 @@ function Column({ column, tasks, projectId, onChange, onDuplicate }) {
           )}
         </div>
       </SortableContext>
+      <ShowMoreDoneButton hiddenCount={hiddenCount} onClick={onExpandDone} />
 
       <button
         onClick={() => setAddOpen(true)}
@@ -136,6 +150,7 @@ function Column({ column, tasks, projectId, onChange, onDuplicate }) {
 function TaskBoard({ tasks, projectId, onChange, onDuplicate }) {
   const [board, setBoard] = useState(() => groupTasksByStatus(tasks));
   const [activeTask, setActiveTask] = useState(null);
+  const [doneExpanded, setDoneExpanded] = useState(false);
   const { reorderTasks } = useTasks(projectId);
 
   useEffect(() => {
@@ -265,6 +280,8 @@ function TaskBoard({ tasks, projectId, onChange, onDuplicate }) {
                 projectId={projectId}
                 onChange={onChange}
                 onDuplicate={onDuplicate}
+                doneExpanded={doneExpanded}
+                onExpandDone={() => setDoneExpanded(true)}
               />
             </div>
           ))}

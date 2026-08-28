@@ -43,7 +43,7 @@ function TaskListRow({ task, projectId, onChange, onDuplicate }) {
       <button
         onClick={handleToggleDone}
         disabled={togglingDone}
-        className={`flex items-center justify-center w-5 h-5 rounded-full border-2 shrink-0 transition-colors ${
+        className={`flex items-center justify-center w-5 h-5 rounded-full border-2 shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
           isDone
             ? "bg-status-done border-status-done text-primary-foreground"
             : "border-border hover:border-primary"

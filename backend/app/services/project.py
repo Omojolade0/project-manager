@@ -3,19 +3,69 @@ from typing import Optional
 from datetime import datetime, timezone, timedelta
 from app.models.project import Project, ProjectStatus
 from app.models.task import Task, TaskStatus
+from app.models.notes import Note
 from app.schemas.project import ProjectCreate, ProjectUpdate
 from fastapi import HTTPException
 from sqlmodel import Session, select
 from sqlalchemy import func, case
 
 
-def _project_sort_columns(sort: Optional[str]):
+def _greatest_ignoring_nulls(a, b):
+    """Two-value GREATEST that ignores NULLs like Postgres's does (only NULL
+    if both inputs are NULL), unlike SQLite's multi-arg max() which returns
+    NULL if *any* input is NULL."""
+    return case(
+        (a.is_(None), b),
+        (b.is_(None), a),
+        (a >= b, a),
+        else_=b,
+    )
+
+
+def _project_recency(session: Session):
+    """Most recent activity on a project: its own updated_at, or whichever of
+    its tasks/notes was touched most recently — computed at read time via
+    correlated subqueries, not a stored column."""
+    task_max = (
+        select(func.max(Task.updated_at))
+        .where(Task.project_id == Project.id)
+        .correlate(Project)
+        .scalar_subquery()
+    )
+    note_max = (
+        select(func.max(Note.updated_at))
+        .where(Note.project_id == Project.id)
+        .correlate(Project)
+        .scalar_subquery()
+    )
+    if session.bind.dialect.name == "postgresql":
+        return func.greatest(Project.updated_at, task_max, note_max)
+    # SQLite (used by the test suite) has no GREATEST(); reproduce Postgres's
+    # NULL-skipping semantics with nested CASEs instead of SQLite's multi-arg
+    # max(), which would return NULL whenever any single input is NULL —
+    # i.e. for almost every project, breaking the sort rather than just
+    # renaming it.
+    return _greatest_ignoring_nulls(
+        _greatest_ignoring_nulls(Project.updated_at, task_max), note_max
+    )
+
+
+def _project_status_tier():
+    return case(
+        (Project.status == ProjectStatus.Active, 0),
+        (Project.status == ProjectStatus.Completed, 1),
+        (Project.status == ProjectStatus.Inactive, 2),
+        else_=3,
+    )
+
+
+def _project_sort_columns(sort: Optional[str], session: Session):
     if sort == "created":
         return [Project.created_at.desc()]
     if sort == "alphabetical":
         return [func.lower(Project.name).asc()]
-    # "updated" and default: most recently updated first
-    return [Project.updated_at.desc().nulls_last()]
+    # "updated" and default: most recently active first
+    return [_project_recency(session).desc().nulls_last()]
 
 
 def _project_card_extras(project_ids: list[uuid.UUID], session: Session) -> dict:
@@ -79,7 +129,7 @@ def get_all_projects(user_id: uuid.UUID, page: int, limit: int, session: Session
         select(func.count()).select_from(Project).where(*filters)
     ).one()
 
-    order_by = [*_project_sort_columns(sort), Project.id]
+    order_by = [_project_status_tier(), *_project_sort_columns(sort, session), Project.id]
 
     results = session.exec(
         select(Project)
