@@ -77,6 +77,15 @@ def update_user(user_id: uuid.UUID, user_data: UserUpdate, session: Session) -> 
   session.refresh(user)
   return user
 
+def revoke_refresh_tokens(user_id: uuid.UUID, session: Session) -> None:
+  user = get_user_by_id(user_id, session)
+  if not user:
+    raise HTTPException(status_code=404, detail="User not found")
+
+  user.token_version += 1
+  session.add(user)
+  session.commit()
+
 def delete_user(user_id: uuid.UUID,  session: Session) -> None:
   user = get_user_by_id(user_id, session)
   if not user:

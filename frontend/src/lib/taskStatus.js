@@ -9,3 +9,7 @@ export const STATUS_META = {
 };
 
 export const STATUS_ORDER = ["Todo", "Inprogress", "Done"];
+
+// Done tasks beyond this count start collapsed behind a "Show more" control,
+// in both the task list and the Kanban board's Done column.
+export const DONE_TASKS_CAP = 5;

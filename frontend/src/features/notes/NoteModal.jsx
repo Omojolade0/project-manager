@@ -172,14 +172,14 @@ function NoteModal({
           <div className="space-y-4">
             {needsProjectPicker && (
               <div className="space-y-1.5">
-                <Label className="text-small font-medium text-foreground">
+                <Label htmlFor="note-project" className="text-small font-medium text-foreground">
                   Project
                 </Label>
                 <Select
                   value={selectedProjectId}
                   onValueChange={setSelectedProjectId}
                 >
-                  <SelectTrigger className="h-10 bg-muted border-transparent rounded-xl text-small">
+                  <SelectTrigger id="note-project" className="h-10 bg-muted border-transparent rounded-xl text-small">
                     <SelectValue
                       placeholder={
                         projectsLoading ? "Loading projects..." : "Select a project"
@@ -197,8 +197,9 @@ function NoteModal({
               </div>
             )}
             <div className="space-y-1.5">
-              <Label className="text-small font-medium text-foreground">Note</Label>
+              <Label htmlFor="note-content" className="text-small font-medium text-foreground">Note</Label>
               <Textarea
+                id="note-content"
                 placeholder="Write your note here..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
@@ -209,15 +210,16 @@ function NoteModal({
           </div>
         </div>
         <div className="flex items-center justify-between gap-3 px-6 py-4 bg-muted/60 border-t border-border">
-          <Label className="text-small font-medium text-foreground">
+          <Label htmlFor="note-pinned" className="text-small font-medium text-foreground">
             Pin to the top
           </Label>
           <button
+            id="note-pinned"
             type="button"
             role="switch"
             aria-checked={isPinned}
             onClick={() => setIsPinned((v) => !v)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
               isPinned ? "bg-primary" : "bg-border"
             }`}
           >

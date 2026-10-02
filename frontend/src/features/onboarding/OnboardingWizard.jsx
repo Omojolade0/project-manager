@@ -188,8 +188,9 @@ function OnboardingWizard({ onComplete }) {
 
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-foreground">Project name</Label>
+                <Label htmlFor="onboarding-project-name" className="text-foreground">Project name</Label>
                 <Input
+                  id="onboarding-project-name"
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                   placeholder="Website redesign"
@@ -198,13 +199,14 @@ function OnboardingWizard({ onComplete }) {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-foreground">
+                <Label htmlFor="onboarding-project-description" className="text-foreground">
                   Description{" "}
                   <span className="font-normal text-muted-foreground">
                     optional
                   </span>
                 </Label>
                 <Textarea
+                  id="onboarding-project-description"
                   value={projectDescription}
                   onChange={(e) => setProjectDescription(e.target.value)}
                   placeholder="What's this project about?"
@@ -250,8 +252,9 @@ function OnboardingWizard({ onComplete }) {
 
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-foreground">Task name</Label>
+                <Label htmlFor="onboarding-task-name" className="text-foreground">Task name</Label>
                 <Input
+                  id="onboarding-task-name"
                   value={taskName}
                   onChange={(e) => setTaskName(e.target.value)}
                   placeholder="Sketch the homepage"
@@ -261,17 +264,18 @@ function OnboardingWizard({ onComplete }) {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-foreground">Deadline</Label>
+                  <Label htmlFor="onboarding-task-deadline" className="text-foreground">Deadline</Label>
                   <Input
+                    id="onboarding-task-deadline"
                     type="date"
                     value={taskDeadline}
                     onChange={(e) => setTaskDeadline(e.target.value)}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-foreground">Priority</Label>
+                  <Label htmlFor="onboarding-task-priority" className="text-foreground">Priority</Label>
                   <Select value={taskPriority} onValueChange={setTaskPriority}>
-                    <SelectTrigger>
+                    <SelectTrigger id="onboarding-task-priority">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

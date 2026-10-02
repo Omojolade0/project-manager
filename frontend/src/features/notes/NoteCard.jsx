@@ -67,24 +67,24 @@ function NoteCard({ note, projectId }) {
           <button
             onClick={handlePin}
             disabled={pinning}
-            className={`p-1.5 rounded-lg transition-opacity ${
+            className={`p-1.5 rounded-lg transition-opacity focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
               note.is_pinned
                 ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100 hover:bg-card"
+                : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-card"
             }`}
           >
             <Pin
               className={`w-3.5 h-3.5 ${note.is_pinned ? "text-primary fill-primary" : "text-muted-foreground"}`}
             />
           </button>
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
             <NoteModal note={note} projectId={projectId} />
           </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button
                 disabled={deleting}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-card"
+                className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-card focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive transition-colors" />
               </button>

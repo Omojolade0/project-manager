@@ -109,11 +109,14 @@ function Register() {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
-              <Label className="text-small font-medium text-foreground">
+              <Label
+                htmlFor="register-username"
+                className="text-small font-medium text-foreground"
+              >
                 Username
               </Label>
               <Input
-                id="username"
+                id="register-username"
                 type="text"
                 placeholder="John Doe"
                 value={username}
@@ -124,11 +127,14 @@ function Register() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-small font-medium text-foreground">
+              <Label
+                htmlFor="register-email"
+                className="text-small font-medium text-foreground"
+              >
                 Email
               </Label>
               <Input
-                id="email"
+                id="register-email"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
@@ -139,11 +145,14 @@ function Register() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-small font-medium text-foreground">
+              <Label
+                htmlFor="register-password"
+                className="text-small font-medium text-foreground"
+              >
                 Password
               </Label>
               <Input
-                id="password"
+                id="register-password"
                 type="password"
                 placeholder="••••••••"
                 value={password}

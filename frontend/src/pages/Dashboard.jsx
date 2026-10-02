@@ -38,6 +38,7 @@ function Dashboard() {
   const { projects, total, isInitialLoading, error, fetchProjects } =
     useProjects({
       autoFetch: true,
+      status: "Active",
     });
   const {
     stats: projectStats,

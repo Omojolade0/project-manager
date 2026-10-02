@@ -175,7 +175,7 @@ function SearchResults() {
                   </h3>
                 )}
                 {projectsPage.items.length === 0 ? (
-                  <p className="text-small text-muted-foreground">No matching projects</p>
+                  <EmptyState compact icon={FolderKanban} title="No matching projects" />
                 ) : (
                   <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
                     {projectsPage.items.map((project) => (
@@ -206,7 +206,7 @@ function SearchResults() {
                   </h3>
                 )}
                 {tasksPage.items.length === 0 ? (
-                  <p className="text-small text-muted-foreground">No matching tasks</p>
+                  <EmptyState compact icon={CheckSquare} title="No matching tasks" />
                 ) : (
                   <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
                     {tasksPage.items.map((task) => (

@@ -302,11 +302,11 @@ function TaskModal({
 
           {needsProjectPicker && (
             <div className="space-y-1.5">
-              <Label className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
+              <Label htmlFor="task-project" className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
                 Project <span className="text-destructive">*</span>
               </Label>
               <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
-                <SelectTrigger className="h-11 rounded-full bg-card border-border text-small">
+                <SelectTrigger id="task-project" className="h-11 rounded-full bg-card border-border text-small">
                   <span className="flex items-center gap-2">
                     <span
                       className={cn(
@@ -421,7 +421,7 @@ function TaskModal({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
+            <Label htmlFor="task-due-date" className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
               Due date
             </Label>
             <div className="flex flex-wrap items-center gap-2">
@@ -495,7 +495,7 @@ function TaskModal({
               aria-checked={isPinned}
               onClick={() => setIsPinned((v) => !v)}
               className={cn(
-                "relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0",
+                "relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                 isPinned ? "bg-primary" : "bg-border",
               )}
             >

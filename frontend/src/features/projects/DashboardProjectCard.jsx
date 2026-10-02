@@ -114,12 +114,12 @@ function DashboardProjectCard({
     >
       {manageable && (
         <div
-          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
           onClick={(e) => e.stopPropagation()}
         >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="p-2 rounded-xl bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+              <button className="p-2 rounded-xl bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
                 <MoreHorizontal className="w-3.5 h-3.5" />
               </button>
             </DropdownMenuTrigger>

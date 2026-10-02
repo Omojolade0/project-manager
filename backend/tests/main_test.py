@@ -83,7 +83,7 @@ async def test_create_project(client, auth_headers):
 async def test_get_projects(client, auth_headers):
     response = await client.get("/projects", headers=auth_headers)
     assert response.status_code == 200
-    assert isinstance(response.json(), list)
+    assert isinstance(response.json()["items"], list)
 
 
 async def test_get_project_by_id(client, auth_headers):
@@ -108,7 +108,7 @@ async def test_delete_project(client, auth_headers):
     project_id = create.json()["id"]
 
     delete = await client.delete(f"/projects/{project_id}", headers=auth_headers)
-    assert delete.status_code == 200
+    assert delete.status_code == 204
 
     response = await client.get(f"/projects/{project_id}", headers=auth_headers)
     assert response.status_code == 404

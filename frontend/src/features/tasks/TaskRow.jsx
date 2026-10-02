@@ -74,7 +74,7 @@ function TickCircle({ done, loading, onClick }) {
       disabled={loading || done}
       aria-label={done ? "Task completed" : "Mark task as done"}
       className={cn(
-        "flex items-center justify-center w-6 h-6 rounded-full border-2 shrink-0 transition-all duration-150 hover:scale-110",
+        "flex items-center justify-center w-6 h-6 rounded-full border-2 shrink-0 transition-all duration-150 hover:scale-110 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
         done
           ? "bg-status-done border-status-done text-primary-foreground"
           : "border-border hover:border-primary",

@@ -1,7 +1,7 @@
 import uuid
 from app.core.dependencies import get_current_user, get_session
 from app.models.user import User
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from app.schemas.notes import NoteCreate, NoteUpdate, NotePublic, NotePage
 from app.services import notes as service
 from sqlmodel import Session
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/projects/{project_id}/notes", tags=["Notes"] )
 @router.get("", response_model=NotePage)
 def get_project_notes(project_id: uuid.UUID ,
                       current_user: User = Depends(get_current_user),
-                      page: int = 1, limit: int = 10,
+                      page: int = Query(default=1, ge=1), limit: int = Query(default=10, ge=1, le=100),
                       session: Session = Depends(get_session)):
   return service.get_all_project_notes(project_id, user_id = current_user.id, page=page, limit=limit, session=session)
 

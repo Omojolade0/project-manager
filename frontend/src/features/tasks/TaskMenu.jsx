@@ -65,7 +65,7 @@ function TaskMenu({ task, projectId, onChange, onDuplicate }) {
     <div onClick={(e) => e.stopPropagation()}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0">
+          <button className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
             <MoreHorizontal className="w-4 h-4" />
           </button>
         </DropdownMenuTrigger>

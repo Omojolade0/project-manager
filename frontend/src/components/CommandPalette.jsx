@@ -59,7 +59,7 @@ function CommandPalette() {
         type="button"
         aria-label="Open command palette"
         onClick={() => setOpen(true)}
-        className="h-9 w-9 rounded-xl flex items-center justify-center hover:bg-muted border border-transparent hover:border-border transition-all bg-transparent"
+        className="h-9 w-9 rounded-xl flex items-center justify-center hover:bg-muted border border-transparent hover:border-border transition-all bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
       >
         <CommandIcon className="h-4 w-4 text-muted-foreground" />
       </button>

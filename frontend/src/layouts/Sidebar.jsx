@@ -7,6 +7,7 @@ import {
   Settings,
   LogOut,
   Search,
+  X,
 } from "lucide-react";
 import useAuth from "@/hooks/useAuth";
 
@@ -61,7 +62,7 @@ function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, onMobileClose }) {
           <div
             className={[
               "flex items-center mb-8 px-2",
-              expanded ? "" : "justify-center",
+              expanded ? "justify-between" : "justify-center",
             ].join(" ")}
           >
             {expanded ? (
@@ -73,6 +74,19 @@ function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, onMobileClose }) {
               </div>
             ) : (
               <img src="/coeus-favicon.svg" alt="Coeus" className="w-8 h-8" />
+            )}
+            {/* Closes the drawer from inside it — the topbar's hamburger sits
+                at this same screen position but the open drawer (z-50) covers
+                it, so the close control has to live in the drawer itself. */}
+            {mobileOpen && (
+              <button
+                type="button"
+                aria-label="Close navigation"
+                onClick={onMobileClose}
+                className="md:hidden h-9 w-9 shrink-0 rounded-xl flex items-center justify-center hover:bg-muted transition-colors"
+              >
+                <X className="h-4 w-4 text-muted-foreground" />
+              </button>
             )}
           </div>
 
@@ -126,6 +140,7 @@ function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, onMobileClose }) {
                 [
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-body transition-colors",
                   "hover:bg-muted text-muted-foreground hover:text-foreground",
+                  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                   isActive ? "bg-muted text-foreground" : "",
                   expanded ? "" : "justify-center",
                 ].join(" ")
@@ -141,6 +156,7 @@ function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, onMobileClose }) {
               className={[
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-body transition-colors",
                 "hover:bg-destructive/10 text-muted-foreground hover:text-destructive w-full",
+                "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                 expanded ? "" : "justify-center",
               ].join(" ")}
             >

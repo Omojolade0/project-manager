@@ -10,9 +10,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles, AlertTriangle } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import ErrorState from "@/components/common/ErrorState";
 import intelligenceService from "@/services/intelligenceService";
 import { useTasks } from "@/hooks/useTasks";
 import { cn } from "@/lib/utils";
@@ -161,12 +162,7 @@ function GenerateTasksDialog({
         )}
 
         {state === "error" && (
-          <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
-            <span className="flex items-center justify-center w-10 h-10 rounded-full bg-destructive/10 text-destructive shrink-0">
-              <AlertTriangle className="w-5 h-5" />
-            </span>
-            <p className="text-small text-foreground max-w-sm">{errorMessage}</p>
-          </div>
+          <ErrorState title="Couldn't generate tasks" message={errorMessage} />
         )}
 
         {(state === "review" || state === "adding") && (

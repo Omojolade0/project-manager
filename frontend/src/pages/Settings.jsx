@@ -142,12 +142,13 @@ function BasicsTab() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
         <div className="space-y-1.5">
-          <Label className="text-foreground">Name</Label>
-          <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+          <Label htmlFor="settings-basics-name" className="text-foreground">Name</Label>
+          <Input id="settings-basics-name" value={username} onChange={(e) => setUsername(e.target.value)} />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-foreground">Email</Label>
+          <Label htmlFor="settings-basics-email" className="text-foreground">Email</Label>
           <Input
+            id="settings-basics-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -354,16 +355,18 @@ function AccountTab() {
 
         <div className="space-y-4 mt-6 max-w-sm">
           <div className="space-y-1.5">
-            <Label className="text-foreground">Current password</Label>
+            <Label htmlFor="settings-account-current-password" className="text-foreground">Current password</Label>
             <Input
+              id="settings-account-current-password"
               type="password"
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-foreground">New password</Label>
+            <Label htmlFor="settings-account-new-password" className="text-foreground">New password</Label>
             <Input
+              id="settings-account-new-password"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}

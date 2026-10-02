@@ -28,6 +28,8 @@ def get_current_user(
     try:
         token = credentials.credentials
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "access":
+            raise credentials_exception
         userId = payload.get("user_id")
         if userId is None:
             raise credentials_exception

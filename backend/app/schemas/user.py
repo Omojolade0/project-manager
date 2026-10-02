@@ -1,14 +1,10 @@
-from enum import Enum
 import uuid
+from app.models.user import ThemePreferences
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing import Optional
 from datetime import datetime
 
 
-class ThemePreferences(str, Enum):
-    light = "light"
-    dark = "dark"
-    system = "system"
 
 class UserCreate(BaseModel):
     username: str = Field(min_length=3, max_length=50)
