@@ -34,6 +34,7 @@ project-manager/
 ## Tech Stack
 
 **Backend:**
+
 - FastAPI
 - SQLModel (SQLAlchemy ORM)
 - PostgreSQL (Railway)
@@ -41,13 +42,16 @@ project-manager/
 - pytest + httpx for testing
 
 **Frontend:**
+
 - React + Vite
 - Tailwind CSS
 - shadcn/ui
 - react-hot-toast
 - Axios
+- Zustand
 
 **DevOps:**
+
 - Railway (backend hosting)
 - Vercel (frontend hosting)
 - GitHub Actions (CI/CD pipeline)
@@ -65,8 +69,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-
 Run the server:
+
 ```bash
 uvicorn app.main:app --reload
 ```
@@ -79,6 +83,7 @@ npm install
 ```
 
 Run the dev server:
+
 ```bash
 npm run dev
 ```
@@ -96,7 +101,6 @@ pytest tests/ -v
 10 tests covering auth (register, login, error cases) and project CRUD.
 
 ---
-
 
 ## Deployment
 

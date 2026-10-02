@@ -9,12 +9,15 @@ import {
   Layers,
   List,
   ListChecks,
+  Menu,
   Pin,
   ShieldCheck,
   Sparkles,
   StickyNote,
+  X,
 } from "lucide-react";
 import useAuth from "@/hooks/useAuth";
+import HeroScene from "@/components/landing/HeroScene";
 
 // Marketing-only display type — headings on this page use it for a
 // distinct, brand-y look; body copy stays on the app's default font.
@@ -56,18 +59,11 @@ const STEPS = [
   },
 ];
 
-const HERO_TASKS = {
-  todo: [
-    { name: "Fix auth redirect loop", tag: "High", tagClass: "bg-status-overdue-tint text-status-overdue" },
-    { name: "Write release notes" },
-  ],
-  progress: [{ name: "Adding Docker", pill: "2d overdue" }],
-  done: ["Set up error tracking", "Ship pricing page"],
-};
-
-const HERO_NOTES = [
-  "Docker work blocks the staging deploy — do it before release notes.",
-  "Agreed to ship V1 without the notifications service.",
+const NAV_LINKS = [
+  ["#features", "Features"],
+  ["#views", "Views"],
+  ["#ai", "AI tasks"],
+  ["#how", "How it works"],
 ];
 
 const AI_SUGGESTIONS = [
@@ -97,6 +93,7 @@ export default function LandingPage() {
   const { loginAsGuest } = useAuth();
   const navigate = useNavigate();
   const [loadingDemo, setLoadingDemo] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -137,211 +134,123 @@ export default function LandingPage() {
       `}</style>
 
       <div id="top" className="theme-light-pinned min-h-screen bg-background text-foreground">
-        {/* Nav */}
-        <header className="sticky top-3 sm:top-5 z-20 px-3 sm:px-6">
-          <nav className="mx-auto max-w-6xl flex items-center justify-between gap-3 rounded-full bg-card/90 backdrop-blur border border-border shadow-card px-3 py-2.5 sm:px-4">
-            <a
-              href="#top"
-              onClick={(e) => {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="flex items-center gap-2 shrink-0"
-            >
+        {/* Hero — full-bleed interactive scene with centred copy */}
+        <section
+          className="relative overflow-hidden min-h-[680px] lg:h-[860px] flex flex-col"
+          style={{
+            background:
+              "radial-gradient(70% 70% at 50% 55%, #EDEBFF 0%, #F6F4FA 60%, #F4F3FA 100%)",
+          }}
+        >
+          <HeroScene className="absolute inset-0" />
+
+          <nav className="relative z-10 flex items-center justify-between gap-4 px-4 sm:px-8 lg:px-[72px] py-5 lg:py-8">
+            <a href="#top" className="flex items-center gap-2.5 shrink-0">
               <img src="/coeus-favicon.svg" alt="" className="w-7 h-7" />
-              <span style={displayFont} className="text-lg sm:text-xl font-semibold tracking-tight">
-                Coeus
-              </span>
+              <span className="text-[19px] font-medium text-[#22222E]">Coeus</span>
             </a>
-            <div className="hidden lg:flex items-center gap-7">
-              <a href="#features" className="text-small text-muted-foreground hover:text-foreground transition-colors">
-                Features
-              </a>
-              <a href="#views" className="text-small text-muted-foreground hover:text-foreground transition-colors">
-                Views
-              </a>
-              <a href="#ai" className="text-small text-muted-foreground hover:text-foreground transition-colors">
-                AI tasks
-              </a>
-              <a href="#how" className="text-small text-muted-foreground hover:text-foreground transition-colors">
-                How it works
-              </a>
+            <div className="hidden lg:flex gap-1.5 bg-white/60 p-1.5 rounded-[14px] text-sm text-[#4A4859]">
+              {NAV_LINKS.map(([href, label]) => (
+                <a
+                  key={href}
+                  href={href}
+                  className="px-4 py-2 rounded-[10px] hover:bg-white/80 hover:text-[#22222E] transition-colors"
+                >
+                  {label}
+                </a>
+              ))}
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div className="flex items-center gap-4 sm:gap-[26px] text-sm shrink-0">
               <button
                 type="button"
                 onClick={handleTryDemo}
                 disabled={loadingDemo}
-                className="px-2.5 sm:px-4 py-2 rounded-full text-small font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-60 whitespace-nowrap"
+                className="hidden sm:inline text-[#22222E] hover:opacity-70 transition-opacity disabled:opacity-60 whitespace-nowrap"
               >
-                {loadingDemo ? "Loading…" : "Try Demo"}
+                {loadingDemo ? "Loading…" : "Try demo"}
               </button>
-              <Link
-                to="/login"
-                className="hidden sm:inline-block px-4 py-2 rounded-full text-small font-medium text-foreground hover:bg-muted transition-colors whitespace-nowrap"
-              >
+              <Link to="/login" className="hidden sm:inline text-[#22222E] hover:opacity-70 transition-opacity whitespace-nowrap">
                 Sign in
               </Link>
               <Link
                 to="/register"
-                className="px-3.5 sm:px-5 py-2 rounded-full text-small font-semibold bg-primary text-primary-foreground hover:opacity-85 transition-opacity whitespace-nowrap"
+                className="bg-[#22222E] text-white px-[22px] py-[11px] rounded-xl font-medium hover:opacity-85 transition-opacity whitespace-nowrap"
               >
                 Get started
               </Link>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-expanded={menuOpen}
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                className="lg:hidden -mr-1 p-2 rounded-xl text-[#22222E] hover:bg-white/60 transition-colors"
+              >
+                {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
             </div>
           </nav>
-        </header>
 
-        {/*
-          overflow-x-hidden lives on this wrapper instead of the #top div —
-          any non-visible overflow on a sticky element's ancestor makes that
-          ancestor the sticky positioning container, which silently breaks
-          `position: sticky` on the header above if it were applied there.
-        */}
-        <div className="overflow-x-hidden">
-
-        {/* Hero */}
-        <section className="relative max-w-6xl mx-auto px-4 sm:px-6 md:px-10 pt-12 sm:pt-16 md:pt-20 pb-16 sm:pb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] items-center gap-10 lg:gap-8">
-            {/* Copy */}
-            <div>
-              <span className="inline-block bg-secondary-tint text-primary text-caption font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full">
-                Now in beta · Free to use
-              </span>
-              <h1
-                style={displayFont}
-                className="text-4xl sm:text-5xl md:text-[3.4rem] font-semibold tracking-tight leading-[1.05] text-foreground mt-6 mb-6 text-balance"
-              >
-                Every project,
-                <br />
-                one clear <span className="text-primary">surface.</span>
-              </h1>
-              <p className="text-base sm:text-lg text-muted-foreground font-light leading-relaxed max-w-md">
-                Projects, tasks and the notes around them, together on one page. Coeus keeps the whole
-                picture in view so you always know what's actually moving.
-              </p>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-9">
-                <Link to="/register" className="btn-primary px-7 py-3 text-base w-full sm:w-auto text-center">
-                  Start for free
-                </Link>
-                <a href="#how" className="btn-outline px-7 py-3 text-base w-full sm:w-auto text-center">
-                  See how it works
+          {menuOpen && (
+            <div className="lg:hidden relative z-10 mx-4 sm:mx-8 flex flex-col gap-1 bg-white/85 backdrop-blur rounded-[14px] p-1.5 text-sm text-[#4A4859] shadow-card">
+              {NAV_LINKS.map(([href, label]) => (
+                <a
+                  key={href}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className="px-4 py-2.5 rounded-[10px] hover:bg-white hover:text-[#22222E]"
+                >
+                  {label}
                 </a>
-              </div>
-              <div className="flex items-center gap-5 sm:gap-7 mt-9 pt-7 border-t border-border">
-                {[
-                  ["3 clicks", "Project to first task"],
-                  ["No setup", "Nothing to configure"],
-                  ["Free", "While in beta"],
-                ].map(([n, label], i) => (
-                  <div key={i} className="flex items-center gap-5 sm:gap-7">
-                    {i > 0 && <span className="hidden sm:block w-px h-8 bg-border shrink-0" />}
-                    <div>
-                      <p style={displayFont} className="text-lg sm:text-xl font-semibold text-foreground leading-none">
-                        {n}
-                      </p>
-                      <p className="text-caption text-muted-foreground mt-1.5">{label}</p>
-                    </div>
-                  </div>
-                ))}
+              ))}
+              <div className="sm:hidden border-t border-black/5 mt-1 pt-1 flex flex-col gap-1">
+                <button
+                  type="button"
+                  onClick={handleTryDemo}
+                  disabled={loadingDemo}
+                  className="text-left px-4 py-2.5 rounded-[10px] hover:bg-white hover:text-[#22222E] disabled:opacity-60"
+                >
+                  {loadingDemo ? "Loading…" : "Try demo"}
+                </button>
+                <Link to="/login" className="px-4 py-2.5 rounded-[10px] hover:bg-white hover:text-[#22222E]">
+                  Sign in
+                </Link>
               </div>
             </div>
+          )}
 
-            {/* App preview mock */}
-            <div className="bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
-              <div className="flex items-center gap-2 px-4 sm:px-5 py-3 border-b border-border">
-                {["#FF5F57", "#FFBD2E", "#28C840"].map((c) => (
-                  <span key={c} style={{ background: c }} className="w-2.5 h-2.5 rounded-full shrink-0" />
-                ))}
-                <span className="ml-2 text-caption text-muted-foreground truncate">
-                  coeus.app / projects / launch-v1
-                </span>
-              </div>
-              <div className="p-4 sm:p-5">
-                <div className="flex items-center gap-3.5">
-                  <svg viewBox="0 0 44 44" className="w-12 h-12 -rotate-90 shrink-0">
-                    <circle cx="22" cy="22" r="18" fill="none" stroke="hsl(var(--muted))" strokeWidth="5" />
-                    <circle
-                      cx="22"
-                      cy="22"
-                      r="18"
-                      fill="none"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth="5"
-                      strokeLinecap="round"
-                      strokeDasharray="113.1"
-                      strokeDashoffset="33.9"
-                    />
-                  </svg>
-                  <div className="min-w-0">
-                    <p className="text-card-title text-foreground truncate">Launch V1</p>
-                    <p className="text-caption text-muted-foreground">7 of 10 tasks · updated today</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-4">
-                  <div className="bg-muted/60 rounded-xl p-2.5">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-status-todo" />
-                      <span className="text-caption font-semibold text-foreground">Todo</span>
-                      <span className="text-caption text-muted-foreground ml-auto">2</span>
-                    </div>
-                    {HERO_TASKS.todo.map((t) => (
-                      <div key={t.name} className="bg-card rounded-lg p-2 mb-1.5 last:mb-0 shadow-card">
-                        <p className="text-caption font-medium text-foreground leading-snug">{t.name}</p>
-                        {t.tag && (
-                          <span className={`inline-block mt-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${t.tagClass}`}>
-                            {t.tag}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="bg-muted/60 rounded-xl p-2.5">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-status-progress" />
-                      <span className="text-caption font-semibold text-foreground">In Progress</span>
-                      <span className="text-caption text-muted-foreground ml-auto">1</span>
-                    </div>
-                    {HERO_TASKS.progress.map((t) => (
-                      <div key={t.name} className="coeus-drift bg-card rounded-lg p-2 shadow-card">
-                        <p className="text-caption font-medium text-foreground leading-snug">{t.name}</p>
-                        <span className="inline-block mt-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-status-overdue-tint text-status-overdue">
-                          {t.pill}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="bg-muted/60 rounded-xl p-2.5">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-status-done" />
-                      <span className="text-caption font-semibold text-foreground">Done</span>
-                      <span className="text-caption text-muted-foreground ml-auto">7</span>
-                    </div>
-                    {HERO_TASKS.done.map((name) => (
-                      <div key={name} className="bg-card rounded-lg p-2 mb-1.5 last:mb-0 shadow-card">
-                        <p className="text-caption font-medium text-muted-foreground line-through leading-snug">
-                          {name}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2.5">
-                  {HERO_NOTES.map((note) => (
-                    <div key={note} className="bg-secondary-tint rounded-xl p-2.5 flex items-start gap-1.5">
-                      <Pin className="w-3 h-3 text-primary fill-primary shrink-0 mt-0.5" />
-                      <p className="text-caption text-foreground leading-snug">{note}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {/* pointer-events-none so the scene behind receives hover/drag/click */}
+          <div className="relative flex-1 flex flex-col items-center justify-center text-center gap-[26px] px-4 sm:px-8 pt-10 pb-28 pointer-events-none lg:absolute lg:inset-x-0 lg:top-[300px] lg:flex-none lg:justify-start lg:p-0">
+            <h1 className="m-0 text-[clamp(44px,9vw,96px)] leading-none font-semibold tracking-[-0.04em] text-[#22222E] max-w-[1000px] text-balance">
+              Every project, one clear surface.
+            </h1>
+            <p className="m-0 text-base sm:text-lg leading-[1.65] text-[#3B3A4B] max-w-[560px] text-pretty">
+              Projects, tasks and the notes around them, together on one page. Coeus keeps the whole picture in
+              view so you always know what's actually moving.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3.5 mt-1.5 pointer-events-auto">
+              <Link
+                to="/register"
+                className="bg-[#22222E] text-white px-[30px] py-[17px] rounded-[14px] text-base font-medium hover:opacity-85 transition-opacity"
+              >
+                Start for free
+              </Link>
+              <a
+                href="#how"
+                className="bg-white/75 text-[#22222E] px-[30px] py-[17px] rounded-[14px] text-base font-medium hover:bg-white transition-colors"
+              >
+                See how it works
+              </a>
             </div>
           </div>
+
+          <div className="absolute inset-x-0 bottom-9 flex justify-center pointer-events-none" aria-hidden="true">
+            <span className="text-xs font-medium tracking-[0.1em] text-[#6E6C82] bg-white/60 px-4 py-2 rounded-full">
+              TOUCH IT · DRAG · CLICK
+            </span>
+          </div>
         </section>
+
+        <div className="overflow-x-hidden">
 
         {/* Features */}
         <section id="features" className="max-w-6xl mx-auto px-4 sm:px-6 md:px-10 py-16 sm:py-24">

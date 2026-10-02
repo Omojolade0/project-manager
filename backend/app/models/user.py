@@ -1,9 +1,14 @@
 from enum import Enum
 import uuid
-from app.schemas.user import ThemePreferences
 from sqlmodel import SQLModel, Field
 from typing import Optional
 from datetime import datetime, timezone
+
+class ThemePreferences(str, Enum):
+    light = "light"
+    dark = "dark"
+    system = "system"
+
 
 class User(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
